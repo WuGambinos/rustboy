@@ -1,0 +1,24 @@
+mod chip;
+pub use chip::*;
+use std::path::Path;
+use std::fs;
+
+#[macro_use]
+extern crate text_io;
+fn main() {
+    let file_name = "";
+
+    //Path to rom
+    let path: &Path = Path::new(file_name);
+
+    //Contents of rom
+    let rom: Vec<u8> = read_file(&path).unwrap();
+
+    let game_boy: GB = GB::new();
+
+}
+
+fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
+    //Reads file contents into vector
+    fs::read(path)
+}
