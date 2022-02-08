@@ -16,6 +16,34 @@ impl Flags {
     }
 }
 
+struct Register {
+    data: u8
+}
+
+impl Register {
+    fn new() -> Self {
+        Register {
+            data: 0,
+        }
+    }
+}
+
+struct RegisterPair {
+    upper: Register,
+    lower: Register,
+    data: u16,
+}
+
+impl RegisterPair {
+    fn new(upper: Register, lower: Register) -> Self {
+        RegisterPair {
+            upper: upper,
+            lower: lower, 
+            data: 0,
+        }
+    }
+}
+
 pub struct Cpu {
 
     memory: [u8; 65536],
