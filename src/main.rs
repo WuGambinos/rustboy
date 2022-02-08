@@ -6,7 +6,7 @@ use std::fs;
 #[macro_use]
 extern crate text_io;
 fn main() {
-    let file_name = "";
+    let file_name = "roms/tetris.gb";
 
     //Path to rom
     let path: &Path = Path::new(file_name);
