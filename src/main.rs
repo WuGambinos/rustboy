@@ -14,7 +14,7 @@ fn main() {
     //Contents of rom
     let rom: Vec<u8> = read_file(&path).unwrap();
 
-    let game_boy: GB = GB::new();
+    let game_boy: Cpu = Cpu::new();
 
 }
 

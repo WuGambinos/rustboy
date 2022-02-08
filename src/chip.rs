@@ -16,7 +16,7 @@ impl Flags {
     }
 }
 
-pub struct GB {
+pub struct Cpu {
 
     memory: [u8; 65536],
 
@@ -49,11 +49,14 @@ pub struct GB {
 
     ///Program counter
     pc: u8,
+
+    ///Current opcode
+    opcode: u8,
 }
 
-impl GB {
+impl Cpu {
     pub fn new() -> Self {
-        GB {
+        Cpu {
             memory: [0; 65536],
             a: 0,
             f: Flags::new(),
@@ -65,6 +68,7 @@ impl GB {
             l: 0,
             sp: 0,
             pc: 0,
+            opcode: 0,
         }
 
     }
