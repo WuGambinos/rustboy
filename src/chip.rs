@@ -73,7 +73,7 @@ impl Cpu {
 
     }
 
-    fn emulate_cycle(&self) {
+    fn emulate_cycle(&mut self) {
 
     }
 
@@ -82,6 +82,11 @@ impl Cpu {
     }
 
     fn load_boot(&mut self, rom: &[u8]) {
+
+    }
+
+    fn ld_bc_16(&mut self) {
+
 
     }
 
