@@ -92,3 +92,13 @@ impl Cpu {
 
 
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test] 
+    fn internal() {
+        assert_eq!(4, 4);
+    }
+
+}
