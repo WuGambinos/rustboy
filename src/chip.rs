@@ -106,6 +106,12 @@ pub struct Cpu {
     opcode: u8,
 }
 
+impl Default for Cpu {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Cpu {
     pub fn new() -> Self {
         Cpu {
