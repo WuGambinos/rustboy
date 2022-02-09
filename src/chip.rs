@@ -16,6 +16,7 @@ impl Flags {
     }
 }
 
+#[derive(Copy, Clone)]
 struct Register {
     data: u8
 }
@@ -28,6 +29,7 @@ impl Register {
     }
 }
 
+#[derive(Copy, Clone)]
 struct RegisterPair {
     upper: Register,
     lower: Register,
@@ -39,7 +41,7 @@ impl RegisterPair {
         RegisterPair {
             upper: upper,
             lower: lower, 
-            data: 0,
+            data: (upper.data as u16) << 8 | (lower.data as u16),
         }
     }
 }
@@ -127,6 +129,22 @@ mod test {
     #[test] 
     fn internal() {
         assert_eq!(4, 4);
+    }
+
+    #[test]
+    fn register_test() {
+        let mut b: Register = Register::new();
+        let mut c: Register = Register::new();
+
+        let mut bc: RegisterPair = RegisterPair::new(b, c);
+
+        b.data = 1;
+        c.data = 1;
+
+        assert_eq!(b.data, c.data);
+
+        //assert_eq!(bc.data, 257);
+
     }
 
 }
