@@ -52,6 +52,39 @@ impl Registers {
             l: 0,
         }
     }
+
+    ///Get register pair BC
+    fn bc(&self) -> u16  {
+        (self.b as u16) << 8 | self.c as u16
+    }
+
+    ///Store value in register pair BC
+    fn set_bc(&mut self, data: u16) {
+        self.b = ((data & 0xFF00) >> 8) as u8;
+        self.c = ((data & 0x00FF)) as u8;
+    }
+
+    ///Get register pair DE
+    fn de(&self) -> u16 {
+        (self.d as u16) << 8 | self.e as u16
+    }
+
+    ///Store value in register pair DE
+    fn set_de(&mut self, data: u16) {
+        self.d = ((data & 0xFF00) >> 8) as u8;
+        self.e = ((data & 0x00FF)) as u8;
+    }
+
+    ///Get register pair HL
+    fn hl(&self) -> u16 {
+        (self.h as u16) << 8 | self.l as u16
+    }
+
+    ///Store value in register pair HL
+    fn set_hl(&mut self, data: u16) {
+        self.h = ((data & 0xFF00) >> 8) as u8;
+        self.l = ((data & 0x00FF)) as u8;
+    }
 }
 
 
@@ -101,11 +134,6 @@ impl Cpu {
 
     }
 
-    fn ld_bc_16(&mut self) {
-
-
-    }
-
 
 }
 
@@ -118,18 +146,11 @@ mod test {
     }
 
     #[test]
-    fn register_test() {
-        let mut b: Register = Register::new();
-        let mut c: Register = Register::new();
-
-        let mut bc: RegisterPair = RegisterPair::new(b, c);
-
-        b.data = 1;
-        c.data = 1;
-
-        assert_eq!(b.data, c.data);
-
-        //assert_eq!(bc.data, 257);
+    fn ld_bc_u16() {
+        let mut regs = Registers::new();
+        let data: u16 = 0xFE67;
+        regs.set_bc(data);
+        assert_eq!(regs.bc(), data);
 
     }
 
