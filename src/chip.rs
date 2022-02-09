@@ -54,14 +54,14 @@ impl Registers {
     }
 
     ///Get register pair BC
-    fn bc(&self) -> u16  {
+    fn bc(&self) -> u16 {
         (self.b as u16) << 8 | self.c as u16
     }
 
     ///Store value in register pair BC
     fn set_bc(&mut self, data: u16) {
         self.b = ((data & 0xFF00) >> 8) as u8;
-        self.c = ((data & 0x00FF)) as u8;
+        self.c = (data & 0x00FF) as u8;
     }
 
     ///Get register pair DE
@@ -72,7 +72,7 @@ impl Registers {
     ///Store value in register pair DE
     fn set_de(&mut self, data: u16) {
         self.d = ((data & 0xFF00) >> 8) as u8;
-        self.e = ((data & 0x00FF)) as u8;
+        self.e = (data & 0x00FF) as u8;
     }
 
     ///Get register pair HL
@@ -83,14 +83,11 @@ impl Registers {
     ///Store value in register pair HL
     fn set_hl(&mut self, data: u16) {
         self.h = ((data & 0xFF00) >> 8) as u8;
-        self.l = ((data & 0x00FF)) as u8;
+        self.l = (data & 0x00FF) as u8;
     }
 }
 
-
-
 pub struct Cpu {
-
     memory: [u8; 65536],
 
     ///Flags
@@ -119,28 +116,19 @@ impl Cpu {
             pc: 0,
             opcode: 0,
         }
-
     }
 
-    fn emulate_cycle(&mut self) {
+    fn emulate_cycle(&mut self) {}
 
-    }
+    fn load_program(&mut self, rom: &[u8]) {}
 
-    fn load_program(&mut self, rom: &[u8]) {
-
-    }
-
-    fn load_boot(&mut self, rom: &[u8]) {
-
-    }
-
-
+    fn load_boot(&mut self, rom: &[u8]) {}
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    #[test] 
+    #[test]
     fn internal() {
         assert_eq!(4, 4);
     }
@@ -151,7 +139,5 @@ mod test {
         let data: u16 = 0xFE67;
         regs.set_bc(data);
         assert_eq!(regs.bc(), data);
-
     }
-
 }
