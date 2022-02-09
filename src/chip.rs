@@ -17,62 +17,54 @@ impl Flags {
 }
 
 #[derive(Copy, Clone)]
-struct Register {
-    data: u8
+struct Registers {
+    //Accumulator
+    a: u8,
+
+    //B Register
+    b: u8,
+
+    //C Register
+    c: u8,
+
+    //D Register
+    d: u8,
+
+    //E Register
+    e: u8,
+
+    //H Registe
+    h: u8,
+
+    //L Register
+    l: u8,
 }
 
-impl Register {
+impl Registers {
     fn new() -> Self {
-        Register {
-            data: 0,
+        Registers {
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
         }
     }
 }
 
-#[derive(Copy, Clone)]
-struct RegisterPair {
-    upper: Register,
-    lower: Register,
-    data: u16,
-}
 
-impl RegisterPair {
-    fn new(upper: Register, lower: Register) -> Self {
-        RegisterPair {
-            upper: upper,
-            lower: lower, 
-            data: (upper.data as u16) << 8 | (lower.data as u16),
-        }
-    }
-}
 
 pub struct Cpu {
 
     memory: [u8; 65536],
 
-    ///Accumulator
-    a: u8,
-
     ///Flags
     f: Flags,
 
-    ///B register
-    b: u8,
-
-    ///C register
-    c: u8,
-
-    ///D register
-    d: u8,
-
-    ///E register
-    e: u8,
-
-    ///H register
-    h: u8,
-
-    ///L register
-    l: u8,
+    //Registers
+    registers: Registers,
 
     ///Stack pointer
     sp: u8,
@@ -88,14 +80,8 @@ impl Cpu {
     pub fn new() -> Self {
         Cpu {
             memory: [0; 65536],
-            a: 0,
+            registers: Registers::new(),
             f: Flags::new(),
-            b: 0,
-            c: 0,
-            d: 0,
-            e: 0,
-            h: 0,
-            l: 0,
             sp: 0,
             pc: 0,
             opcode: 0,
