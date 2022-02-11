@@ -1,3 +1,4 @@
+///Struct that represents flags of the Gameboy CPU
 struct Flags {
     zero_flag: u8,
     sub_flag: u8,
@@ -16,6 +17,7 @@ impl Flags {
     }
 }
 
+///Struct that represents registers for the Gameboy CPU
 #[derive(Copy, Clone)]
 struct Registers {
     //Accumulator
@@ -87,6 +89,7 @@ impl Registers {
     }
 }
 
+///Struct that represents the gameboy cpu
 pub struct Cpu {
     memory: [u8; 65536],
 
@@ -113,6 +116,7 @@ impl Default for Cpu {
 }
 
 impl Cpu {
+    ///Create a new instance of the gameboy cpu
     pub fn new() -> Self {
         Cpu {
             memory: [0; 65536],
@@ -124,7 +128,36 @@ impl Cpu {
         }
     }
 
-    fn emulate_cycle(&mut self) {}
+    fn emulate_cycle(&mut self) {
+        self.fetch();
+
+        match self.opcode {
+            //NOP
+            0x00 => self.pc += 1,
+
+            //LD BC, u16
+            0x01 => {
+                //Grab u16 value
+                let data = self.get_u16();
+
+                //BC = u16
+                self.registers.set_bc(data);
+
+                //Increase program counter
+                self.pc += 3;
+            }
+            _ => println!("NOT AN OPCODE"),
+        }
+    }
+
+    fn fetch(&mut self) {
+        self.opcode = self.memory[self.pc as usize]
+    }
+
+    fn get_u16(&mut self) -> u16 {
+        (self.memory[(self.pc + 1) as usize] as u16) << 8
+            | (self.memory[(self.pc + 2) as usize]) as u16
+    }
 
     fn load_program(&mut self, rom: &[u8]) {}
 
@@ -141,9 +174,14 @@ mod test {
 
     #[test]
     fn ld_bc_u16() {
-        let mut regs = Registers::new();
-        let data: u16 = 0xFE67;
-        regs.set_bc(data);
-        assert_eq!(regs.bc(), data);
+        let mut cpu = Cpu::new();
+
+        cpu.memory[0] = 0x01;
+        cpu.memory[1] = 0xFA;
+        cpu.memory[2] = 0xDC;
+
+        cpu.emulate_cycle();
+
+        assert_eq!(cpu.registers.bc(), 0xFADC);
     }
 }
