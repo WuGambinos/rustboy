@@ -146,6 +146,20 @@ impl Cpu {
                 //Increase program counter
                 self.pc += 3;
             }
+
+            //LD (BC), A
+            0x02 => self.memory[self.registers.bc() as usize] = self.registers.a,
+
+            //INC BC
+            0x03 => self.registers.set_bc(self.registers.bc().wrapping_add(1)),
+
+            //0x04 INC B: Flags:Z0H
+            //0x04 => self.registers.b = self.registers.b.wrapping_add(1),
+            0x04 => {
+                //self.inc_8bit_register(&self.registers.b);
+                self.pc += 1
+            }
+
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -162,6 +176,71 @@ impl Cpu {
     fn load_program(&mut self, rom: &[u8]) {}
 
     fn load_boot(&mut self, rom: &[u8]) {}
+
+    /*************************************************************************
+     * INSTRUCTIONS
+     *************************************************************************/
+
+    fn inc_8bit_register(&mut self, reg: char) {
+        match reg {
+            'A' => {
+                let res: Option<u8> = self.registers.a.checked_add(1);
+                self.registers.a = match res {
+                    Some(v) => v,
+
+                    None => self.registers.a.wrapping_add(1),
+                }
+            }
+
+            'B' => {
+                let res: Option<u8> = self.registers.b.checked_add(1);
+                self.registers.b = match res {
+                    Some(v) => v,
+
+                    None => self.registers.b.wrapping_add(1),
+                }
+            }
+
+            'C' => {
+                let res: Option<u8> = self.registers.c.checked_add(1);
+                self.registers.c = match res {
+                    Some(v) => v,
+                    None => self.registers.c.wrapping_add(1),
+                }
+            }
+
+            'D' => {
+                let res: Option<u8> = self.registers.d.checked_add(1);
+                self.registers.d = match res {
+                    Some(v) => v,
+                    None => self.registers.d.wrapping_add(1),
+                }
+            }
+
+            'E' => {
+                let res: Option<u8> = self.registers.e.checked_add(1);
+                self.registers.e = match res {
+                    Some(v) => v,
+                    None => self.registers.e.wrapping_add(1),
+                }
+            }
+            'H' => {
+                let res: Option<u8> = self.registers.h.checked_add(1);
+                self.registers.h = match res {
+                    Some(v) => v,
+                    None => self.registers.h.wrapping_add(1),
+                }
+            }
+            'L' => {
+                let res: Option<u8> = self.registers.l.checked_add(1);
+                self.registers.l = match res {
+                    Some(v) => v,
+                    None => self.registers.l.wrapping_add(1),
+                }
+            }
+            _ => (),
+        };
+    }
 }
 
 #[cfg(test)]
@@ -183,5 +262,15 @@ mod test {
         cpu.emulate_cycle();
 
         assert_eq!(cpu.registers.bc(), 0xFADC);
+    }
+
+    #[test]
+    fn inc_bc() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.set_bc(0xFFFF);
+        cpu.registers.set_bc(cpu.registers.bc().wrapping_add(1));
+
+        assert_eq!(cpu.registers.bc(), 0);
     }
 }
