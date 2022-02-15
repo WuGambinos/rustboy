@@ -154,10 +154,30 @@ impl Cpu {
             0x03 => self.registers.set_bc(self.registers.bc().wrapping_add(1)),
 
             //0x04 INC B: Flags:Z0H
-            //0x04 => self.registers.b = self.registers.b.wrapping_add(1),
             0x04 => {
-                //self.inc_8bit_register(&self.registers.b);
-                self.pc += 1
+                //Update Half Carry
+                self.update_half_carry_flag(1);
+
+                //Increment B register
+                self.inc_8bit_register('B');
+
+                //Update Zero flag
+                self.update_zero_flag(self.registers.b);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+            }
+
+            0x05 => {
+                //Update Half Carry
+
+                //Decrement B register
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.b);
+
+                //Set Sub Flag
+                self.f.sub_flag = 1;
             }
 
             _ => println!("NOT AN OPCODE"),
@@ -176,6 +196,30 @@ impl Cpu {
     fn load_program(&mut self, rom: &[u8]) {}
 
     fn load_boot(&mut self, rom: &[u8]) {}
+
+    ///UPdates Zero Flag
+    /// Zero flag is set when operation results in 0
+    fn update_zero_flag(&mut self, v: u8) {
+        if v == 0 {
+            self.f.zero_flag = 1;
+        } else {
+            self.f.zero_flag = 0;
+        }
+    }
+
+    ///Updates Sub flag
+    ///Sub flag is set if subtraction operation was done
+    fn update_sub_flag(&mut self) {}
+
+    ///Updates the half carry flag
+    ///In 8 bit arithmetic, half carry is set when there is a carry from bit 3 to bit 4
+    fn update_half_carry_flag(&mut self, operand: u8) {
+        self.f.half_carry_flag = ((self.registers.b & 0xF) + (operand & 0xF) > 0xF) as u8;
+    }
+
+    /// Updates Carry flag
+    /// Carry flag is set when operation results in overflow
+    fn update_carry_flag(&mut self) {}
 
     /*************************************************************************
      * INSTRUCTIONS
@@ -266,7 +310,7 @@ mod test {
     }
 
     #[test]
-    fn inc_a() {
+    fn inc() {
         let mut cpu = Cpu::new();
 
         cpu.inc_8bit_register('A');
@@ -289,5 +333,19 @@ mod test {
 
         cpu.inc_8bit_register('L');
         assert_eq!(cpu.registers.l, 1);
+    }
+
+    #[test]
+    fn half_carry() {
+        let mut cpu = Cpu::new();
+        cpu.registers.b = 0x09;
+
+        let operand: u8 = 0x0A;
+
+        cpu.f.half_carry_flag = ((cpu.registers.b & 0xF) + (operand & 0xF) > 0xF) as u8;
+
+        cpu.inc_8bit_register('B');
+
+        assert_eq!(cpu.f.half_carry_flag, 1);
     }
 }
