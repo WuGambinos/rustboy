@@ -148,10 +148,16 @@ impl Cpu {
             }
 
             //LD (BC), A
-            0x02 => self.memory[self.registers.bc() as usize] = self.registers.a,
+            0x02 => {
+                self.memory[self.registers.bc() as usize] = self.registers.a;
+                self.pc += 1;
+            }
 
             //INC BC
-            0x03 => self.registers.set_bc(self.registers.bc().wrapping_add(1)),
+            0x03 => {
+                self.registers.set_bc(self.registers.bc().wrapping_add(1));
+                self.pc += 1;
+            }
 
             //0x04 INC B: Flags:Z0H
             0x04 => {
@@ -159,27 +165,71 @@ impl Cpu {
                 self.update_half_carry_flag(1);
 
                 //Increment B register
-                self.inc_8bit_register('B');
+                self.registers.b = self.registers.b.wrapping_add(1);
 
                 //Update Zero flag
                 self.update_zero_flag(self.registers.b);
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
+
+                self.pc += 1;
             }
 
+            //0x05 DEC B: Flags Z1H
             0x05 => {
                 //Update Half Carry
 
                 //Decrement B register
+                self.registers.b = self.registers.b.wrapping_sub(1);
 
                 //Update Zero Flag
                 self.update_zero_flag(self.registers.b);
 
                 //Set Sub Flag
                 self.f.sub_flag = 1;
+
+                self.pc += 1;
             }
 
+            //LD B, u8
+            0x06 => {
+                self.registers.b = self.memory[(self.pc + 1) as usize];
+
+                //Increase Program Counter
+                self.pc += 2;
+            }
+
+            //RLCA
+            0x07 => {
+                self.rlca();
+                self.f.zero_flag = 0;
+                self.f.sub_flag = 0;
+                self.f.half_carry_flag = 0;
+                self.pc += 1;
+            }
+
+            //LD (u16), SP
+            0x08 => {
+                self.memory[((self.pc + 1) << 8 | (self.pc + 2)) as usize] = self.sp;
+                self.pc += 3;
+            }
+
+            //ADD HL, BC
+            0x09 => {
+                //Clear Sub flag
+                self.f.sub_flag = 0;
+
+                //Update Half Carry
+
+                //Update Carry
+                self.update_carry_flag_16bit(self.registers.hl(), self.registers.bc());
+
+                self.registers
+                    .set_hl(self.registers.hl().wrapping_add(self.registers.bc()));
+
+                self.pc += 1;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -221,70 +271,27 @@ impl Cpu {
     /// Carry flag is set when operation results in overflow
     fn update_carry_flag(&mut self) {}
 
+    fn update_carry_flag_16bit(&mut self, register: u16, operand: u16) {
+        self.f.carry_flag = (register + operand > u16::MAX) as u8;
+    }
+
     /*************************************************************************
      * INSTRUCTIONS
      *************************************************************************/
 
-    fn inc_8bit_register(&mut self, reg: char) {
-        match reg {
-            'A' => {
-                let res: Option<u8> = self.registers.a.checked_add(1);
-                self.registers.a = match res {
-                    Some(v) => v,
+    ///Rotate Accumulator Left
+    ///
+    /// Copy Original 7th bit into carry and 0th bit
+    fn rlca(&mut self) {
+        let lmb: u8 = self.registers.a & 0x80;
 
-                    None => self.registers.a.wrapping_add(1),
-                };
-                println!("VALUE: {}", self.registers.a);
-            }
+        //Rotate Accumulator to left
+        self.registers.a = self.registers.a << 1;
 
-            'B' => {
-                let res: Option<u8> = self.registers.b.checked_add(1);
-                self.registers.b = match res {
-                    Some(v) => v,
+        //Store previous leftmostbit in rightmost position
+        self.registers.a |= (1 << 0) & lmb;
 
-                    None => self.registers.b.wrapping_add(1),
-                }
-            }
-
-            'C' => {
-                let res: Option<u8> = self.registers.c.checked_add(1);
-                self.registers.c = match res {
-                    Some(v) => v,
-                    None => self.registers.c.wrapping_add(1),
-                }
-            }
-
-            'D' => {
-                let res: Option<u8> = self.registers.d.checked_add(1);
-                self.registers.d = match res {
-                    Some(v) => v,
-                    None => self.registers.d.wrapping_add(1),
-                }
-            }
-
-            'E' => {
-                let res: Option<u8> = self.registers.e.checked_add(1);
-                self.registers.e = match res {
-                    Some(v) => v,
-                    None => self.registers.e.wrapping_add(1),
-                }
-            }
-            'H' => {
-                let res: Option<u8> = self.registers.h.checked_add(1);
-                self.registers.h = match res {
-                    Some(v) => v,
-                    None => self.registers.h.wrapping_add(1),
-                }
-            }
-            'L' => {
-                let res: Option<u8> = self.registers.l.checked_add(1);
-                self.registers.l = match res {
-                    Some(v) => v,
-                    None => self.registers.l.wrapping_add(1),
-                }
-            }
-            _ => (),
-        };
+        self.f.carry_flag = lmb;
     }
 }
 
@@ -310,29 +317,14 @@ mod test {
     }
 
     #[test]
-    fn inc() {
+    fn inc_b() {
         let mut cpu = Cpu::new();
 
-        cpu.inc_8bit_register('A');
-        assert_eq!(cpu.registers.a, 1);
+        cpu.registers.b = 0x01;
 
-        cpu.inc_8bit_register('B');
-        assert_eq!(cpu.registers.b, 1);
+        cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
-        cpu.inc_8bit_register('C');
-        assert_eq!(cpu.registers.c, 1);
-
-        cpu.inc_8bit_register('D');
-        assert_eq!(cpu.registers.d, 1);
-
-        cpu.inc_8bit_register('E');
-        assert_eq!(cpu.registers.e, 1);
-
-        cpu.inc_8bit_register('H');
-        assert_eq!(cpu.registers.h, 1);
-
-        cpu.inc_8bit_register('L');
-        assert_eq!(cpu.registers.l, 1);
+        assert_eq!(cpu.registers.b, 0x02);
     }
 
     #[test]
@@ -344,7 +336,7 @@ mod test {
 
         cpu.f.half_carry_flag = ((cpu.registers.b & 0xF) + (operand & 0xF) > 0xF) as u8;
 
-        cpu.inc_8bit_register('B');
+        //cpu.inc_8bit_register('B');
 
         assert_eq!(cpu.f.half_carry_flag, 1);
     }
