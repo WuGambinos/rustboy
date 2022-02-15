@@ -189,7 +189,8 @@ impl Cpu {
                     Some(v) => v,
 
                     None => self.registers.a.wrapping_add(1),
-                }
+                };
+                println!("VALUE: {}", self.registers.a);
             }
 
             'B' => {
@@ -265,12 +266,28 @@ mod test {
     }
 
     #[test]
-    fn inc_bc() {
+    fn inc_a() {
         let mut cpu = Cpu::new();
 
-        cpu.registers.set_bc(0xFFFF);
-        cpu.registers.set_bc(cpu.registers.bc().wrapping_add(1));
+        cpu.inc_8bit_register('A');
+        assert_eq!(cpu.registers.a, 1);
 
-        assert_eq!(cpu.registers.bc(), 0);
+        cpu.inc_8bit_register('B');
+        assert_eq!(cpu.registers.b, 1);
+
+        cpu.inc_8bit_register('C');
+        assert_eq!(cpu.registers.c, 1);
+
+        cpu.inc_8bit_register('D');
+        assert_eq!(cpu.registers.d, 1);
+
+        cpu.inc_8bit_register('E');
+        assert_eq!(cpu.registers.e, 1);
+
+        cpu.inc_8bit_register('H');
+        assert_eq!(cpu.registers.h, 1);
+
+        cpu.inc_8bit_register('L');
+        assert_eq!(cpu.registers.l, 1);
     }
 }
