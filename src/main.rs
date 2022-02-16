@@ -15,6 +15,8 @@ fn main() {
     let rom: Vec<u8> = read_file(&path).unwrap();
 
     let mut game_boy: Cpu = Cpu::new();
+
+    let mut cpu = Cpu::new();
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {

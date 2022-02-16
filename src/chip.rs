@@ -162,7 +162,7 @@ impl Cpu {
             //0x04 INC B: Flags:Z0H
             0x04 => {
                 //Update Half Carry
-                self.update_half_carry_flag(1);
+                self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
 
                 //Increment B register
                 self.registers.b = self.registers.b.wrapping_add(1);
@@ -211,7 +211,8 @@ impl Cpu {
 
             //LD (u16), SP
             0x08 => {
-                self.memory[((self.pc + 1) << 8 | (self.pc + 2)) as usize] = self.sp;
+                self.memory[(((self.pc + 1) as u16) << 8 | (self.pc + 2) as u16) as usize] =
+                    self.sp;
                 self.pc += 3;
             }
 
@@ -258,21 +259,59 @@ impl Cpu {
     }
 
     ///Updates Sub flag
+    ///
     ///Sub flag is set if subtraction operation was done
     fn update_sub_flag(&mut self) {}
 
     ///Updates the half carry flag
-    ///In 8 bit arithmetic, half carry is set when there is a carry from bit 3 to bit 4
-    fn update_half_carry_flag(&mut self, operand: u8) {
-        self.f.half_carry_flag = ((self.registers.b & 0xF) + (operand & 0xF) > 0xF) as u8;
+    ///
+    ///In 8 bit addition, half carry is set when there is a carry from bit 3 to bit 4
+    fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+        self.f.half_carry_flag = ((register & 0xF) + (operand & 0xF) > 0xF) as u8;
+    }
+
+    ///Updates the half carry flag
+    ///
+    /// In 8 bit subtraction, half carry is set when lower byte of minuend is less than lower byte of subtrahend
+    fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+        self.f.half_carry_flag = ((register & 0xF) < (operand & 0xF)) as u8;
+    }
+
+    ///Updates the half carry flag
+    ///
+    /// In 16 bit addition, half carry is set when there is a carry from bit 11 to bit 12
+    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
+
+    ///Updates the half carry flag
+    ///
+    /// In 16 bit subtraction, half carry is set when lower 3 bytes of minuend is less then lower 3 bytes of subtrahend
+    fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
+        self.f.half_carry_flag = ((register & 0xFFF) < (operand & 0xFFF)) as u8;
     }
 
     /// Updates Carry flag
     /// Carry flag is set when operation results in overflow
-    fn update_carry_flag(&mut self) {}
+    fn update_carry_flag(&mut self, register: u8, operand: u8) {
+        let mut res: u8 = 0;
 
+        match register.checked_add(operand) {
+            Some(_v) => res = 1,
+            None => res = 0,
+        }
+
+        self.f.carry_flag = res;
+    }
+
+    /// Updates Carry Flag
+    /// Carry flag is set when operation results in overflow
     fn update_carry_flag_16bit(&mut self, register: u16, operand: u16) {
-        self.f.carry_flag = (register + operand > u16::MAX) as u8;
+        let mut res: u8 = 0;
+        match register.checked_add(operand) {
+            Some(_v) => res = 1,
+            None => res = 0,
+        }
+
+        self.f.carry_flag = res;
     }
 
     /*************************************************************************
@@ -286,7 +325,7 @@ impl Cpu {
         let lmb: u8 = self.registers.a & 0x80;
 
         //Rotate Accumulator to left
-        self.registers.a = self.registers.a << 1;
+        self.registers.a <<= 1;
 
         //Store previous leftmostbit in rightmost position
         self.registers.a |= (1 << 0) & lmb;
@@ -339,5 +378,19 @@ mod test {
         //cpu.inc_8bit_register('B');
 
         assert_eq!(cpu.f.half_carry_flag, 1);
+    }
+
+    #[test]
+    fn carry() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.set_bc(0xFFFF);
+        cpu.registers.set_hl(0x0001);
+
+        cpu.update_carry_flag_16bit(cpu.registers.bc(), cpu.registers.hl());
+
+        //assert_eq!(cpu.f.carry_flag, 1);
+        assert_eq!(cpu.registers.bc(), 0xFFFF);
+        assert_eq!(cpu.registers.hl(), 0x0001);
     }
 }
