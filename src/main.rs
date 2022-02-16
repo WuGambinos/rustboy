@@ -1,5 +1,5 @@
-mod chip;
-pub use chip::*;
+mod cpu;
+pub use cpu::*;
 use std::fs;
 use std::path::Path;
 
