@@ -159,7 +159,7 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            //0x04 INC B: Flags:Z0H
+            //INC B: Flags:Z0H
             0x04 => {
                 //Update Half Carry
                 self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
@@ -176,9 +176,10 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            //0x05 DEC B: Flags Z1H
+            //DEC B: Flags Z1H
             0x05 => {
                 //Update Half Carry
+                self.update_half_carry_flag_sub_8bit(self.registers.b, 1);
 
                 //Decrement B register
                 self.registers.b = self.registers.b.wrapping_sub(1);
@@ -194,6 +195,7 @@ impl Cpu {
 
             //LD B, u8
             0x06 => {
+                //B = u8
                 self.registers.b = self.memory[(self.pc + 1) as usize];
 
                 //Increase Program Counter
@@ -203,16 +205,27 @@ impl Cpu {
             //RLCA
             0x07 => {
                 self.rlca();
+
+                //Clear Zero Flag
                 self.f.zero_flag = 0;
+
+                //Clear Sub Flag
                 self.f.sub_flag = 0;
+
+                //Clear Half Carry Flag
                 self.f.half_carry_flag = 0;
+
+                //Increase Program Counter
                 self.pc += 1;
             }
 
             //LD (u16), SP
             0x08 => {
+                //memory[u16] = SP
                 self.memory[(((self.pc + 1) as u16) << 8 | (self.pc + 2) as u16) as usize] =
                     self.sp;
+
+                //Increase Program Counter
                 self.pc += 3;
             }
 
@@ -226,20 +239,25 @@ impl Cpu {
                 //Update Carry
                 self.update_carry_flag_16bit(self.registers.hl(), self.registers.bc());
 
+                //HL = HL + BC
                 self.registers
                     .set_hl(self.registers.hl().wrapping_add(self.registers.bc()));
 
+                //Increase Program Counter
                 self.pc += 1;
             }
 
-            //LD A, (BC)
+            //LD A, (BC) NEED TO IMPLEMENT THIS
             0x0A => {
                 self.pc += 1;
             }
 
             //DEC BC
             0x0B => {
+                //BC = BC - 1
                 self.registers.set_bc(self.registers.bc().wrapping_sub(1));
+
+                //Increase Program Counter
                 self.pc += 1;
             }
 
@@ -262,13 +280,67 @@ impl Cpu {
             }
 
             //DEC C
-            0x0D => {}
+            0x0D => {
+                //Set Sub Flag
+                self.f.sub_flag = 1;
+
+                //Update Half Carry
+                self.update_half_carry_flag_sub_8bit(self.registers.c, 1);
+
+                //C = C - 1
+                self.registers.c = self.registers.c.wrapping_sub(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.c);
+
+                //Increase Program Counter
+                self.pc += 1;
+            }
 
             //LD C, u8
-            0x0E => {}
+            0x0E => {
+                //C = u8
+                self.registers.c = self.memory[(self.pc + 1) as usize];
+
+                //Increase Program Counter
+                self.pc += 2;
+            }
 
             //RRCA
-            0x0F => {}
+            0x0F => {
+                //Rotate
+                self.rrca();
+
+                //Clear Zero Flag
+                self.f.zero_flag = 0;
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Clear Half Carry Flag
+                self.f.half_carry_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
+            }
+
+            //STOP
+            0x10 => {}
+
+            // LD DE, u16
+            0x11 => {
+                //DE = u16
+                self.memory[self.registers.de() as usize] = self.registers.a;
+
+                //Increase Program Counter
+                self.pc += 3;
+            }
+
+            //LD (DE) = A
+            0x12 => {
+                //memory[DE] = A
+                self.memory[self.registers.de() as usize] = self.registers.a;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -286,7 +358,7 @@ impl Cpu {
 
     fn load_boot(&mut self, rom: &[u8]) {}
 
-    ///UPdates Zero Flag
+    ///Updates Zero Flag
     /// Zero flag is set when operation results in 0
     fn update_zero_flag(&mut self, v: u8) {
         if v == 0 {
@@ -369,6 +441,18 @@ impl Cpu {
         self.registers.a |= (1 << 0) & lmb;
 
         self.f.carry_flag = lmb;
+    }
+
+    fn rrca(&mut self) {
+        let rmb: u8 = self.registers.a & 0x01;
+
+        //Rotate Accumulator to right
+        self.registers.a >>= 1;
+
+        //Store previous rightmost bi tin leftmost position
+        self.registers.a |= (1 << 7) & rmb;
+
+        self.f.carry_flag = rmb;
     }
 }
 
