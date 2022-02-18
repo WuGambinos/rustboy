@@ -231,6 +231,44 @@ impl Cpu {
 
                 self.pc += 1;
             }
+
+            //LD A, (BC)
+            0x0A => {
+                self.pc += 1;
+            }
+
+            //DEC BC
+            0x0B => {
+                self.registers.set_bc(self.registers.bc().wrapping_sub(1));
+                self.pc += 1;
+            }
+
+            //INC C
+            0x0C => {
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.c, 1);
+
+                //C = C + 1;
+                self.registers.c = self.registers.c.wrapping_add(1);
+
+                //Update Zero flag
+                self.update_zero_flag(self.registers.c);
+
+                //Increase Program Counter
+                self.pc += 1;
+            }
+
+            //DEC C
+            0x0D => {}
+
+            //LD C, u8
+            0x0E => {}
+
+            //RRCA
+            0x0F => {}
             _ => println!("NOT AN OPCODE"),
         }
     }
