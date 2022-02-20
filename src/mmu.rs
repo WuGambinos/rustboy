@@ -1,4 +1,7 @@
-struct MMU {
+use raylib::models::RaylibMesh;
+
+#[derive(Debug)]
+pub struct MMU {
     boot: [u8; 255],
 
     memory: [u8; 0xFF00],
@@ -29,12 +32,34 @@ struct MMU {
     high_ram: [u8; 127],*/
 }
 
+impl Default for MMU {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MMU {
-    fn new() -> Self {
+    pub fn new() -> Self {
         MMU {
-            boot: [255; 0],
+            boot: [0; 255],
             memory: [0; 0xFF00],
             interrupt_en: 0,
         }
+    }
+
+    pub fn write_mem(&mut self, value: u8, addr: u16) {
+        self.memory[addr as usize] = value;
+    }
+
+    pub fn read_mem(&self, addr: u16) -> u8 {
+        self.memory[addr as usize]
+    }
+
+    pub fn write_boot(&mut self, value: u8, addr: u16) {
+        self.memory[addr as usize] = value;
+    }
+
+    pub fn read_boot(&self, addr: u16) -> u8 {
+        self.boot[addr as usize]
     }
 }
