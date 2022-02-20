@@ -1,5 +1,10 @@
 struct MMU {
-    rom_bank: [u8; 16384],
+    boot: [u8; 255],
+
+    memory: [u8; 0xFF00],
+    //Interrupt Enable Register
+    interrupt_en: u8,
+    /*rom_bank: [u8; 16384],
     extra_rom_bank: [u8; 16384],
 
     //Video Ram
@@ -21,10 +26,15 @@ struct MMU {
     io: [u8; 128],
 
     //High Ram
-    high_ram: [u8; 127],
-
-    //Interrupt Enable Register
-    interrupt_en: u8,
+    high_ram: [u8; 127],*/
 }
 
-impl MMU {}
+impl MMU {
+    fn new() -> Self {
+        MMU {
+            boot: [255; 0],
+            memory: [0; 0xFF00],
+            interrupt_en: 0,
+        }
+    }
+}
