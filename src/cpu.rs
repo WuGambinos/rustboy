@@ -1,3 +1,5 @@
+use crate::{mmu, MMU};
+
 ///Struct that represents flags of the Gameboy CPU
 struct Flags {
     zero_flag: u8,
@@ -128,7 +130,7 @@ impl Cpu {
         }
     }
 
-    fn emulate_cycle(&mut self) {
+    fn emulate_cycle(&mut self, mmu: MMU) {
         self.fetch();
 
         match self.opcode {
@@ -149,7 +151,7 @@ impl Cpu {
 
             //LD (BC), A
             0x02 => {
-                self.memory[self.registers.bc() as usize] = self.registers.a;
+                //self.memory[self.registers.bc() as usize] = self.registers.a;
                 self.pc += 1;
             }
 
