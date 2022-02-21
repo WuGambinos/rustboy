@@ -102,10 +102,10 @@ pub struct Cpu {
     registers: Registers,
 
     ///Stack pointer
-    sp: u8,
+    sp: u16,
 
     ///Program counter
-    pc: u8,
+    pc: u16,
 
     ///Current opcode
     opcode: u8,
@@ -130,8 +130,8 @@ impl Cpu {
         }
     }
 
-    fn emulate_cycle(&mut self, mmu: MMU) {
-        self.fetch();
+    fn emulate_cycle(&mut self, mmu: &mut MMU) {
+        self.fetch(mmu);
 
         match self.opcode {
             //NOP
@@ -152,6 +152,7 @@ impl Cpu {
             //LD (BC), A
             0x02 => {
                 //self.memory[self.registers.bc() as usize] = self.registers.a;
+                mmu.write_mem(self.registers.bc(), self.registers.a);
                 self.pc += 1;
             }
 
@@ -198,7 +199,7 @@ impl Cpu {
             //LD B, u8
             0x06 => {
                 //B = u8
-                self.registers.b = self.memory[(self.pc + 1) as usize];
+                self.registers.b = mmu.read_mem(self.pc + 1);
 
                 //Increase Program Counter
                 self.pc += 2;
@@ -224,8 +225,19 @@ impl Cpu {
             //LD (u16), SP
             0x08 => {
                 //memory[u16] = SP
-                self.memory[(((self.pc + 1) as u16) << 8 | (self.pc + 2) as u16) as usize] =
-                    self.sp;
+                let addr: u16 = ((self.pc + 1) as u16) << 8 | (self.pc + 2) as u16;
+
+                //Lower byte of stack pointer
+                let lower_sp: u8 = (self.sp & 0x00FF) as u8;
+
+                //Higher byte of stack pointer
+                let upper_sp: u8 = ((self.sp & 0xFF00) >> 8) as u8;
+
+                //Write lower_sp to addr
+                mmu.write_mem(addr, lower_sp);
+
+                //Write lower_sp to addr+1
+                mmu.write_mem(addr + 1, upper_sp);
 
                 //Increase Program Counter
                 self.pc += 3;
@@ -347,8 +359,8 @@ impl Cpu {
         }
     }
 
-    fn fetch(&mut self) {
-        self.opcode = self.memory[self.pc as usize]
+    fn fetch(&mut self, mmu: &MMU) {
+        self.opcode = mmu.read_mem(self.pc);
     }
 
     fn get_u16(&mut self) -> u16 {
@@ -356,11 +368,8 @@ impl Cpu {
             | (self.memory[(self.pc + 2) as usize]) as u16
     }
 
-    fn load_program(&mut self, rom: &[u8]) {}
-
-    fn load_boot(&mut self, rom: &[u8]) {}
-
     ///Updates Zero Flag
+    ///
     /// Zero flag is set when operation results in 0
     fn update_zero_flag(&mut self, v: u8) {
         if v == 0 {
@@ -415,6 +424,7 @@ impl Cpu {
     }
 
     /// Updates Carry Flag
+    ///
     /// Carry flag is set when operation results in overflow
     fn update_carry_flag_16bit(&mut self, register: u16, operand: u16) {
         let mut res: u8 = 0;
@@ -474,7 +484,8 @@ mod test {
         cpu.memory[1] = 0xFA;
         cpu.memory[2] = 0xDC;
 
-        cpu.emulate_cycle();
+        let mut mmu: MMU = MMU::new();
+        cpu.emulate_cycle(&mut mmu);
 
         assert_eq!(cpu.registers.bc(), 0xFADC);
     }
