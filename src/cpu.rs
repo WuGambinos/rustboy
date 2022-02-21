@@ -1,3 +1,5 @@
+use std::io::Read;
+
 use crate::{mmu, MMU};
 
 ///Struct that represents flags of the Gameboy CPU
@@ -243,7 +245,7 @@ impl Cpu {
                 self.pc += 3;
             }
 
-            //ADD HL, BC
+            //ADD HL, BC NEED TO FIX THSIS
             0x09 => {
                 //Clear Sub flag
                 self.f.sub_flag = 0;
@@ -261,8 +263,10 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            //LD A, (BC) NEED TO IMPLEMENT THIS
+            //LD A, (BC)
             0x0A => {
+                let addr: u16 = self.registers.bc();
+                self.registers.a = mmu.read_mem(addr);
                 self.pc += 1;
             }
 
@@ -314,7 +318,8 @@ impl Cpu {
             //LD C, u8
             0x0E => {
                 //C = u8
-                self.registers.c = self.memory[(self.pc + 1) as usize];
+                let value: u8 = mmu.read_mem(self.pc + 1);
+                self.registers.c = value;
 
                 //Increase Program Counter
                 self.pc += 2;
@@ -344,7 +349,11 @@ impl Cpu {
             // LD DE, u16
             0x11 => {
                 //DE = u16
-                self.memory[self.registers.de() as usize] = self.registers.a;
+                let lower_value: u8 = mmu.read_mem(self.pc + 1);
+                let upper_value: u8 = mmu.read_mem(self.pc + 2);
+
+                let u16_value: u16 = ((upper_value as u16) << 8) | (lower_value as u16);
+                self.registers.set_bc(u16_value);
 
                 //Increase Program Counter
                 self.pc += 3;
@@ -353,7 +362,8 @@ impl Cpu {
             //LD (DE) = A
             0x12 => {
                 //memory[DE] = A
-                self.memory[self.registers.de() as usize] = self.registers.a;
+                let addr: u16 = self.registers.de();
+                mmu.write_mem(addr, self.registers.a);
             }
             _ => println!("NOT AN OPCODE"),
         }
