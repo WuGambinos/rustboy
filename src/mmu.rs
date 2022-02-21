@@ -44,7 +44,7 @@ impl MMU {
         }
     }
 
-    pub fn write_mem(&mut self, value: u8, addr: u16) {
+    pub fn write_mem(&mut self, addr: u16, value: u8) {
         self.memory[addr as usize] = value;
     }
 
