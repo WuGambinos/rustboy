@@ -364,7 +364,34 @@ impl Cpu {
                 //memory[DE] = A
                 let addr: u16 = self.registers.de();
                 mmu.write_mem(addr, self.registers.a);
+                self.pc += 1;
             }
+
+            //INC DE
+            0x13 => {
+                self.registers.set_de(self.registers.de().wrapping_add(1));
+                self.pc += 1;
+            }
+
+            //INC D
+            0x14 => {
+                //Update half carry
+                self.update_half_carry_flag_sum_8bit(self.registers.d, 1);
+
+                //D = D + 1
+                self.registers.d = self.registers.d.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.d);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                self.pc += 1;
+            }
+
+            //DEC D
+            0x15 => {}
             _ => println!("NOT AN OPCODE"),
         }
     }
