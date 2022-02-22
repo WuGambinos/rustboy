@@ -142,7 +142,7 @@ impl Cpu {
             //LD BC, u16
             0x01 => {
                 //Grab u16 value
-                let data = self.get_u16();
+                let data = self.get_u16(&mmu);
 
                 //BC = u16
                 self.registers.set_bc(data);
@@ -400,9 +400,11 @@ impl Cpu {
         self.opcode = mmu.read_mem(self.pc);
     }
 
-    fn get_u16(&mut self) -> u16 {
-        (self.memory[(self.pc + 1) as usize] as u16) << 8
-            | (self.memory[(self.pc + 2) as usize]) as u16
+    fn get_u16(&mut self, mmu: &MMU) -> u16 {
+        /*(self.memory[(self.pc + 1) as usize] as u16) << 8
+        | (self.memory[(self.pc + 2) as usize]) as u16*/
+
+        (mmu.read_mem(self.pc + 1) as u16) << 8 | mmu.read_mem(self.pc + 2) as u16
     }
 
     ///Updates Zero Flag
@@ -516,12 +518,19 @@ mod test {
     #[test]
     fn ld_bc_u16() {
         let mut cpu = Cpu::new();
+        let mut mmu = MMU::new();
+        cpu.pc = 0;
 
-        cpu.memory[0] = 0x01;
+        mmu.write_mem(0, 0x01);
+        mmu.write_mem(1, 0xFA);
+        mmu.write_mem(2, 0xDC);
+
+        /*cpu.memory[0] = 0x01;
         cpu.memory[1] = 0xFA;
-        cpu.memory[2] = 0xDC;
+        cpu.memory[2] = 0xDC;*/
 
-        let mut mmu: MMU = MMU::new();
+        //FADC
+
         cpu.emulate_cycle(&mut mmu);
 
         assert_eq!(cpu.registers.bc(), 0xFADC);
@@ -536,6 +545,21 @@ mod test {
         cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
         assert_eq!(cpu.registers.b, 0x02);
+    }
+
+    #[test]
+    fn inc_d() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.d = 0x05;
+
+        cpu.registers.d = cpu.registers.d.wrapping_add(1);
+
+        assert_eq!(cpu.registers.d, 0x06);
+    }
+
+    fn inc_de() {
+        let mut cpu = Cpu::new();
     }
 
     #[test]
