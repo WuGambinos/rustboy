@@ -9,7 +9,8 @@ use std::path::Path;
 extern crate text_io;
 fn main() {
     let file_name = "roms/tetris.gb";
-
+    //Arch Test
+    //
     //Path to rom
     let rom_path: &Path = Path::new(file_name);
 
