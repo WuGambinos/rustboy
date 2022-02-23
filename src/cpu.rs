@@ -349,11 +349,8 @@ impl Cpu {
             // LD DE, u16
             0x11 => {
                 //DE = u16
-                let lower_value: u8 = mmu.read_mem(self.pc + 1);
-                let upper_value: u8 = mmu.read_mem(self.pc + 2);
-
-                let u16_value: u16 = ((upper_value as u16) << 8) | (lower_value as u16);
-                self.registers.set_bc(u16_value);
+                let u16_value = self.get_u16(mmu);
+                self.registers.set_de(u16_value);
 
                 //Increase Program Counter
                 self.pc += 3;
@@ -404,7 +401,7 @@ impl Cpu {
         /*(self.memory[(self.pc + 1) as usize] as u16) << 8
         | (self.memory[(self.pc + 2) as usize]) as u16*/
 
-        (mmu.read_mem(self.pc + 1) as u16) << 8 | mmu.read_mem(self.pc + 2) as u16
+        (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
     }
 
     ///Updates Zero Flag
@@ -533,7 +530,7 @@ mod test {
 
         cpu.emulate_cycle(&mut mmu);
 
-        assert_eq!(cpu.registers.bc(), 0xFADC);
+        assert_eq!(cpu.registers.bc(), 0xDCFA);
     }
 
     #[test]
