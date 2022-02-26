@@ -142,7 +142,7 @@ impl Cpu {
             //LD BC, u16
             0x01 => {
                 //Grab u16 value
-                let data = self.get_u16(&mmu);
+                let data = self.get_u16(mmu);
 
                 //BC = u16
                 self.registers.set_bc(data);
