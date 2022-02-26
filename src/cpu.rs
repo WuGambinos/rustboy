@@ -384,11 +384,27 @@ impl Cpu {
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
 
+                //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
-            0x15 => {}
+            0x15 => {
+                //Update Half Carry
+                self.update_half_carry_flag_sub_8bit(self.registers.d, 1);
+
+                //D = D - 1
+                self.registers.d = self.registers.d.wrapping_sub(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.d);
+
+                //Set Sub Flag
+                self.f.sub_flag = 1;
+
+                //Inrease Program Counter
+                self.pc += 1;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -478,7 +494,7 @@ impl Cpu {
 
     ///Rotate Accumulator Left
     ///
-    /// Copy Original 7th bit into carry and 0th bit
+    /// 7th bit of Accumulator is copied into carry and into the 0th bit of A
     fn rlca(&mut self) {
         let lmb: u8 = self.registers.a & 0x80;
 
@@ -488,9 +504,13 @@ impl Cpu {
         //Store previous leftmostbit in rightmost position
         self.registers.a |= (1 << 0) & lmb;
 
+        //Store original 7th bit in carry
         self.f.carry_flag = lmb;
     }
 
+    ///Rotate Accumjlator Right
+    ///
+    /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
     fn rrca(&mut self) {
         let rmb: u8 = self.registers.a & 0x01;
 
@@ -500,8 +520,13 @@ impl Cpu {
         //Store previous rightmost bi tin leftmost position
         self.registers.a |= (1 << 7) & rmb;
 
+        //Store original 0th bit in carry
         self.f.carry_flag = rmb;
     }
+
+    fn inc_8bit() {}
+
+    fn dec_8bit() {}
 }
 
 #[cfg(test)]
