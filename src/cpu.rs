@@ -524,8 +524,29 @@ impl Cpu {
         self.f.carry_flag = rmb;
     }
 
-    fn inc_8bit(&self, register: char) {
+    fn inc_8bit(&mut self, register: char) {
         match register {
+            'A' => {
+                self.registers.a = self.registers.a.wrapping_add(1);
+            }
+            'B' => {
+                self.registers.b = self.registers.b.wrapping_add(1);
+            }
+            'C' => {
+                self.registers.c = self.registers.c.wrapping_add(1);
+            }
+            'D' => {
+                self.registers.d = self.registers.d.wrapping_add(1);
+            }
+            'E' => {
+                self.registers.e = self.registers.e.wrapping_add(1);
+            }
+            'H' => {
+                self.registers.h = self.registers.h.wrapping_add(1);
+            }
+            'L' => {
+                self.registers.l = self.registers.l.wrapping_add(1);
+            }
             _ => println!("NOT A REGISTER!"),
         }
     }
@@ -570,7 +591,7 @@ mod test {
 
         cpu.inc_8bit('B');
 
-        cpu.registers.b = cpu.registers.b.wrapping_add(1);
+        //cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
         assert_eq!(cpu.registers.b, 0x02);
     }
