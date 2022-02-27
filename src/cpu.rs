@@ -524,7 +524,11 @@ impl Cpu {
         self.f.carry_flag = rmb;
     }
 
-    fn inc_8bit() {}
+    fn inc_8bit(&self, register: char) {
+        match register {
+            _ => println!("NOT A REGISTER!"),
+        }
+    }
 
     fn dec_8bit() {}
 }
@@ -564,6 +568,8 @@ mod test {
 
         cpu.registers.b = 0x01;
 
+        cpu.inc_8bit('B');
+
         cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
         assert_eq!(cpu.registers.b, 0x02);
@@ -574,7 +580,6 @@ mod test {
         let mut cpu = Cpu::new();
 
         cpu.registers.d = 0x05;
-
         cpu.registers.d = cpu.registers.d.wrapping_add(1);
 
         assert_eq!(cpu.registers.d, 0x06);
