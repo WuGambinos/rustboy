@@ -644,9 +644,9 @@ impl Cpu {
         }
     }
 
-    fn inc_16bit(&mut self, register: String) {}
+    fn dec_8bit(&mut self, register: char) {}
 
-    fn dec_8bit() {}
+    fn inc_16bit(&mut self, register: String) {}
 }
 
 #[cfg(test)]
@@ -749,14 +749,24 @@ mod test {
     #[test]
     fn inc_8bit_overflow() {
         let mut cpu = Cpu::new();
+
+        cpu.registers.b = 0xFF;
+        cpu.inc_8bit('B');
+
+        assert_eq!(cpu.registers.l, 0x00);
+        assert_eq!(cpu.f.zero_flag, 0x01);
+        assert_eq!(cpu.f.sub_flag, 0x00);
+        assert_eq!(cpu.f.half_carry_flag, 0x01);
     }
 
     /*************************************************************************
      * 16-bit Arithmetic Tests
      *************************************************************************/
 
-    fn inc_de() {
+    fn inc_bc() {
         let mut cpu = Cpu::new();
+
+        cpu.registers.set_bc(0x00FF);
     }
 
     #[test]
