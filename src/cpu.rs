@@ -405,6 +405,8 @@ impl Cpu {
                 //Inrease Program Counter
                 self.pc += 1;
             }
+
+            //LD D, u8
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -527,29 +529,122 @@ impl Cpu {
     fn inc_8bit(&mut self, register: char) {
         match register {
             'A' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.a, 1);
+
+                //A = A + 1
                 self.registers.a = self.registers.a.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.a);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             'B' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
+
+                //B = B + 1
                 self.registers.b = self.registers.b.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.b);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             'C' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.c, 1);
+
+                //C = C + 1
                 self.registers.c = self.registers.c.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.c);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             'D' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.d, 1);
+
+                //D = D + 1
                 self.registers.d = self.registers.d.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.d);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Incerase Program Counter
+                self.pc += 1;
             }
             'E' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.e, 1);
+
+                //E = E + 1
                 self.registers.e = self.registers.e.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.e);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             'H' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.h, 1);
+
+                //H = H + 1
                 self.registers.h = self.registers.h.wrapping_add(1);
+
+                //Update Zero Flag
+                self.update_zero_flag(self.registers.h);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             'L' => {
+                //Update Half Carry
+                self.update_half_carry_flag_sum_8bit(self.registers.l, 1);
+
+                //L = L + 1
                 self.registers.l = self.registers.l.wrapping_add(1);
+
+                //Updafte Zero Flag
+                self.update_zero_flag(self.registers.l);
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
             }
             _ => println!("NOT A REGISTER!"),
         }
     }
+
+    fn inc_16bit(&mut self, register: String) {}
 
     fn dec_8bit() {}
 }
@@ -583,6 +678,10 @@ mod test {
         assert_eq!(cpu.registers.bc(), 0xDCFA);
     }
 
+    /*************************************************************************
+     * 8-bit Arithmetic Tests
+     *************************************************************************/
+
     #[test]
     fn inc_b() {
         let mut cpu = Cpu::new();
@@ -597,14 +696,64 @@ mod test {
     }
 
     #[test]
+    fn inc_c() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.c = 0x01;
+
+        cpu.inc_8bit('C');
+
+        assert_eq!(cpu.registers.c, 0x02);
+    }
+
+    #[test]
     fn inc_d() {
         let mut cpu = Cpu::new();
 
         cpu.registers.d = 0x05;
-        cpu.registers.d = cpu.registers.d.wrapping_add(1);
+        cpu.inc_8bit('D');
 
         assert_eq!(cpu.registers.d, 0x06);
     }
+
+    #[test]
+    fn inc_e() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.e = 0x05;
+        cpu.inc_8bit('E');
+
+        assert_eq!(cpu.registers.e, 0x06);
+    }
+
+    #[test]
+    fn inc_h() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.h = 0x05;
+        cpu.inc_8bit('H');
+
+        assert_eq!(cpu.registers.h, 0x06);
+    }
+
+    #[test]
+    fn inc_l() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.l = 0x05;
+        cpu.inc_8bit('L');
+
+        assert_eq!(cpu.registers.l, 0x06);
+    }
+
+    #[test]
+    fn inc_8bit_overflow() {
+        let mut cpu = Cpu::new();
+    }
+
+    /*************************************************************************
+     * 16-bit Arithmetic Tests
+     *************************************************************************/
 
     fn inc_de() {
         let mut cpu = Cpu::new();
