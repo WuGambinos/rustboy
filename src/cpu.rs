@@ -166,35 +166,13 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
-
-                //Increment B register
-                self.registers.b = self.registers.b.wrapping_add(1);
-
-                //Update Zero flag
-                self.update_zero_flag(self.registers.b);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
+                self.inc_8bit('B');
                 self.pc += 1;
             }
 
             //DEC B: Flags Z1H
             0x05 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.b, 1);
-
-                //Decrement B register
-                self.registers.b = self.registers.b.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.b);
-
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
+                self.dec_8bit('B');
                 self.pc += 1;
             }
 
@@ -281,36 +259,14 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.c, 1);
-
-                //C = C + 1;
-                self.registers.c = self.registers.c.wrapping_add(1);
-
-                //Update Zero flag
-                self.update_zero_flag(self.registers.c);
-
+                self.inc_8bit('C');
                 //Increase Program Counter
                 self.pc += 1;
             }
 
             //DEC C
             0x0D => {
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.c, 1);
-
-                //C = C - 1
-                self.registers.c = self.registers.c.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.c);
-
+                self.dec_8bit('C');
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -372,41 +328,27 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                //Update half carry
-                self.update_half_carry_flag_sum_8bit(self.registers.d, 1);
-
-                //D = D + 1
-                self.registers.d = self.registers.d.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.d);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
+                self.inc_8bit('D');
                 //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
             0x15 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.d, 1);
-
-                //D = D - 1
-                self.registers.d = self.registers.d.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.d);
-
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
+                self.dec_8bit('D');
                 //Inrease Program Counter
                 self.pc += 1;
             }
 
             //LD D, u8
+            0x16 => {
+                //C = u8
+                let value: u8 = mmu.read_mem(self.pc + 1);
+                self.registers.c = value;
+
+                //Increase Program Counter
+                self.pc += 2;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -822,6 +764,7 @@ mod test {
         assert_eq!(cpu.registers.h, 0xFF);
     }
 
+    #[test]
     fn dec_l() {
         let mut cpu = Cpu::new();
 
