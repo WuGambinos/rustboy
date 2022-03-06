@@ -540,9 +540,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             'B' => {
                 //Update Half Carry
@@ -556,9 +553,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             'C' => {
                 //Update Half Carry
@@ -572,9 +566,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             'D' => {
                 //Update Half Carry
@@ -588,9 +579,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Incerase Program Counter
-                self.pc += 1;
             }
             'E' => {
                 //Update Half Carry
@@ -604,9 +592,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             'H' => {
                 //Update Half Carry
@@ -620,9 +605,6 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             'L' => {
                 //Update Half Carry
@@ -636,15 +618,58 @@ impl Cpu {
 
                 //Clear Sub Flag
                 self.f.sub_flag = 0;
-
-                //Increase Program Counter
-                self.pc += 1;
             }
             _ => println!("NOT A REGISTER!"),
         }
     }
 
-    fn dec_8bit(&mut self, register: char) {}
+    fn dec_8bit(&mut self, register: char) {
+        match register {
+            'A' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.a, 1);
+                self.registers.a = self.registers.a.wrapping_sub(1);
+                self.update_zero_flag(self.registers.a);
+                self.f.sub_flag = 1;
+            }
+            'B' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.b, 1);
+                self.registers.b = self.registers.b.wrapping_sub(1);
+                self.update_zero_flag(self.registers.b);
+                self.f.sub_flag = 1;
+            }
+            'C' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.c, 1);
+                self.registers.c = self.registers.c.wrapping_sub(1);
+                self.update_zero_flag(self.registers.c);
+                self.f.sub_flag = 1;
+            }
+            'D' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.d, 1);
+                self.registers.d = self.registers.d.wrapping_sub(1);
+                self.update_zero_flag(self.registers.d);
+                self.f.sub_flag = 1;
+            }
+            'E' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.e, 1);
+                self.registers.e = self.registers.e.wrapping_sub(1);
+                self.update_zero_flag(self.registers.e);
+                self.f.sub_flag = 1;
+            }
+            'H' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.h, 1);
+                self.registers.h = self.registers.h.wrapping_sub(1);
+                self.update_zero_flag(self.registers.h);
+                self.f.sub_flag = 1;
+            }
+            'L' => {
+                self.update_half_carry_flag_sub_8bit(self.registers.l, 1);
+                self.registers.l = self.registers.l.wrapping_sub(1);
+                self.update_zero_flag(self.registers.l);
+                self.f.sub_flag = 1;
+            }
+            _ => println!("NOT A REGISTER"),
+        }
+    }
 
     fn inc_16bit(&mut self, register: String) {}
 }
@@ -744,6 +769,66 @@ mod test {
         cpu.inc_8bit('L');
 
         assert_eq!(cpu.registers.l, 0x06);
+    }
+
+    #[test]
+    fn dec_b() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.b = 0x02;
+        cpu.dec_8bit('B');
+
+        assert_eq!(cpu.registers.b, 0x01);
+    }
+
+    #[test]
+    fn dec_c() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.c = 0x05;
+        cpu.dec_8bit('C');
+
+        assert_eq!(cpu.registers.c, 0x04);
+    }
+
+    #[test]
+    fn dec_d() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.d = 0x03;
+        cpu.dec_8bit('D');
+
+        assert_eq!(cpu.registers.d, 0x02);
+    }
+
+    #[test]
+    fn dec_e() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.e = 0x01;
+        cpu.dec_8bit('E');
+
+        assert_eq!(cpu.registers.e, 0x00);
+        assert_eq!(cpu.f.zero_flag, 1);
+    }
+
+    #[test]
+    fn dec_h() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.h = 0x00;
+        cpu.dec_8bit('H');
+
+        assert_eq!(cpu.registers.h, 0xFF);
+    }
+
+    fn dec_l() {
+        let mut cpu = Cpu::new();
+
+        cpu.registers.l = 0x05;
+        cpu.dec_8bit('L');
+
+        assert_eq!(cpu.registers.l, 0x04);
     }
 
     #[test]
