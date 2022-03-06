@@ -342,13 +342,15 @@ impl Cpu {
 
             //LD D, u8
             0x16 => {
-                //C = u8
+                //D = u8
                 let value: u8 = mmu.read_mem(self.pc + 1);
-                self.registers.c = value;
+                self.registers.d = value;
 
                 //Increase Program Counter
                 self.pc += 2;
             }
+
+            0x17 => {}
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -436,7 +438,7 @@ impl Cpu {
      * INSTRUCTIONS
      *************************************************************************/
 
-    ///Rotate Accumulator Left
+    ///Rotate Left Circular Accumulator
     ///
     /// 7th bit of Accumulator is copied into carry and into the 0th bit of A
     fn rlca(&mut self) {
@@ -452,7 +454,7 @@ impl Cpu {
         self.f.carry_flag = lmb;
     }
 
-    ///Rotate Accumjlator Right
+    ///Rotate Right Circular Accumulator
     ///
     /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
     fn rrca(&mut self) {
@@ -467,6 +469,16 @@ impl Cpu {
         //Store original 0th bit in carry
         self.f.carry_flag = rmb;
     }
+
+    /// Rotate Left Accumulator
+    ///
+    /// 7th bit is moved into carry, and the carry is moved into the 0th bit
+    fn rla(&mut self) {}
+
+    /// Rotate Right Accumulator
+    ///
+    /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
+    fn rra(&mut self) {}
 
     fn inc_8bit(&mut self, register: char) {
         match register {
