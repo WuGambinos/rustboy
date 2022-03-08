@@ -350,7 +350,22 @@ impl Cpu {
                 self.pc += 2;
             }
 
-            0x17 => {}
+            //RLA
+            0x17 => {
+                //Rotate
+                self.rla();
+                //Clear Zero Flag
+                self.f.zero_flag = 0;
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Clear Half Carry Flag
+                self.f.half_carry_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -447,7 +462,7 @@ impl Cpu {
         //Rotate Accumulator to left
         self.registers.a <<= 1;
 
-        //Store previous leftmostbit in rightmost position
+        //Store previous 7th bit in 0th position
         self.registers.a |= (1 << 0) & lmb;
 
         //Store original 7th bit in carry
@@ -463,7 +478,7 @@ impl Cpu {
         //Rotate Accumulator to right
         self.registers.a >>= 1;
 
-        //Store previous rightmost bi tin leftmost position
+        //Store previous 0th bit in 7th bit of A
         self.registers.a |= (1 << 7) & rmb;
 
         //Store original 0th bit in carry
@@ -473,12 +488,34 @@ impl Cpu {
     /// Rotate Left Accumulator
     ///
     /// 7th bit is moved into carry, and the carry is moved into the 0th bit
-    fn rla(&mut self) {}
+    fn rla(&mut self) {
+        let lmb: u8 = self.registers.a & 0x80;
+
+        //Rotate Accumulator Left
+        self.registers.a <<= 1;
+
+        //Store carry into 0th bit of Accumulator
+        self.registers.a |= (1 << 0) & (self.f.carry_flag);
+
+        //Move 7th bit into carry
+        self.f.carry_flag = lmb;
+    }
 
     /// Rotate Right Accumulator
     ///
     /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
-    fn rra(&mut self) {}
+    fn rra(&mut self) {
+        let rmb: u8 = self.registers.a & 0x01;
+
+        //Rotate Accumulator to right
+        self.registers.a >>= 1;
+
+        //Store carry in 7th bit of A
+        self.registers.a |= (1 << 7) & self.f.carry_flag;
+
+        //Store original 0th bit in carry
+        self.f.carry_flag = rmb;
+    }
 
     fn inc_8bit(&mut self, register: char) {
         match register {
