@@ -680,28 +680,28 @@ impl Cpu {
             "BC" => {
                 self.update_half_carry_flag_sum_16bit(self.registers.bc(), 1);
                 self.registers.set_bc(self.registers.bc().wrapping_add(1));
-                self.update_zero_flag();
+                self.f.zero_flag = (self.registers.bc() == 0) as u8;
                 self.f.sub_flag = 1;
             }
 
             "DE" => {
                 self.update_half_carry_flag_sum_16bit(self.registers.de(), 1);
                 self.registers.set_de(self.registers.de().wrapping_add(1));
-                self.update_zero_flag();
+                self.f.zero_flag = (self.registers.de() == 0) as u8;
                 self.f.sub_flag = 1;
             }
 
             "HL" => {
                 self.update_half_carry_flag_sum_16bit(self.registers.hl(), 1);
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
-                self.update_zero_flag();
+                self.f.zero_flag = (self.registers.hl() == 0) as u8;
                 self.f.sub_flag = 1;
             }
 
             "SP" => {
                 self.update_half_carry_flag_sum_16bit(self.sp, 1);
                 self.pc = self.pc.wrapping_add(1);
-                self.update_zero_flag();
+                self.f.zero_flag = (self.pc == 0) as u8;
                 self.f.sub_flag = 1;
             }
             _ => println!("Not a register PAIR"),
@@ -886,10 +886,29 @@ mod test {
      * 16-bit Arithmetic Tests
      *************************************************************************/
 
+    #[test]
     fn inc_bc() {
         let mut cpu = Cpu::new();
-
         cpu.registers.set_bc(0x00FF);
+        cpu.inc_16bit("BC");
+        assert_eq!(cpu.registers.bc(), 256);
+    }
+
+    #[test]
+    fn inc_de() {
+        let mut cpu = Cpu::new();
+        cpu.registers.set_de(0xFFFF);
+        cpu.inc_16bit("DE");
+        assert_eq!(cpu.f.sub_flag, 1);
+        assert_eq!(cpu.registers.de(), 0);
+    }
+
+    #[test]
+    fn inc_hl() {
+        let mut cpu = Cpu::new();
+        cpu.registers.set_hl(0x0008);
+        cpu.inc_16bit("HL");
+        assert_eq!(cpu.registers.hl(), 0x09);
     }
 
     #[test]
