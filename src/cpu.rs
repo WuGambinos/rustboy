@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use crate::{mmu, MMU};
+use crate::MMU;
 
 ///Struct that represents flags of the Gameboy CPU
 struct Flags {
@@ -166,35 +166,13 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
-
-                //Increment B register
-                self.registers.b = self.registers.b.wrapping_add(1);
-
-                //Update Zero flag
-                self.update_zero_flag(self.registers.b);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
+                self.inc_8bit('B');
                 self.pc += 1;
             }
 
             //DEC B: Flags Z1H
             0x05 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.b, 1);
-
-                //Decrement B register
-                self.registers.b = self.registers.b.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.b);
-
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
+                self.dec_8bit('B');
                 self.pc += 1;
             }
 
@@ -281,36 +259,14 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.c, 1);
-
-                //C = C + 1;
-                self.registers.c = self.registers.c.wrapping_add(1);
-
-                //Update Zero flag
-                self.update_zero_flag(self.registers.c);
-
+                self.inc_8bit('C');
                 //Increase Program Counter
                 self.pc += 1;
             }
 
             //DEC C
             0x0D => {
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.c, 1);
-
-                //C = C - 1
-                self.registers.c = self.registers.c.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.c);
-
+                self.dec_8bit('C');
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -372,41 +328,57 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                //Update half carry
-                self.update_half_carry_flag_sum_8bit(self.registers.d, 1);
-
-                //D = D + 1
-                self.registers.d = self.registers.d.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.d);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-
+                self.inc_8bit('D');
                 //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
             0x15 => {
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(self.registers.d, 1);
-
-                //D = D - 1
-                self.registers.d = self.registers.d.wrapping_sub(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.d);
-
-                //Set Sub Flag
-                self.f.sub_flag = 1;
-
+                self.dec_8bit('D');
                 //Inrease Program Counter
                 self.pc += 1;
             }
 
             //LD D, u8
+            0x16 => {
+                //D = u8
+                let value: u8 = mmu.read_mem(self.pc + 1);
+                self.registers.d = value;
+
+                //Increase Program Counter
+                self.pc += 2;
+            }
+
+            //RLA
+            0x17 => {
+                //Rotate
+                self.rla();
+                //Clear Zero Flag
+                self.f.zero_flag = 0;
+
+                //Clear Sub Flag
+                self.f.sub_flag = 0;
+
+                //Clear Half Carry Flag
+                self.f.half_carry_flag = 0;
+
+                //Increase Program Counter
+                self.pc += 1;
+            }
+
+            //JR i8
+            0x18 => {
+                let value: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.pc += 2;
+                self.pc = self.pc + (value as u16);
+            }
+
+            //ADD HL, DE
+            0x19 => {
+                self.pc += 1;
+            }
+
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -494,7 +466,7 @@ impl Cpu {
      * INSTRUCTIONS
      *************************************************************************/
 
-    ///Rotate Accumulator Left
+    ///Rotate Left Circular Accumulator
     ///
     /// 7th bit of Accumulator is copied into carry and into the 0th bit of A
     fn rlca(&mut self) {
@@ -503,14 +475,14 @@ impl Cpu {
         //Rotate Accumulator to left
         self.registers.a <<= 1;
 
-        //Store previous leftmostbit in rightmost position
+        //Store previous 7th bit in 0th position
         self.registers.a |= (1 << 0) & lmb;
 
         //Store original 7th bit in carry
         self.f.carry_flag = lmb;
     }
 
-    ///Rotate Accumjlator Right
+    ///Rotate Right Circular Accumulator
     ///
     /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
     fn rrca(&mut self) {
@@ -519,8 +491,40 @@ impl Cpu {
         //Rotate Accumulator to right
         self.registers.a >>= 1;
 
-        //Store previous rightmost bi tin leftmost position
+        //Store previous 0th bit in 7th bit of A
         self.registers.a |= (1 << 7) & rmb;
+
+        //Store original 0th bit in carry
+        self.f.carry_flag = rmb;
+    }
+
+    /// Rotate Left Accumulator
+    ///
+    /// 7th bit is moved into carry, and the carry is moved into the 0th bit
+    fn rla(&mut self) {
+        let lmb: u8 = self.registers.a & 0x80;
+
+        //Rotate Accumulator Left
+        self.registers.a <<= 1;
+
+        //Store carry into 0th bit of Accumulator
+        self.registers.a |= (1 << 0) & (self.f.carry_flag);
+
+        //Move 7th bit into carry
+        self.f.carry_flag = lmb;
+    }
+
+    /// Rotate Right Accumulator
+    ///
+    /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
+    fn rra(&mut self) {
+        let rmb: u8 = self.registers.a & 0x01;
+
+        //Rotate Accumulator to right
+        self.registers.a >>= 1;
+
+        //Store carry in 7th bit of A
+        self.registers.a |= (1 << 7) & self.f.carry_flag;
 
         //Store original 0th bit in carry
         self.f.carry_flag = rmb;
@@ -671,214 +675,41 @@ impl Cpu {
         }
     }
 
-    fn inc_16bit(&mut self, register: String) {}
+    fn inc_16bit(&mut self, register: &str) {
+        match register {
+            "BC" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.bc(), 1);
+                self.registers.set_bc(self.registers.bc().wrapping_add(1));
+                self.f.zero_flag = (self.registers.bc() == 0) as u8;
+                self.f.sub_flag = 1;
+            }
+
+            "DE" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.de(), 1);
+                self.registers.set_de(self.registers.de().wrapping_add(1));
+                self.f.zero_flag = (self.registers.de() == 0) as u8;
+                self.f.sub_flag = 1;
+            }
+
+            "HL" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.hl(), 1);
+                self.registers.set_hl(self.registers.hl().wrapping_add(1));
+                self.f.zero_flag = (self.registers.hl() == 0) as u8;
+                self.f.sub_flag = 1;
+            }
+
+            "SP" => {
+                self.update_half_carry_flag_sum_16bit(self.sp, 1);
+                self.pc = self.pc.wrapping_add(1);
+                self.f.zero_flag = (self.pc == 0) as u8;
+                self.f.sub_flag = 1;
+            }
+            _ => println!("Not a register PAIR"),
+        }
+    }
+
+    fn add_rr_hl(&mut self) {}
 }
 
 #[cfg(test)]
-mod test {
-    use super::*;
-    #[test]
-    fn internal() {
-        assert_eq!(4, 4);
-    }
-
-    #[test]
-    fn ld_bc_u16() {
-        let mut cpu = Cpu::new();
-        let mut mmu = MMU::new();
-        cpu.pc = 0;
-
-        mmu.write_mem(0, 0x01);
-        mmu.write_mem(1, 0xFA);
-        mmu.write_mem(2, 0xDC);
-
-        /*cpu.memory[0] = 0x01;
-        cpu.memory[1] = 0xFA;
-        cpu.memory[2] = 0xDC;*/
-
-        //FADC
-
-        cpu.emulate_cycle(&mut mmu);
-
-        assert_eq!(cpu.registers.bc(), 0xDCFA);
-    }
-
-    /*************************************************************************
-     * 8-bit Arithmetic Tests
-     *************************************************************************/
-
-    #[test]
-    fn inc_b() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.b = 0x01;
-
-        cpu.inc_8bit('B');
-
-        //cpu.registers.b = cpu.registers.b.wrapping_add(1);
-
-        assert_eq!(cpu.registers.b, 0x02);
-    }
-
-    #[test]
-    fn inc_c() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.c = 0x01;
-
-        cpu.inc_8bit('C');
-
-        assert_eq!(cpu.registers.c, 0x02);
-    }
-
-    #[test]
-    fn inc_d() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.d = 0x05;
-        cpu.inc_8bit('D');
-
-        assert_eq!(cpu.registers.d, 0x06);
-    }
-
-    #[test]
-    fn inc_e() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.e = 0x05;
-        cpu.inc_8bit('E');
-
-        assert_eq!(cpu.registers.e, 0x06);
-    }
-
-    #[test]
-    fn inc_h() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.h = 0x05;
-        cpu.inc_8bit('H');
-
-        assert_eq!(cpu.registers.h, 0x06);
-    }
-
-    #[test]
-    fn inc_l() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.l = 0x05;
-        cpu.inc_8bit('L');
-
-        assert_eq!(cpu.registers.l, 0x06);
-    }
-
-    #[test]
-    fn dec_b() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.b = 0x02;
-        cpu.dec_8bit('B');
-
-        assert_eq!(cpu.registers.b, 0x01);
-    }
-
-    #[test]
-    fn dec_c() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.c = 0x05;
-        cpu.dec_8bit('C');
-
-        assert_eq!(cpu.registers.c, 0x04);
-    }
-
-    #[test]
-    fn dec_d() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.d = 0x03;
-        cpu.dec_8bit('D');
-
-        assert_eq!(cpu.registers.d, 0x02);
-    }
-
-    #[test]
-    fn dec_e() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.e = 0x01;
-        cpu.dec_8bit('E');
-
-        assert_eq!(cpu.registers.e, 0x00);
-        assert_eq!(cpu.f.zero_flag, 1);
-    }
-
-    #[test]
-    fn dec_h() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.h = 0x00;
-        cpu.dec_8bit('H');
-
-        assert_eq!(cpu.registers.h, 0xFF);
-    }
-
-    fn dec_l() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.l = 0x05;
-        cpu.dec_8bit('L');
-
-        assert_eq!(cpu.registers.l, 0x04);
-    }
-
-    #[test]
-    fn inc_8bit_overflow() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.b = 0xFF;
-        cpu.inc_8bit('B');
-
-        assert_eq!(cpu.registers.l, 0x00);
-        assert_eq!(cpu.f.zero_flag, 0x01);
-        assert_eq!(cpu.f.sub_flag, 0x00);
-        assert_eq!(cpu.f.half_carry_flag, 0x01);
-    }
-
-    /*************************************************************************
-     * 16-bit Arithmetic Tests
-     *************************************************************************/
-
-    fn inc_bc() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.set_bc(0x00FF);
-    }
-
-    #[test]
-    fn half_carry() {
-        let mut cpu = Cpu::new();
-        cpu.registers.b = 0x09;
-
-        let operand: u8 = 0x0A;
-
-        cpu.f.half_carry_flag = ((cpu.registers.b & 0xF) + (operand & 0xF) > 0xF) as u8;
-
-        //cpu.inc_8bit_register('B');
-
-        assert_eq!(cpu.f.half_carry_flag, 1);
-    }
-
-    #[test]
-    fn carry() {
-        let mut cpu = Cpu::new();
-
-        cpu.registers.set_bc(0xFFFF);
-        cpu.registers.set_hl(0x0001);
-
-        cpu.update_carry_flag_16bit(cpu.registers.bc(), cpu.registers.hl());
-
-        //assert_eq!(cpu.f.carry_flag, 1);
-        assert_eq!(cpu.registers.bc(), 0xFFFF);
-        assert_eq!(cpu.registers.hl(), 0x0001);
-    }
-}
+mod tests;
