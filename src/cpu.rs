@@ -366,6 +366,19 @@ impl Cpu {
                 //Increase Program Counter
                 self.pc += 1;
             }
+
+            //JR i8
+            0x18 => {
+                let value: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.pc += 2;
+                self.pc = self.pc + (value as u16);
+            }
+
+            //ADD HL, DE
+            0x19 => {
+                self.pc += 1;
+            }
+
             _ => println!("NOT AN OPCODE"),
         }
     }
@@ -662,7 +675,40 @@ impl Cpu {
         }
     }
 
-    fn inc_16bit(&mut self, register: String) {}
+    fn inc_16bit(&mut self, register: &str) {
+        match register {
+            "BC" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.bc(), 1);
+                self.registers.set_bc(self.registers.bc().wrapping_add(1));
+                self.update_zero_flag();
+                self.f.sub_flag = 1;
+            }
+
+            "DE" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.de(), 1);
+                self.registers.set_de(self.registers.de().wrapping_add(1));
+                self.update_zero_flag();
+                self.f.sub_flag = 1;
+            }
+
+            "HL" => {
+                self.update_half_carry_flag_sum_16bit(self.registers.hl(), 1);
+                self.registers.set_hl(self.registers.hl().wrapping_add(1));
+                self.update_zero_flag();
+                self.f.sub_flag = 1;
+            }
+
+            "SP" => {
+                self.update_half_carry_flag_sum_16bit(self.sp, 1);
+                self.pc = self.pc.wrapping_add(1);
+                self.update_zero_flag();
+                self.f.sub_flag = 1;
+            }
+            _ => println!("Not a register PAIR"),
+        }
+    }
+
+    fn add_rr_hl(&mut self) {}
 }
 
 #[cfg(test)]
