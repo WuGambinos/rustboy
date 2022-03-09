@@ -315,6 +315,8 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 pub fn jr_z(cpu: &mut Cpu, dd: u8) {
     if cpu.f.zero_flag == 1 {
         jr(cpu, dd);
+    } else {
+        cpu.pc += 2;
     }
 }
 
@@ -323,6 +325,8 @@ pub fn jr_z(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
     if cpu.f.zero_flag == 0 {
         jr(cpu, dd);
+    } else {
+        cpu.pc += 2;
     }
 }
 
@@ -331,6 +335,8 @@ pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
 pub fn jr_c(cpu: &mut Cpu, dd: u8) {
     if cpu.f.carry_flag == 1 {
         jr(cpu, dd);
+    } else {
+        cpu.pc += 2;
     }
 }
 
@@ -339,5 +345,7 @@ pub fn jr_c(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
     if cpu.f.carry_flag == 0 {
         jr(cpu, dd);
+    } else {
+        cpu.pc += 2;
     }
 }
