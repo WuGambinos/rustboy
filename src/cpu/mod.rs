@@ -1,6 +1,4 @@
-use std::io::Read;
-
-use crate::MMU;
+use crate::Mmu;
 
 ///Struct that represents flags of the Gameboy CPU
 struct Flags {
@@ -132,7 +130,7 @@ impl Cpu {
         }
     }
 
-    fn emulate_cycle(&mut self, mmu: &mut MMU) {
+    fn emulate_cycle(&mut self, mmu: &mut Mmu) {
         self.fetch(mmu);
 
         match self.opcode {
@@ -371,7 +369,7 @@ impl Cpu {
             0x18 => {
                 let value: i8 = mmu.read_mem(self.pc + 1) as i8;
                 self.pc += 2;
-                self.pc = self.pc + (value as u16);
+                self.pc += value as u16;
             }
 
             //ADD HL, DE
@@ -383,11 +381,11 @@ impl Cpu {
         }
     }
 
-    fn fetch(&mut self, mmu: &MMU) {
+    fn fetch(&mut self, mmu: &Mmu) {
         self.opcode = mmu.read_mem(self.pc);
     }
 
-    fn get_u16(&mut self, mmu: &MMU) -> u16 {
+    fn get_u16(&mut self, mmu: &Mmu) -> u16 {
         /*(self.memory[(self.pc + 1) as usize] as u16) << 8
         | (self.memory[(self.pc + 2) as usize]) as u16*/
 

@@ -1,4 +1,3 @@
-
 use super::*;
 #[test]
 fn internal() {
@@ -8,7 +7,7 @@ fn internal() {
 #[test]
 fn ld_bc_u16() {
     let mut cpu = Cpu::new();
-    let mut mmu = MMU::new();
+    let mut mmu = Mmu::new();
     cpu.pc = 0;
 
     mmu.write_mem(0, 0x01);

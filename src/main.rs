@@ -1,16 +1,21 @@
-mod cpu;
+/*mod cpu;
 pub use cpu::*;
 mod mmu;
-pub use mmu::*;
-use std::fs;
-use std::path::Path;
+pub use mmu::*;*/
+mod cpu;
+use cpu::Cpu;
+
+mod mmu;
+use mmu::*;
 
 #[macro_use]
 extern crate text_io;
+use std::fs;
+use std::path::Path;
+
 fn main() {
     let file_name = "roms/tetris.gb";
-    //Arch Test
-    //
+
     //Path to rom
     let rom_path: &Path = Path::new(file_name);
 
@@ -21,7 +26,7 @@ fn main() {
     let mut cpu = Cpu::new();
 
     //Mapped Memory Unit
-    let mut mmu: MMU = MMU::new();
+    let mut mmu: Mmu = Mmu::new();
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
