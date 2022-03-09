@@ -222,20 +222,9 @@ impl Cpu {
                 self.pc += 3;
             }
 
-            //ADD HL, BC NEED TO FIX THSIS
+            //ADD HL, BC
             0x09 => {
-                //Clear Sub flag
-                self.f.sub_flag = 0;
-
-                //Update Half Carry
-
-                //Update Carry
-                self.update_carry_flag_16bit(self.registers.hl(), self.registers.bc());
-
-                //HL = HL + BC
-                self.registers
-                    .set_hl(self.registers.hl().wrapping_add(self.registers.bc()));
-
+                instructions::add_rr_hl(self, "DE");
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -376,6 +365,7 @@ impl Cpu {
 
             //ADD HL, DE
             0x19 => {
+                instructions::add_rr_hl(self, "DE");
                 self.pc += 1;
             }
 

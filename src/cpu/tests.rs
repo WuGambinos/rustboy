@@ -197,6 +197,19 @@ fn inc_hl() {
 }
 
 #[test]
+fn add_bc_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0xF0);
+
+    cpu.registers.set_bc(0xFF);
+
+    instructions::add_rr_hl(&mut cpu, "BC");
+
+    assert_eq!(cpu.registers.hl(), 0x01EF);
+}
+
+#[test]
 fn half_carry() {
     let mut cpu = Cpu::new();
     cpu.registers.b = 0x09;
