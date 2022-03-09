@@ -35,7 +35,7 @@ fn inc_b() {
 
     cpu.registers.b = 0x01;
 
-    cpu.inc_8bit('B');
+    instructions::inc_8bit(&mut cpu, 'B');
 
     //cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
@@ -48,7 +48,7 @@ fn inc_c() {
 
     cpu.registers.c = 0x01;
 
-    cpu.inc_8bit('C');
+    instructions::inc_8bit(&mut cpu, 'C');
 
     assert_eq!(cpu.registers.c, 0x02);
 }
@@ -58,7 +58,7 @@ fn inc_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x05;
-    cpu.inc_8bit('D');
+    instructions::inc_8bit(&mut cpu, 'D');
 
     assert_eq!(cpu.registers.d, 0x06);
 }
@@ -68,7 +68,7 @@ fn inc_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x05;
-    cpu.inc_8bit('E');
+    instructions::inc_8bit(&mut cpu, 'E');
 
     assert_eq!(cpu.registers.e, 0x06);
 }
@@ -78,7 +78,7 @@ fn inc_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x05;
-    cpu.inc_8bit('H');
+    instructions::inc_8bit(&mut cpu, 'H');
 
     assert_eq!(cpu.registers.h, 0x06);
 }
@@ -88,7 +88,7 @@ fn inc_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    cpu.inc_8bit('L');
+    instructions::inc_8bit(&mut cpu, 'L');
 
     assert_eq!(cpu.registers.l, 0x06);
 }
