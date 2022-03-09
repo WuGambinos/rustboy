@@ -1,17 +1,14 @@
-/*mod cpu;
-pub use cpu::*;
-mod mmu;
-pub use mmu::*;*/
-mod cpu;
-use cpu::Cpu;
+pub mod cpu;
+pub use cpu::Cpu;
 
-mod mmu;
-use mmu::*;
+pub mod mmu;
+pub use mmu::*;
+
+use std::fs;
+use std::path::Path;
 
 #[macro_use]
 extern crate text_io;
-use std::fs;
-use std::path::Path;
 
 fn main() {
     let file_name = "roms/tetris.gb";
