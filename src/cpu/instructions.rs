@@ -242,4 +242,29 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
     }
 }
 
-fn add_rr_hl(cpu: &mut Cpu) {}
+fn add_rr_hl(cpu: &mut Cpu, register: &str) {
+    match register {
+        "BC" => {
+            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
+            cpu.registers
+                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
+            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        "DE" => {
+            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+            cpu.registers
+                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
+            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        "HL" => {
+            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+            cpu.registers
+                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
+            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        _ => println!("NOT A REGISTER PAIR"),
+    }
+}
