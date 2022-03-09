@@ -165,13 +165,13 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                self.inc_8bit('B');
+                instructions::inc_8bit(self, 'B');
                 self.pc += 1;
             }
 
             //DEC B: Flags Z1H
             0x05 => {
-                self.dec_8bit('B');
+                instructions::dec_8bit(self, 'B');
                 self.pc += 1;
             }
 
@@ -186,7 +186,7 @@ impl Cpu {
 
             //RLCA
             0x07 => {
-                self.rlca();
+                instructions::rlca(self);
 
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
@@ -258,14 +258,14 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                self.inc_8bit('C');
+                instructions::inc_8bit(self, 'C');
                 //Increase Program Counter
                 self.pc += 1;
             }
 
             //DEC C
             0x0D => {
-                self.dec_8bit('C');
+                instructions::dec_8bit(self, 'C');
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -283,7 +283,7 @@ impl Cpu {
             //RRCA
             0x0F => {
                 //Rotate
-                self.rrca();
+                instructions::rrca(self);
 
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
@@ -327,14 +327,14 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                self.inc_8bit('D');
+                instructions::inc_8bit(self, 'D');
                 //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
             0x15 => {
-                self.dec_8bit('D');
+                instructions::dec_8bit(self, 'D');
                 //Inrease Program Counter
                 self.pc += 1;
             }
@@ -352,7 +352,8 @@ impl Cpu {
             //RLA
             0x17 => {
                 //Rotate
-                self.rla();
+                instructions::rla(self);
+
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
 
@@ -460,254 +461,6 @@ impl Cpu {
 
         self.f.carry_flag = res;
     }
-
-    /*************************************************************************
-     * INSTRUCTIONS
-     *************************************************************************/
-
-    ///Rotate Left Circular Accumulator
-    ///
-    /// 7th bit of Accumulator is copied into carry and into the 0th bit of A
-    fn rlca(&mut self) {
-        let lmb: u8 = self.registers.a & 0x80;
-
-        //Rotate Accumulator to left
-        self.registers.a <<= 1;
-
-        //Store previous 7th bit in 0th position
-        self.registers.a |= (1 << 0) & lmb;
-
-        //Store original 7th bit in carry
-        self.f.carry_flag = lmb;
-    }
-
-    ///Rotate Right Circular Accumulator
-    ///
-    /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
-    fn rrca(&mut self) {
-        let rmb: u8 = self.registers.a & 0x01;
-
-        //Rotate Accumulator to right
-        self.registers.a >>= 1;
-
-        //Store previous 0th bit in 7th bit of A
-        self.registers.a |= (1 << 7) & rmb;
-
-        //Store original 0th bit in carry
-        self.f.carry_flag = rmb;
-    }
-
-    /// Rotate Left Accumulator
-    ///
-    /// 7th bit is moved into carry, and the carry is moved into the 0th bit
-    fn rla(&mut self) {
-        let lmb: u8 = self.registers.a & 0x80;
-
-        //Rotate Accumulator Left
-        self.registers.a <<= 1;
-
-        //Store carry into 0th bit of Accumulator
-        self.registers.a |= (1 << 0) & (self.f.carry_flag);
-
-        //Move 7th bit into carry
-        self.f.carry_flag = lmb;
-    }
-
-    /// Rotate Right Accumulator
-    ///
-    /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
-    fn rra(&mut self) {
-        let rmb: u8 = self.registers.a & 0x01;
-
-        //Rotate Accumulator to right
-        self.registers.a >>= 1;
-
-        //Store carry in 7th bit of A
-        self.registers.a |= (1 << 7) & self.f.carry_flag;
-
-        //Store original 0th bit in carry
-        self.f.carry_flag = rmb;
-    }
-
-    fn inc_8bit(&mut self, register: char) {
-        match register {
-            'A' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.a, 1);
-
-                //A = A + 1
-                self.registers.a = self.registers.a.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.a);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'B' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.b, 1);
-
-                //B = B + 1
-                self.registers.b = self.registers.b.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.b);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'C' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.c, 1);
-
-                //C = C + 1
-                self.registers.c = self.registers.c.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.c);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'D' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.d, 1);
-
-                //D = D + 1
-                self.registers.d = self.registers.d.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.d);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'E' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.e, 1);
-
-                //E = E + 1
-                self.registers.e = self.registers.e.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.e);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'H' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.h, 1);
-
-                //H = H + 1
-                self.registers.h = self.registers.h.wrapping_add(1);
-
-                //Update Zero Flag
-                self.update_zero_flag(self.registers.h);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            'L' => {
-                //Update Half Carry
-                self.update_half_carry_flag_sum_8bit(self.registers.l, 1);
-
-                //L = L + 1
-                self.registers.l = self.registers.l.wrapping_add(1);
-
-                //Updafte Zero Flag
-                self.update_zero_flag(self.registers.l);
-
-                //Clear Sub Flag
-                self.f.sub_flag = 0;
-            }
-            _ => println!("NOT A REGISTER!"),
-        }
-    }
-
-    fn dec_8bit(&mut self, register: char) {
-        match register {
-            'A' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.a, 1);
-                self.registers.a = self.registers.a.wrapping_sub(1);
-                self.update_zero_flag(self.registers.a);
-                self.f.sub_flag = 1;
-            }
-            'B' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.b, 1);
-                self.registers.b = self.registers.b.wrapping_sub(1);
-                self.update_zero_flag(self.registers.b);
-                self.f.sub_flag = 1;
-            }
-            'C' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.c, 1);
-                self.registers.c = self.registers.c.wrapping_sub(1);
-                self.update_zero_flag(self.registers.c);
-                self.f.sub_flag = 1;
-            }
-            'D' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.d, 1);
-                self.registers.d = self.registers.d.wrapping_sub(1);
-                self.update_zero_flag(self.registers.d);
-                self.f.sub_flag = 1;
-            }
-            'E' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.e, 1);
-                self.registers.e = self.registers.e.wrapping_sub(1);
-                self.update_zero_flag(self.registers.e);
-                self.f.sub_flag = 1;
-            }
-            'H' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.h, 1);
-                self.registers.h = self.registers.h.wrapping_sub(1);
-                self.update_zero_flag(self.registers.h);
-                self.f.sub_flag = 1;
-            }
-            'L' => {
-                self.update_half_carry_flag_sub_8bit(self.registers.l, 1);
-                self.registers.l = self.registers.l.wrapping_sub(1);
-                self.update_zero_flag(self.registers.l);
-                self.f.sub_flag = 1;
-            }
-            _ => println!("NOT A REGISTER"),
-        }
-    }
-
-    fn inc_16bit(&mut self, register: &str) {
-        match register {
-            "BC" => {
-                self.update_half_carry_flag_sum_16bit(self.registers.bc(), 1);
-                self.registers.set_bc(self.registers.bc().wrapping_add(1));
-                self.f.zero_flag = (self.registers.bc() == 0) as u8;
-                self.f.sub_flag = 1;
-            }
-
-            "DE" => {
-                self.update_half_carry_flag_sum_16bit(self.registers.de(), 1);
-                self.registers.set_de(self.registers.de().wrapping_add(1));
-                self.f.zero_flag = (self.registers.de() == 0) as u8;
-                self.f.sub_flag = 1;
-            }
-
-            "HL" => {
-                self.update_half_carry_flag_sum_16bit(self.registers.hl(), 1);
-                self.registers.set_hl(self.registers.hl().wrapping_add(1));
-                self.f.zero_flag = (self.registers.hl() == 0) as u8;
-                self.f.sub_flag = 1;
-            }
-
-            "SP" => {
-                self.update_half_carry_flag_sum_16bit(self.sp, 1);
-                self.pc = self.pc.wrapping_add(1);
-                self.f.zero_flag = (self.pc == 0) as u8;
-                self.f.sub_flag = 1;
-            }
-            _ => println!("Not a register PAIR"),
-        }
-    }
-
-    fn add_rr_hl(&mut self) {}
 }
 
 #[cfg(test)]
