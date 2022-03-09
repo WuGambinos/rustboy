@@ -1,3 +1,4 @@
+pub mod instructions;
 use crate::Mmu;
 
 ///Struct that represents flags of the Gameboy CPU
