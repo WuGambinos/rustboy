@@ -360,9 +360,8 @@ impl Cpu {
 
             //JR i8
             0x18 => {
-                let value: i8 = mmu.read_mem(self.pc + 1) as i8;
-                self.pc += 2;
-                self.pc += value as u16;
+                let value = mmu.read_mem(self.pc + 1);
+                jr(self, value);
             }
 
             //ADD HL, DE
