@@ -209,6 +209,8 @@ pub fn rra(cpu: &mut Cpu) {
     cpu.f.carry_flag = rmb;
 }
 
+///
+/// Increment register pair
 pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
@@ -242,6 +244,37 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
     }
 }
 
+///Decrement Register Pair
+pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
+    match register {
+        "BC" => {
+            cpu.update_half_carry_flag_sub_16bit(cpu.registers.bc(), 1);
+            cpu.registers.set_bc(cpu.registers.bc().wrapping_sub(1));
+            cpu.f.zero_flag = (cpu.registers.bc() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        "DE" => {
+            cpu.update_half_carry_flag_sub_16bit(cpu.registers.de(), 1);
+            cpu.registers.set_de(cpu.registers.de().wrapping_sub(1));
+            cpu.f.zero_flag = (cpu.registers.de() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        "HL" => {
+            cpu.update_half_carry_flag_sub_16bit(cpu.registers.hl(), 1);
+            cpu.registers.set_hl(cpu.registers.hl().wrapping_sub(1));
+            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        "SP" => {
+            cpu.update_half_carry_flag_sub_16bit(cpu.sp, 1);
+            cpu.sp = cpu.registers.bc().wrapping_sub(1);
+            cpu.f.zero_flag = (cpu.sp == 0) as u8;
+            cpu.f.sub_flag = 0;
+        }
+        _ => println!("NOT A REGISTER PAIR"),
+    }
+}
+
 pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
@@ -266,5 +299,45 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.f.sub_flag = 0;
         }
         _ => println!("NOT A REGISTER PAIR"),
+    }
+}
+
+///
+/// Relative Jump
+/// PC = PC + 8bit signed
+pub fn jr(cpu: &mut Cpu, dd: u8) {
+    let value = dd as i8;
+    cpu.pc += value as u16;
+}
+
+///
+/// Relative Jump if Zero flag is set
+pub fn jr_z(cpu: &mut Cpu, dd: u8) {
+    if cpu.f.zero_flag == 1 {
+        jr(cpu, dd);
+    }
+}
+
+///
+/// Relative Jump if Zero flag is clear
+pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
+    if cpu.f.zero_flag == 0 {
+        jr(cpu, dd);
+    }
+}
+
+///
+/// Relative Jump if Carry flag is Set
+pub fn jr_c(cpu: &mut Cpu, dd: u8) {
+    if cpu.f.carry_flag == 1 {
+        jr(cpu, dd);
+    }
+}
+
+///
+/// Relative Jump if Carry flag is clear
+pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
+    if cpu.f.carry_flag == 0 {
+        jr(cpu, dd);
     }
 }

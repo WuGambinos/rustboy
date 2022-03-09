@@ -1,6 +1,8 @@
 pub mod instructions;
 use crate::Mmu;
 
+use self::instructions::*;
+
 ///Struct that represents flags of the Gameboy CPU
 struct Flags {
     zero_flag: u8,
@@ -165,13 +167,13 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                instructions::inc_8bit(self, 'B');
+                inc_8bit(self, 'B');
                 self.pc += 1;
             }
 
             //DEC B: Flags Z1H
             0x05 => {
-                instructions::dec_8bit(self, 'B');
+                dec_8bit(self, 'B');
                 self.pc += 1;
             }
 
@@ -186,7 +188,7 @@ impl Cpu {
 
             //RLCA
             0x07 => {
-                instructions::rlca(self);
+                rlca(self);
 
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
@@ -224,7 +226,7 @@ impl Cpu {
 
             //ADD HL, BC
             0x09 => {
-                instructions::add_rr_hl(self, "DE");
+                add_rr_hl(self, "DE");
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -247,14 +249,14 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                instructions::inc_8bit(self, 'C');
+                inc_8bit(self, 'C');
                 //Increase Program Counter
                 self.pc += 1;
             }
 
             //DEC C
             0x0D => {
-                instructions::dec_8bit(self, 'C');
+                dec_8bit(self, 'C');
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -272,7 +274,7 @@ impl Cpu {
             //RRCA
             0x0F => {
                 //Rotate
-                instructions::rrca(self);
+                rrca(self);
 
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
@@ -316,14 +318,14 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                instructions::inc_8bit(self, 'D');
+                inc_8bit(self, 'D');
                 //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
             0x15 => {
-                instructions::dec_8bit(self, 'D');
+                dec_8bit(self, 'D');
                 //Inrease Program Counter
                 self.pc += 1;
             }
@@ -341,7 +343,7 @@ impl Cpu {
             //RLA
             0x17 => {
                 //Rotate
-                instructions::rla(self);
+                rla(self);
 
                 //Clear Zero Flag
                 self.f.zero_flag = 0;
@@ -365,10 +367,53 @@ impl Cpu {
 
             //ADD HL, DE
             0x19 => {
-                instructions::add_rr_hl(self, "DE");
+                add_rr_hl(self, "DE");
                 self.pc += 1;
             }
 
+            //LD A, (DE)
+            0x1A => {
+                self.registers.a = mmu.read_mem(self.registers.de());
+                self.pc += 1;
+            }
+
+            //DEC DE
+            0x1B => {
+                dec_16bit(self, "DE");
+                self.pc += 1;
+            }
+
+            //INC E
+            0x1C => {
+                inc_8bit(self, 'E');
+                self.pc += 1;
+            }
+
+            //DEC E
+            0x1D => {
+                dec_8bit(self, 'E');
+                self.pc += 1;
+            }
+
+            //LD E, u8
+            0x1E => {
+                self.registers.e = mmu.read_mem(self.pc + 1);
+                self.pc += 2;
+            }
+
+            //RRA
+            0x1F => {
+                rra(self);
+
+                self.f.zero_flag = 0;
+                self.f.sub_flag = 0;
+                self.f.half_carry_flag = 0;
+
+                self.pc += 1;
+            }
+
+            //JR NZ, i8
+            0x20 => {}
             _ => println!("NOT AN OPCODE"),
         }
     }
