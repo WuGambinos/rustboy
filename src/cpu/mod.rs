@@ -412,7 +412,30 @@ impl Cpu {
             }
 
             //JR NZ, i8
-            0x20 => {}
+            0x20 => {
+                let value = mmu.read_mem(self.pc + 1);
+                jr_nz(self, value);
+            }
+
+            //LD HL, u16
+            0x21 => {
+                let value = self.get_u16(mmu);
+                self.registers.set_hl(value);
+                self.pc += 3;
+            }
+
+            //LD (HL+), A
+            0x22 => {
+                mmu.write_mem(self.registers.hl(), self.registers.a);
+                self.registers.set_hl(self.registers.hl().wrapping_add(1));
+                self.pc += 1;
+            }
+
+            //INC HL
+            0x23 => {
+                inc_16bit(self, "HL");
+                self.pc += 1;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
