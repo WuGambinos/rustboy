@@ -1,4 +1,3 @@
-
 use super::*;
 #[test]
 fn internal() {
@@ -8,7 +7,7 @@ fn internal() {
 #[test]
 fn ld_bc_u16() {
     let mut cpu = Cpu::new();
-    let mut mmu = MMU::new();
+    let mut mmu = Mmu::new();
     cpu.pc = 0;
 
     mmu.write_mem(0, 0x01);
@@ -36,7 +35,7 @@ fn inc_b() {
 
     cpu.registers.b = 0x01;
 
-    cpu.inc_8bit('B');
+    instructions::inc_8bit(&mut cpu, 'B');
 
     //cpu.registers.b = cpu.registers.b.wrapping_add(1);
 
@@ -49,7 +48,7 @@ fn inc_c() {
 
     cpu.registers.c = 0x01;
 
-    cpu.inc_8bit('C');
+    instructions::inc_8bit(&mut cpu, 'C');
 
     assert_eq!(cpu.registers.c, 0x02);
 }
@@ -59,7 +58,7 @@ fn inc_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x05;
-    cpu.inc_8bit('D');
+    instructions::inc_8bit(&mut cpu, 'D');
 
     assert_eq!(cpu.registers.d, 0x06);
 }
@@ -69,7 +68,7 @@ fn inc_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x05;
-    cpu.inc_8bit('E');
+    instructions::inc_8bit(&mut cpu, 'E');
 
     assert_eq!(cpu.registers.e, 0x06);
 }
@@ -79,7 +78,7 @@ fn inc_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x05;
-    cpu.inc_8bit('H');
+    instructions::inc_8bit(&mut cpu, 'H');
 
     assert_eq!(cpu.registers.h, 0x06);
 }
@@ -89,9 +88,22 @@ fn inc_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    cpu.inc_8bit('L');
+    instructions::inc_8bit(&mut cpu, 'L');
 
     assert_eq!(cpu.registers.l, 0x06);
+}
+
+#[test]
+fn inc_8bit_overflow() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0xFF;
+    instructions::inc_8bit(&mut cpu, 'B');
+
+    assert_eq!(cpu.registers.l, 0x00);
+    assert_eq!(cpu.f.zero_flag, 0x01);
+    assert_eq!(cpu.f.sub_flag, 0x00);
+    assert_eq!(cpu.f.half_carry_flag, 0x01);
 }
 
 #[test]
@@ -99,7 +111,7 @@ fn dec_b() {
     let mut cpu = Cpu::new();
 
     cpu.registers.b = 0x02;
-    cpu.dec_8bit('B');
+    instructions::dec_8bit(&mut cpu, 'B');
 
     assert_eq!(cpu.registers.b, 0x01);
 }
@@ -109,7 +121,7 @@ fn dec_c() {
     let mut cpu = Cpu::new();
 
     cpu.registers.c = 0x05;
-    cpu.dec_8bit('C');
+    instructions::dec_8bit(&mut cpu, 'C');
 
     assert_eq!(cpu.registers.c, 0x04);
 }
@@ -119,7 +131,7 @@ fn dec_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x03;
-    cpu.dec_8bit('D');
+    instructions::dec_8bit(&mut cpu, 'D');
 
     assert_eq!(cpu.registers.d, 0x02);
 }
@@ -129,7 +141,7 @@ fn dec_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x01;
-    cpu.dec_8bit('E');
+    instructions::dec_8bit(&mut cpu, 'E');
 
     assert_eq!(cpu.registers.e, 0x00);
     assert_eq!(cpu.f.zero_flag, 1);
@@ -140,7 +152,7 @@ fn dec_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x00;
-    cpu.dec_8bit('H');
+    instructions::dec_8bit(&mut cpu, 'H');
 
     assert_eq!(cpu.registers.h, 0xFF);
 }
@@ -150,22 +162,9 @@ fn dec_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    cpu.dec_8bit('L');
+    instructions::dec_8bit(&mut cpu, 'L');
 
     assert_eq!(cpu.registers.l, 0x04);
-}
-
-#[test]
-fn inc_8bit_overflow() {
-    let mut cpu = Cpu::new();
-
-    cpu.registers.b = 0xFF;
-    cpu.inc_8bit('B');
-
-    assert_eq!(cpu.registers.l, 0x00);
-    assert_eq!(cpu.f.zero_flag, 0x01);
-    assert_eq!(cpu.f.sub_flag, 0x00);
-    assert_eq!(cpu.f.half_carry_flag, 0x01);
 }
 
 /*************************************************************************
@@ -176,7 +175,7 @@ fn inc_8bit_overflow() {
 fn inc_bc() {
     let mut cpu = Cpu::new();
     cpu.registers.set_bc(0x00FF);
-    cpu.inc_16bit("BC");
+    instructions::inc_16bit(&mut cpu, "BC");
     assert_eq!(cpu.registers.bc(), 256);
 }
 
@@ -184,7 +183,7 @@ fn inc_bc() {
 fn inc_de() {
     let mut cpu = Cpu::new();
     cpu.registers.set_de(0xFFFF);
-    cpu.inc_16bit("DE");
+    instructions::inc_16bit(&mut cpu, "DE");
     assert_eq!(cpu.f.sub_flag, 1);
     assert_eq!(cpu.registers.de(), 0);
 }
@@ -193,8 +192,42 @@ fn inc_de() {
 fn inc_hl() {
     let mut cpu = Cpu::new();
     cpu.registers.set_hl(0x0008);
-    cpu.inc_16bit("HL");
+    instructions::inc_16bit(&mut cpu, "HL");
     assert_eq!(cpu.registers.hl(), 0x09);
+}
+
+#[test]
+fn add_bc_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0xF0);
+
+    cpu.registers.set_bc(0xFF);
+
+    instructions::add_rr_hl(&mut cpu, "BC");
+
+    assert_eq!(cpu.registers.hl(), 0x01EF);
+}
+
+#[test]
+fn add_de_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0x0002);
+    cpu.registers.set_de(0x0005);
+
+    instructions::add_rr_hl(&mut cpu, "DE");
+    assert_eq!(cpu.registers.hl(), 0x0007);
+}
+
+#[test]
+fn add_hl_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0xFF);
+
+    instructions::add_rr_hl(&mut cpu, "HL");
+    assert_eq!(cpu.registers.hl(), 0x01FE);
 }
 
 #[test]
