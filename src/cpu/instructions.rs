@@ -242,7 +242,7 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
     }
 }
 
-fn add_rr_hl(cpu: &mut Cpu, register: &str) {
+pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
             cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
