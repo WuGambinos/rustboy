@@ -210,6 +210,27 @@ fn add_bc_hl() {
 }
 
 #[test]
+fn add_de_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0x0002);
+    cpu.registers.set_de(0x0005);
+
+    instructions::add_rr_hl(&mut cpu, "DE");
+    assert_eq!(cpu.registers.hl(), 0x0007);
+}
+
+#[test]
+fn add_hl_hl() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.set_hl(0xFF);
+
+    instructions::add_rr_hl(&mut cpu, "HL");
+    assert_eq!(cpu.registers.hl(), 0x01FE);
+}
+
+#[test]
 fn half_carry() {
     let mut cpu = Cpu::new();
     cpu.registers.b = 0x09;
