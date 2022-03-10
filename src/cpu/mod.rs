@@ -436,6 +436,60 @@ impl Cpu {
                 inc_16bit(self, "HL");
                 self.pc += 1;
             }
+
+            //INC H
+            0x24 => {
+                inc_8bit(self, 'H');
+                self.pc += 1;
+            }
+
+            //DEC H
+            0x25 => {
+                dec_8bit(self, 'H');
+                self.pc += 1;
+            }
+
+            //LD H, u8
+            0x26 => {
+                self.registers.h = mmu.read_mem(self.pc + 1);
+                self.pc += 2;
+            }
+
+            //DAA
+            0x27 => {}
+
+            //JR Z, i8
+            0x28 => {
+                let value = mmu.read_mem(self.pc + 1);
+                jr_z(self, value);
+            }
+
+            //ADD HL, HL
+            0x29 => {
+                add_rr_hl(self, "HL");
+                self.pc += 1;
+            }
+
+            //LD A, (HL+)
+            0x2A => {
+                self.registers.a = mmu.read_mem(self.registers.hl());
+                self.registers.set_hl(self.registers.hl().wrapping_add(1));
+            }
+
+            //DEC HL
+            0x2B => {}
+
+            //INC L
+            0x2C => {}
+
+            //DEC L
+            0x2D => {}
+
+            //LD L, u8
+            0x2E => {}
+
+            //CPL
+            0x2F => {}
             _ => println!("NOT AN OPCODE"),
         }
     }
