@@ -349,3 +349,24 @@ pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
         cpu.pc += 2;
     }
 }
+
+pub fn daa(cpu: &mut Cpu) {
+    if (cpu.registers.a & 0x0F) > 0x09 || cpu.f.half_carry_flag == 1 {
+        cpu.registers.a += 0x06;
+    }
+
+    let upper_nibble = cpu.registers.a & 0xF0 >> 4;
+    let mut reached = false;
+
+    if upper_nibble > 9 || cpu.f.carry_flag == 1 {
+        cpu.registers.a += 0x60;
+        reached = true;
+    }
+
+    //Set carry if second addition was needed, otherwise reset carry
+    if reached {
+        cpu.f.carry_flag = 1;
+    } else {
+        cpu.f.carry_flag = 0;
+    }
+}

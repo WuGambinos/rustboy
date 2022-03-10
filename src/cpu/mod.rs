@@ -455,8 +455,12 @@ impl Cpu {
                 self.pc += 2;
             }
 
-            //DAA
-            0x27 => {}
+            //DAA MAY need to check
+            0x27 => {
+                daa(self);
+                self.f.zero_flag = (self.registers.a == 0) as u8;
+                self.f.half_carry_flag = 0;
+            }
 
             //JR Z, i8
             0x28 => {
@@ -477,19 +481,36 @@ impl Cpu {
             }
 
             //DEC HL
-            0x2B => {}
+            0x2B => {
+                dec_16bit(self, "HL");
+                self.pc += 1;
+            }
 
             //INC L
-            0x2C => {}
+            0x2C => {
+                inc_8bit(self, 'L');
+                self.pc += 1;
+            }
 
             //DEC L
-            0x2D => {}
+            0x2D => {
+                dec_8bit(self, 'L');
+                self.pc += 1;
+            }
 
             //LD L, u8
-            0x2E => {}
+            0x2E => {
+                let value = mmu.read_mem(self.pc + 1);
+                self.registers.l = value;
+            }
 
             //CPL
-            0x2F => {}
+            0x2F => {
+                self.f.sub_flag = 1;
+                self.f.half_carry_flag = 1;
+                //A = A xor FF
+                self.registers.a = self.registers.a ^ 0xFF;
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
