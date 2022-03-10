@@ -511,6 +511,12 @@ impl Cpu {
                 //A = A xor FF
                 self.registers.a = self.registers.a ^ 0xFF;
             }
+
+            //JR NC, i8
+            0x30 => {
+                let value = mmu.read_mem(self.pc + 1);
+                jr_nc(self, value);
+            }
             _ => println!("NOT AN OPCODE"),
         }
     }
