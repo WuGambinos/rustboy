@@ -517,6 +517,31 @@ impl Cpu {
                 let value = mmu.read_mem(self.pc + 1);
                 jr_nc(self, value);
             }
+
+            //LD SP, u16
+            0x31 => {
+                self.sp = self.get_u16(mmu);
+                self.pc += 3;
+            }
+
+            //LD (HL-), A
+            0x32 => {
+                //mmu[HL] = A
+                mmu.write_mem(self.registers.hl(), self.registers.a);
+                self.pc += 1;
+            }
+
+            //INC SP
+            0x33 => {
+                inc_16bit(self, "SP");
+                self.pc += 1;
+            }
+
+            //INC (HL)
+            0x34 => {}
+
+            //DEC (HL)
+            0x35 => {}
             _ => println!("NOT AN OPCODE"),
         }
     }

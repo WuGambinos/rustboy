@@ -214,31 +214,19 @@ pub fn rra(cpu: &mut Cpu) {
 pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.bc(), 1);
             cpu.registers.set_bc(cpu.registers.bc().wrapping_add(1));
-            cpu.f.zero_flag = (cpu.registers.bc() == 0) as u8;
-            cpu.f.sub_flag = 1;
         }
 
         "DE" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.de(), 1);
             cpu.registers.set_de(cpu.registers.de().wrapping_add(1));
-            cpu.f.zero_flag = (cpu.registers.de() == 0) as u8;
-            cpu.f.sub_flag = 1;
         }
 
         "HL" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), 1);
             cpu.registers.set_hl(cpu.registers.hl().wrapping_add(1));
-            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
-            cpu.f.sub_flag = 1;
         }
 
         "SP" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.sp, 1);
-            cpu.pc = cpu.pc.wrapping_add(1);
-            cpu.f.zero_flag = (cpu.pc == 0) as u8;
-            cpu.f.sub_flag = 1;
+            cpu.sp = cpu.sp.wrapping_add(1);
         }
         _ => println!("Not a register PAIR"),
     }
@@ -248,28 +236,16 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
 pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
-            cpu.update_half_carry_flag_sub_16bit(cpu.registers.bc(), 1);
             cpu.registers.set_bc(cpu.registers.bc().wrapping_sub(1));
-            cpu.f.zero_flag = (cpu.registers.bc() == 0) as u8;
-            cpu.f.sub_flag = 0;
         }
         "DE" => {
-            cpu.update_half_carry_flag_sub_16bit(cpu.registers.de(), 1);
             cpu.registers.set_de(cpu.registers.de().wrapping_sub(1));
-            cpu.f.zero_flag = (cpu.registers.de() == 0) as u8;
-            cpu.f.sub_flag = 0;
         }
         "HL" => {
-            cpu.update_half_carry_flag_sub_16bit(cpu.registers.hl(), 1);
             cpu.registers.set_hl(cpu.registers.hl().wrapping_sub(1));
-            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
-            cpu.f.sub_flag = 0;
         }
         "SP" => {
-            cpu.update_half_carry_flag_sub_16bit(cpu.sp, 1);
-            cpu.sp = cpu.registers.bc().wrapping_sub(1);
-            cpu.f.zero_flag = (cpu.sp == 0) as u8;
-            cpu.f.sub_flag = 0;
+            cpu.sp = cpu.sp.wrapping_sub(1);
         }
         _ => println!("NOT A REGISTER PAIR"),
     }
