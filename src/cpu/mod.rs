@@ -552,6 +552,79 @@ impl Cpu {
                 dec_mem(self, mmu);
                 self.pc += 1;
             }
+
+            //LD (HL), u8
+            0x36 => {
+                let value = mmu.read_mem(self.pc + 1);
+
+                //mmu[HL] = u8
+                mmu.write_mem(self.registers.hl(), value);
+
+                self.pc += 2;
+            }
+
+            //Set Carry Flag(SCF)
+            0x37 => {
+                self.f.carry_flag = 1;
+                self.pc += 1;
+            }
+
+            //JR C, i8
+            0x38 => {
+                let value = mmu.read_mem(self.pc + 1);
+                jr_c(self, value);
+            }
+
+            //ADD HL, SP
+            0x39 => {
+                add_rr_hl(self, "SP");
+                self.pc += 1;
+            }
+
+            //LD A, (HL--)
+            0x3A => {
+                //value = mem[HL]
+                let value = mmu.read_mem(self.registers.hl());
+
+                //A = mem[HL]
+                self.registers.a = value;
+
+                //HL--
+                self.registers.set_hl(self.registers.hl().wrapping_sub(1));
+
+                self.pc += 1;
+            }
+
+            //DEC SP
+            0x3B => {
+                dec_16bit(self, "SP");
+                self.pc += 1;
+            }
+
+            //INC A
+            0x3C => {
+                inc_8bit(self, 'A');
+                self.pc += 1;
+            }
+
+            //DEC A
+            0x3D => {
+                dec_8bit(self, 'A');
+                self.pc += 1;
+            }
+
+            //LD A, u8
+            0x3E => {
+                self.registers.a = mmu.read_mem(self.pc + 1);
+                self.pc += 1;
+            }
+
+            //Clear Carry Flag(CCF)
+            0x3F => {
+                self.f.carry_flag = 0;
+                self.pc += 1;
+            }
+
             _ => println!("NOT AN OPCODE"),
         }
     }
