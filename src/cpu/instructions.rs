@@ -145,6 +145,48 @@ pub fn dec_8bit(cpu: &mut Cpu, register: char) {
     }
 }
 
+///Increment vlaue in memory using HL pointer
+pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
+    //Grab value in memory
+    let mut value = mmu.read_mem(cpu.registers.hl());
+
+    //Check for Half Carry
+    cpu.update_half_carry_flag_sum_8bit(value, 1);
+
+    //Increment value
+    value = value.wrapping_add(1);
+
+    //Write new incremented value back into memory
+    mmu.write_mem(cpu.registers.hl(), value);
+
+    //Update Zero Flag
+    cpu.update_zero_flag(value);
+
+    //Clear Sub Flag
+    cpu.f.sub_flag = 0;
+}
+
+///Decrement value in memory using HL pointer
+pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
+    //Grab value in memory
+    let mut value: u8 = mmu.read_mem(cpu.registers.hl());
+
+    //Check for Half Carry
+    cpu.update_half_carry_flag_sub_8bit(value, 1);
+
+    //Decrement Value
+    value = value.wrapping_sub(1);
+
+    //Write new decremented value back into memory
+    mmu.write_mem(cpu.registers.hl(), value);
+
+    //Update Zero Flag
+    cpu.update_zero_flag(value);
+
+    //Set sub flag
+    cpu.f.sub_flag = 1;
+}
+
 ///Rotate Left Circular Accumulator
 ///
 /// 7th bit of Accumulator is copied into carry and into the 0th bit of A

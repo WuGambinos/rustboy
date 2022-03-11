@@ -543,31 +543,13 @@ impl Cpu {
 
             //INC (HL)
             0x34 => {
-                let mut value = mmu.read_mem(self.registers.hl());
-
-                self.update_half_carry_flag_sub_8bit(value, 1);
-                value = value.wrapping_add(1);
-                mmu.write_mem(self.registers.hl(), value);
-                self.update_zero_flag(value);
-                self.f.sub_flag = 0;
+                inc_mem(self, mmu);
                 self.pc += 1;
             }
 
             //DEC (HL)
             0x35 => {
-                let mut value = mmu.read_mem(self.registers.hl());
-
-                //Update Half Carry
-                self.update_half_carry_flag_sub_8bit(value, 1);
-
-                //decrement value
-                value = value.wrapping_sub(1);
-
-                //mmu[HL] = new_value
-                mmu.write_mem(self.registers.hl(), value);
-
-                self.update_zero_flag(value);
-                self.f.sub_flag = 1;
+                dec_mem(self, mmu);
                 self.pc += 1;
             }
             _ => println!("NOT AN OPCODE"),
