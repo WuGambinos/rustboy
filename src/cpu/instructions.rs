@@ -306,8 +306,9 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 /// Relative Jump
 /// PC = PC + 8bit signed
 pub fn jr(cpu: &mut Cpu, dd: u8) {
-    let value = dd as i8;
-    cpu.pc += value as u16;
+    let offset = dd as i8;
+
+    cpu.pc += cpu.pc.wrapping_add(offset as u16);
 }
 
 ///
