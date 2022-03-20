@@ -389,3 +389,12 @@ pub fn daa(cpu: &mut Cpu) {
         cpu.f.carry_flag = 0;
     }
 }
+
+// 8-bit LOAD instructions
+
+///
+/// Load 8 bit value into specific register
+pub fn ld_8bit(r: &mut u8, data: u8) {
+    //Rd = Rr
+    *r = data;
+}

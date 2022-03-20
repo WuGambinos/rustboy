@@ -627,37 +627,36 @@ impl Cpu {
 
             //LD B, B
             0x40 => {
-                self.registers.b = self.registers.b;
                 self.pc += 1;
             }
 
             //LD B, C
             0x41 => {
-                self.registers.b = self.registers.c;
+                ld_8bit(&mut self.registers.b, self.registers.c);
                 self.pc += 1;
             }
 
             //LD B, D
             0x42 => {
-                self.registers.b = self.registers.d;
+                ld_8bit(&mut self.registers.b, self.registers.d);
                 self.pc += 1;
             }
 
             //LD B, E
             0x43 => {
-                self.registers.b = self.registers.e;
+                ld_8bit(&mut self.registers.b, self.registers.e);
                 self.pc += 1;
             }
 
             //LD B, H
             0x44 => {
-                self.registers.b = self.registers.h;
+                ld_8bit(&mut self.registers.b, self.registers.h);
                 self.pc += 1;
             }
 
             //LD B, L
             0x45 => {
-                self.registers.b = self.registers.l;
+                ld_8bit(&mut self.registers.b, self.registers.l);
                 self.pc += 1;
             }
 
@@ -669,7 +668,7 @@ impl Cpu {
 
             //LD B, A
             0x47 => {
-                self.registers.b = self.registers.a;
+                ld_8bit(&mut self.registers.b, self.registers.a);
                 self.pc += 1;
             }
 
