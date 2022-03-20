@@ -867,7 +867,51 @@ impl Cpu {
             }
 
             //LD L, C
-            0x69 => {}
+            0x69 => {
+                ld_8bit(&mut self.registers.l, self.registers.c);
+                self.pc += 1;
+            }
+
+            //LD L, D
+            0x6A => {
+                ld_8bit(&mut self.registers.l, self.registers.d);
+                self.pc += 1;
+            }
+
+            //LD L, E
+            0x6B => {
+                ld_8bit(&mut self.registers.l, self.registers.e);
+                self.pc += 1;
+            }
+
+            //LD L, H
+            0x6C => {
+                ld_8bit(&mut self.registers.l, self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD L, L
+            0x6D => {
+                self.pc += 1;
+            }
+
+            //LD L, (HL)
+            0x6E => {
+                ld_8bit(&mut self.registers.l, mmu.read_mem(self.pc + 1));
+                self.pc += 1;
+            }
+
+            //LD L, A
+            0x6F => {
+                ld_8bit(&mut self.registers.l, self.registers.a);
+                self.pc += 1;
+            }
+
+            //LD (HL), B
+            0x70 => {
+                mmu.write_mem(self.registers.hl(), self.registers.b);
+                self.pc += 1;
+            }
 
             _ => println!("NOT AN OPCODE"),
         }
