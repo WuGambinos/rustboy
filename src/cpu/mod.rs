@@ -913,6 +913,47 @@ impl Cpu {
                 self.pc += 1;
             }
 
+            //LD (HL), C
+            0x71 => {
+                mmu.write_mem(self.registers.hl(), self.registers.c);
+                self.pc += 1;
+            }
+
+            //LD (HL), D
+            0x72 => {
+                mmu.write_mem(self.registers.hl(), self.registers.d);
+                self.pc += 1;
+            }
+
+            //LD (HL), E
+            0x73 => {
+                mmu.write_mem(self.registers.hl(), self.registers.e);
+                self.pc += 1;
+            }
+
+            //LD (HL), H
+            0x74 => {
+                mmu.write_mem(self.registers.hl(), self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD (HL), L
+            0x75 => {
+                mmu.write_mem(self.registers.hl(), self.registers.l);
+                self.pc += 1;
+            }
+
+            //HALT (NEED TO FINISH)
+            0x76 => {}
+
+            //LD (HL), A
+            0x77 => {
+                mmu.write_mem(self.registers.hl(), self.registers.a);
+                self.pc += 1;
+            }
+
+            0x78 => {}
+
             _ => println!("NOT AN OPCODE"),
         }
     }
