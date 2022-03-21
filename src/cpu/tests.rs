@@ -184,7 +184,7 @@ fn inc_de() {
     let mut cpu = Cpu::new();
     cpu.registers.set_de(0xFFFF);
     instructions::inc_16bit(&mut cpu, "DE");
-    assert_eq!(cpu.f.sub_flag, 1);
+    assert_eq!(cpu.f.sub_flag, 0);
     assert_eq!(cpu.registers.de(), 0);
 }
 
@@ -256,4 +256,16 @@ fn carry() {
     //assert_eq!(cpu.f.carry_flag, 1);
     assert_eq!(cpu.registers.bc(), 0xFFFF);
     assert_eq!(cpu.registers.hl(), 0x0001);
+}
+
+/*************************************************************************
+ * 8-bit Load Tests
+ *************************************************************************/
+
+#[test]
+fn load_8bit_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.c = 5;
+    ld_8bit(&mut (cpu.registers.b), cpu.registers.c);
 }
