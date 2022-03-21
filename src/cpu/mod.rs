@@ -678,6 +678,143 @@ impl Cpu {
                 self.pc += 1;
             }
 
+            //LD C, C
+            0x49 => {
+                self.pc += 1;
+            }
+
+            //LD C, D
+            0x4A => {
+                ld_8bit(&mut self.registers.c, self.registers.d);
+                self.pc += 1;
+            }
+
+            //LD C, E
+            0x4B => {
+                ld_8bit(&mut self.registers.c, self.registers.e);
+                self.pc += 1;
+            }
+
+            //LD C, H
+            0x4C => {
+                ld_8bit(&mut self.registers.c, self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD C, L
+            0x4D => {
+                ld_8bit(&mut self.registers.c, self.registers.l);
+                self.pc += 1;
+            }
+
+            //LD C, (HL)
+            0x4E => {
+                self.registers.c = mmu.read_mem(self.pc + 1);
+                self.pc += 1;
+            }
+
+            //LD C, A
+            0x4F => {
+                ld_8bit(&mut self.registers.c, self.registers.a);
+                self.pc += 1;
+            }
+
+            //LD D, B
+            0x50 => {
+                ld_8bit(&mut self.registers.d, self.registers.b);
+                self.pc += 1;
+            }
+
+            //LD D, C
+            0x51 => {
+                ld_8bit(&mut self.registers.d, self.registers.c);
+                self.pc += 1;
+            }
+
+            //LD D, D
+            0x52 => {
+                self.pc += 1;
+            }
+
+            //LD D, E
+            0x53 => {
+                ld_8bit(&mut self.registers.d, self.registers.e);
+                self.pc += 1;
+            }
+
+            //LD D, H
+            0x54 => {
+                ld_8bit(&mut self.registers.d, self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD D, L
+            0x55 => {
+                ld_8bit(&mut self.registers.d, self.registers.l);
+                self.pc += 1;
+            }
+
+            //LD D, (HL)
+            0x56 => {
+                self.registers.d = mmu.read_mem(self.pc + 1);
+                self.pc += 1;
+            }
+
+            //LD D, A
+            0x57 => {
+                ld_8bit(&mut self.registers.d, self.registers.a);
+                self.pc += 1;
+            }
+
+            //LD E, B
+            0x58 => {
+                ld_8bit(&mut self.registers.e, self.registers.b);
+                self.pc += 1;
+            }
+
+            //LD E, C
+            0x59 => {
+                ld_8bit(&mut self.registers.e, self.registers.c);
+                self.pc += 1;
+            }
+
+            //LD E, D
+            0x5A => {
+                ld_8bit(&mut self.registers.e, self.registers.d);
+                self.pc += 1;
+            }
+
+            //LD E, E
+            0x5B => {
+                self.pc += 1;
+            }
+
+            //LD E, H
+            0x5C => {
+                ld_8bit(&mut self.registers.e, self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD E, L
+            0x5D => {
+                ld_8bit(&mut self.registers.e, self.registers.l);
+                self.pc += 1;
+            }
+
+            //LD E, (HL)
+            0x5E => {
+                self.registers.e = mmu.read_mem(self.pc + 1);
+                self.pc += 1;
+            }
+
+            //LD E, A
+            0x5F => {
+                ld_8bit(&mut self.registers.e, self.registers.a);
+                self.pc += 1;
+            }
+
+            0x60 => {}
+
             _ => println!("NOT AN OPCODE"),
         }
     }
