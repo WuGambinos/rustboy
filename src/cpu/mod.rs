@@ -672,6 +672,12 @@ impl Cpu {
                 self.pc += 1;
             }
 
+            //LD C, B
+            0x48 => {
+                ld_8bit(&mut self.registers.c, self.registers.b);
+                self.pc += 1;
+            }
+
             _ => println!("NOT AN OPCODE"),
         }
     }
