@@ -952,7 +952,72 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            0x78 => {}
+            //LD A, B
+            0x78 => {
+                ld_8bit(&mut self.registers.a, self.registers.b);
+                self.pc += 1;
+            }
+
+            //LD A, C
+            0x79 => {
+                ld_8bit(&mut self.registers.a, self.registers.c);
+                self.pc += 1;
+            }
+
+            //LD A, D
+            0x7A => {
+                ld_8bit(&mut self.registers.a, self.registers.d);
+                self.pc += 1;
+            }
+
+            //LD A, E
+            0x7B => {
+                ld_8bit(&mut self.registers.a, self.registers.e);
+                self.pc += 1;
+            }
+
+            //LD A, H
+            0x7C => {
+                ld_8bit(&mut self.registers.a, self.registers.h);
+                self.pc += 1;
+            }
+
+            //LD A, L
+            0x7D => {
+                ld_8bit(&mut self.registers.a, self.registers.l);
+                self.pc += 1;
+            }
+
+            //LD A, (HL)
+            0x7E => {
+                let addr = self.registers.hl();
+                ld_8bit(&mut self.registers.a, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //LD A, A
+            0x7F => {
+                self.pc += 1;
+            }
+
+            //ADD A, B
+            0x80 => {}
+
+            0x81 => {}
+
+            0x82 => {}
+
+            0x83 => {}
+
+            0x84 => {}
+
+            0x85 => {}
+
+            0x86 => {}
+
+            0x87 => {}
+
+            0x88 => {}
 
             _ => println!("NOT AN OPCODE"),
         }
