@@ -4,7 +4,7 @@ use crate::Mmu;
 use self::instructions::*;
 
 ///Struct that represents flags of the Gameboy CPU
-struct Flags {
+pub struct Flags {
     zero_flag: u8,
     sub_flag: u8,
     half_carry_flag: u8,
@@ -18,6 +18,71 @@ impl Flags {
             sub_flag: 0,
             half_carry_flag: 0,
             carry_flag: 0,
+        }
+    }
+
+    fn set_zero_flag(&mut self) {
+        self.zero_flag = 1;
+    }
+
+    fn clear_zero_flag(&mut self) {
+        self.zero_flag = 0;
+    }
+
+    fn set_sub_flag(&mut self) {
+        self.sub_flag = 1;
+    }
+
+    fn clear_sub_flag(&mut self) {
+        self.sub_flag = 0;
+    }
+
+    fn set_half_carry_flag(&mut self) {
+        self.half_carry_flag = 1;
+    }
+
+    fn clear_half_carry_flag(&mut self) {
+        self.half_carry_flag = 0;
+    }
+
+    fn set_carry_flag(&mut self) {
+        self.carry_flag = 1;
+    }
+
+    fn clear_carry_flag(&mut self) {
+        self.carry_flag = 0;
+    }
+
+    ///Updates Carry flag
+    ///
+    /// Carry flag is set when operation results in overflow
+    fn update_carry_flag_8bit(&mut self, register: u8, operand: u8) {
+        let mut res: u8 = 0;
+
+        //Set res equal to 1 if there is carry
+        match register.checked_add(operand) {
+            Some(_v) => res = 1,
+            None => res = 0,
+        }
+
+        self.carry_flag = res;
+    }
+
+    ///Updates the half carry flag
+    ///
+    /// In 8 bit additoin, half carry is set when there is a carry  from bit 3 to bit 4
+    fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+        self.half_carry_flag = ((register & 0xF) + (operand & 0xF) > 0xF) as u8;
+    }
+
+    /// Updates the zero flag
+    ///
+    /// Zero flag is set when operation results in 0
+    fn update_zero_flag(&mut self, v: u8) {
+        if v == 0 {
+            self.zero_flag = 1;
+        } else {
+            self.zero_flag = 0;
         }
     }
 }
@@ -1002,51 +1067,51 @@ impl Cpu {
 
             //ADD A, B
             0x80 => {
-                add_a_r(&mut self.registers.a, self.registers.b);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.b);
                 self.pc += 1;
             }
 
             //ADD A, C
             0x81 => {
-                add_a_r(&mut self.registers.a, self.registers.c);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.c);
                 self.pc += 1;
             }
 
             //ADD A, D
             0x82 => {
-                add_a_r(&mut self.registers.a, self.registers.d);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.d);
                 self.pc += 1;
             }
 
             //ADD A, E
             0x83 => {
-                add_a_r(&mut self.registers.a, self.registers.e);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.e);
                 self.pc += 1;
             }
 
             //ADD A, H
             0x84 => {
-                add_a_r(&mut self.registers.a, self.registers.h);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.h);
                 self.pc += 1;
             }
 
             //ADD A, L
             0x85 => {
-                add_a_r(&mut self.registers.a, self.registers.l);
+                add_a_r(&mut self.f, &mut self.registers.a, self.registers.l);
                 self.pc += 1;
             }
 
             //ADD A, (HL)
             0x86 => {
                 let addr: u16 = self.registers.hl();
-                add_a_r(&mut self.registers.a, mmu.read_mem(addr));
+                add_a_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
             //ADD A, A
             0x87 => {
                 let value: u8 = self.registers.a;
-                add_a_r(&mut self.registers.a, value);
+                add_a_r(&mut self.f, &mut self.registers.a, value);
                 self.pc += 1;
             }
 
