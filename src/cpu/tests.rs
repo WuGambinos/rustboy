@@ -167,6 +167,18 @@ fn dec_l() {
     assert_eq!(cpu.registers.l, 0x04);
 }
 
+#[test]
+fn add_r() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0xFF;
+    cpu.registers.b = 0x05;
+
+    instructions::add_a_r(&mut cpu, &mut cpu.registers.a, cpu.registers.b);
+
+    assert_eq!(cpu.registers.a, 0x04);
+}
+
 /*************************************************************************
  * 16-bit Arithmetic Tests
  *************************************************************************/
