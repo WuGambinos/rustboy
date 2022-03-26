@@ -1116,7 +1116,54 @@ impl Cpu {
             }
 
             //ADC A, B
-            0x88 => {}
+            0x88 => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.b);
+                self.pc += 1;
+            }
+
+            //ADC A, C
+            0x89 => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.c);
+                self.pc += 1;
+            }
+
+            //ADC A, D
+            0x8A => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.d);
+                self.pc += 1;
+            }
+
+            //ADC A, E
+            0x8B => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.e);
+                self.pc += 1;
+            }
+
+            //ADC A, H
+            0x8C => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.h);
+                self.pc += 1;
+            }
+
+            //ADC A, L
+            0x8D => {
+                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.l);
+                self.pc += 1;
+            }
+
+            //ADC A, (HL)
+            0x8E => {
+                let addr = self.registers.hl();
+                adc_a_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //ADC A, A
+            0x8F => {
+                let value = self.registers.a;
+                adc_a_r(&mut self.f, &mut self.registers.a, value);
+                self.pc += 1;
+            }
 
             _ => println!("NOT AN OPCODE"),
         }
