@@ -1,5 +1,8 @@
 use super::*;
 
+/************************************************************************
+ * 8-bit Arithmetic instructions
+ * *********************************************************************/
 pub fn inc_8bit(cpu: &mut Cpu, register: char) {
     match register {
         'A' => {
@@ -186,6 +189,16 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     //Set sub flag
     cpu.f.sub_flag = 1;
 }
+
+///Adds Accumulator(register A) and another register together, storing result in the accumulator
+pub fn add_a_r(accumulator: &mut u8, second_reg: u8) {
+    //a = a + r
+    *accumulator += second_reg;
+}
+
+/************************************************************************
+ * 8-bit Rotate instructions
+ * *********************************************************************/
 
 ///Rotate Left Circular Accumulator
 ///
@@ -390,7 +403,9 @@ pub fn daa(cpu: &mut Cpu) {
     }
 }
 
-// 8-bit LOAD instructions
+/************************************************************************
+ * 8-bit LOAD instructions
+ * *********************************************************************/
 
 ///
 /// Load 8 bit value into specific register
