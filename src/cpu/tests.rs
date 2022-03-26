@@ -174,8 +174,9 @@ fn add_r() {
     cpu.registers.a = 0xFF;
     cpu.registers.b = 0x05;
 
-    instructions::add_a_r(&mut cpu, &mut cpu.registers.a, cpu.registers.b);
+    instructions::add_a_r(&mut cpu.f, &mut cpu.registers.a, cpu.registers.b);
 
+    assert_eq!(cpu.f.carry_flag, 1);
     assert_eq!(cpu.registers.a, 0x04);
 }
 
