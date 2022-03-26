@@ -193,21 +193,21 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
 ///Adds Accumulator(register A) and another register together, storing result in the accumulator
 ///
 /// Flags: Z0HC
-pub fn add_a_r(accumulator: &mut u8, second_reg: u8) {
+pub fn add_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
     //Update Half Carry
-    //cpu.update_half_carry_flag_sum_8bit(cpu.registers.a, second_reg);
+    flags.update_half_carry_flag_sum_8bit(*accumulator, second_reg);
 
     //a = r + a
     *accumulator = second_reg.wrapping_add(*accumulator);
 
     //Clear Sub Flag
-    //cpu.f.sub_flag = 0;
+    flags.clear_sub_flag();
 
     //Update Zero Flag
-    //cpu.update_zero_flag(cpu.registers.a);
+    flags.update_zero_flag(*accumulator);
 
     //Update Carry Flag
-    //cpu.update_carry_flag(cpu.registers.a, second_reg);
+    flags.update_carry_flag_8bit(*accumulator, second_reg);
 }
 
 /************************************************************************
