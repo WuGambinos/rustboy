@@ -192,6 +192,8 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
 
 ///Adds Accumulator(register A) and another register together, storing result in the accumulator
 ///
+/// a = r + a
+///
 /// Flags: Z0HC
 pub fn add_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
     //Update Half Carry
@@ -199,6 +201,26 @@ pub fn add_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
 
     //a = r + a
     *accumulator = second_reg.wrapping_add(*accumulator);
+
+    //Clear Sub Flag
+    flags.clear_sub_flag();
+
+    //Update Zero Flag
+    flags.update_zero_flag(*accumulator);
+
+    //Update Carry Flag
+    flags.update_carry_flag_8bit(*accumulator, second_reg);
+}
+
+///Adds Accumulator(register A), another register, and carry all together, storing result in the accumulator
+///
+/// a = a + r + c
+pub fn adc_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
+    //Update Half Carry
+    flags.update_half_carry_flag_sum_8bit(*accumulator, second_reg);
+
+    //a = r + a + c
+    *accumulator = (second_reg.wrapping_add(*accumulator)).wrapping_add(flags.carry_flag);
 
     //Clear Sub Flag
     flags.clear_sub_flag();
