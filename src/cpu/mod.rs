@@ -241,7 +241,7 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                inc_8bit(self, 'B');
+                inc_8bit(&mut self.f, &mut self.registers.b);
                 self.pc += 1;
             }
 
@@ -323,7 +323,7 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                inc_8bit(self, 'C');
+                inc_8bit(&mut self.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -392,7 +392,7 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                inc_8bit(self, 'D');
+                inc_8bit(&mut self.f, &mut self.registers.d);
                 //Increase Program counter
                 self.pc += 1;
             }
@@ -458,7 +458,7 @@ impl Cpu {
 
             //INC E
             0x1C => {
-                inc_8bit(self, 'E');
+                inc_8bit(&mut self.f, &mut self.registers.e);
                 self.pc += 1;
             }
 
@@ -513,7 +513,7 @@ impl Cpu {
 
             //INC H
             0x24 => {
-                inc_8bit(self, 'H');
+                inc_8bit(&mut self.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
@@ -562,7 +562,7 @@ impl Cpu {
 
             //INC L
             0x2C => {
-                inc_8bit(self, 'L');
+                inc_8bit(&mut self.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
@@ -677,7 +677,7 @@ impl Cpu {
 
             //INC A
             0x3C => {
-                inc_8bit(self, 'A');
+                inc_8bit(&mut self.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
