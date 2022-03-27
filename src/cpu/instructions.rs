@@ -3,7 +3,25 @@ use super::*;
 /************************************************************************
  * 8-bit Arithmetic instructions
  * *********************************************************************/
-pub fn inc_8bit(cpu: &mut Cpu, register: char) {
+
+pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
+    let mut value: u8 = *register;
+
+    //Update Half Carry
+    flags.update_half_carry_flag_sum_8bit(value, 1);
+
+    value = value.wrapping_add(1);
+
+    //Update Zero Flag
+    flags.update_zero_flag(value);
+
+    //Clear Sub Flag
+    flags.clear_sub_flag();
+
+    *register = value;
+}
+
+/*pub fn inc_8bit(cpu: &mut Cpu, register: char) {
     match register {
         'A' => {
             //Update Half Carry
@@ -98,7 +116,7 @@ pub fn inc_8bit(cpu: &mut Cpu, register: char) {
         }
         _ => println!("NOT A REGISTER!"),
     }
-}
+}*/
 
 pub fn dec_8bit(cpu: &mut Cpu, register: char) {
     match register {
