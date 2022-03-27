@@ -68,6 +68,10 @@ impl Flags {
         self.carry_flag = res;
     }
 
+    fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+        self.carry_flag = (register < operand) as u8;
+    }
+
     ///Updates the half carry flag when there is an addition
     ///
     /// In 8 bit additoin, half carry is set when there is a carry  from bit 3 to bit 4
@@ -1171,7 +1175,63 @@ impl Cpu {
             }
 
             //SUB A, B
-            0x90 => {}
+            0x90 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.b);
+                self.pc += 1;
+            }
+
+            //SUB A, C
+            0x91 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.c);
+                self.pc += 1;
+            }
+
+            //SUB A, D
+            0x92 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.d);
+                self.pc += 1;
+            }
+
+            //SUB A, E
+            0x93 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.e);
+                self.pc += 1;
+            }
+
+            //SUB A, H
+            0x94 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.h);
+                self.pc += 1;
+            }
+
+            //SUB A, L
+            0x95 => {
+                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.l);
+                self.pc += 1;
+            }
+
+            //SUB A, (HL)
+            0x96 => {
+                let addr: u16 = self.registers.hl();
+                sub_r_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //SUB  A, A
+            0x97 => {
+                let a: u8 = self.registers.a;
+                sub_r_r(&mut self.f, &mut self.registers.a, a);
+                self.pc += 1;
+            }
+
+            //SBC A, B
+            0x98 => {}
+
+            //SBC A, C
+            0x99 => {}
+
+            //SBC A, D
+            0x9A => {}
 
             _ => println!("NOT AN OPCODE"),
         }

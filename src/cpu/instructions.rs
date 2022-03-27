@@ -260,6 +260,7 @@ pub fn sub_r_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
 
     //Update Carry(Borrow) Flag
 
+    //Set actual accumulator equal to resulting value
     *accumulator = a;
 }
 
