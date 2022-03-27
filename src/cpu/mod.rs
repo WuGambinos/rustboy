@@ -68,11 +68,16 @@ impl Flags {
         self.carry_flag = res;
     }
 
-    ///Updates the half carry flag
+    ///Updates the half carry flag when there is an addition
     ///
     /// In 8 bit additoin, half carry is set when there is a carry  from bit 3 to bit 4
     fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         self.half_carry_flag = ((register & 0xF) + (operand & 0xF) > 0xF) as u8;
+    }
+
+    //Updates the half carry flag where there is a subtraction
+    fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+        self.half_carry_flag = ((register & 0xF) < (operand & 0xF)) as u8;
     }
 
     /// Updates the zero flag
@@ -1164,6 +1169,9 @@ impl Cpu {
                 adc_a_r(&mut self.f, &mut self.registers.a, value);
                 self.pc += 1;
             }
+
+            //SUB A, B
+            0x90 => {}
 
             _ => println!("NOT AN OPCODE"),
         }

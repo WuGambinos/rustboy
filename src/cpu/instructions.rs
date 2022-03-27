@@ -196,40 +196,71 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
 ///
 /// Flags: Z0HC
 pub fn add_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
+    let mut a: u8 = *accumulator;
     //Update Half Carry
-    flags.update_half_carry_flag_sum_8bit(*accumulator, second_reg);
+    flags.update_half_carry_flag_sum_8bit(a, second_reg);
 
     //a = r + a
-    *accumulator = second_reg.wrapping_add(*accumulator);
+    a = a.wrapping_add(second_reg);
 
     //Clear Sub Flag
     flags.clear_sub_flag();
 
     //Update Zero Flag
-    flags.update_zero_flag(*accumulator);
+    flags.update_zero_flag(a);
 
     //Update Carry Flag
-    flags.update_carry_flag_8bit(*accumulator, second_reg);
+    flags.update_carry_flag_8bit(a, second_reg);
+
+    //Set Actual accumulator equal to resulting value
+    *accumulator = a;
 }
 
 ///Adds Accumulator(register A), another register, and carry all together, storing result in the accumulator
 ///
 /// a = a + r + c
 pub fn adc_a_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
+    let mut a: u8 = *accumulator;
     //Update Half Carry
-    flags.update_half_carry_flag_sum_8bit(*accumulator, second_reg);
+    flags.update_half_carry_flag_sum_8bit(a, second_reg);
 
     //a = r + a + c
-    *accumulator = (second_reg.wrapping_add(*accumulator)).wrapping_add(flags.carry_flag);
+    a = a.wrapping_add(second_reg).wrapping_add(flags.carry_flag);
 
     //Clear Sub Flag
     flags.clear_sub_flag();
 
     //Update Zero Flag
-    flags.update_zero_flag(*accumulator);
+    flags.update_zero_flag(a);
 
     //Update Carry Flag
-    flags.update_carry_flag_8bit(*accumulator, second_reg);
+    flags.update_carry_flag_8bit(a, second_reg);
+
+    //Set actual accumulator equal to resulting value
+    *accumulator = a;
+}
+
+///Subtracts another register from the accumulator, storing the result in the accumulator
+///
+/// a = a - r
+pub fn sub_r_r(flags: &mut Flags, accumulator: &mut u8, second_reg: u8) {
+    let mut a: u8 = *accumulator;
+
+    //Update Half Carry
+    flags.update_half_carry_flag_sub_8bit(a, second_reg);
+
+    //a = a - r
+    a = a.wrapping_sub(second_reg);
+
+    //Set Sub flag
+    flags.set_sub_flag();
+
+    //Update Zero Flag
+    flags.update_zero_flag(a);
+
+    //Update Carry(Borrow) Flag
+
+    *accumulator = a;
 }
 
 /************************************************************************
