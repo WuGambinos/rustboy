@@ -1076,156 +1076,156 @@ impl Cpu {
 
             //ADD A, B
             0x80 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.b);
+                add_a_r(self, self.registers.b);
                 self.pc += 1;
             }
 
             //ADD A, C
             0x81 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.c);
+                add_a_r(self, self.registers.c);
                 self.pc += 1;
             }
 
             //ADD A, D
             0x82 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.d);
+                add_a_r(self, self.registers.d);
                 self.pc += 1;
             }
 
             //ADD A, E
             0x83 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.e);
+                add_a_r(self, self.registers.e);
                 self.pc += 1;
             }
 
             //ADD A, H
             0x84 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.h);
+                add_a_r(self, self.registers.e);
                 self.pc += 1;
             }
 
             //ADD A, L
             0x85 => {
-                add_a_r(&mut self.f, &mut self.registers.a, self.registers.l);
+                add_a_r(self, self.registers.l);
                 self.pc += 1;
             }
 
             //ADD A, (HL)
             0x86 => {
                 let addr: u16 = self.registers.hl();
-                add_a_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
+                add_a_r(self, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
             //ADD A, A
             0x87 => {
-                let value: u8 = self.registers.a;
-                add_a_r(&mut self.f, &mut self.registers.a, value);
+                add_a_r(self, self.registers.a);
                 self.pc += 1;
             }
 
             //ADC A, B
             0x88 => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.b);
+                adc_a_r(self, self.registers.b);
                 self.pc += 1;
             }
 
             //ADC A, C
             0x89 => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.c);
+                adc_a_r(self, self.registers.c);
                 self.pc += 1;
             }
 
             //ADC A, D
             0x8A => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.d);
+                adc_a_r(self, self.registers.d);
                 self.pc += 1;
             }
 
             //ADC A, E
             0x8B => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.e);
+                adc_a_r(self, self.registers.e);
                 self.pc += 1;
             }
 
             //ADC A, H
             0x8C => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.h);
+                adc_a_r(self, self.registers.h);
                 self.pc += 1;
             }
 
             //ADC A, L
             0x8D => {
-                adc_a_r(&mut self.f, &mut self.registers.a, self.registers.l);
+                adc_a_r(self, self.registers.l);
                 self.pc += 1;
             }
 
             //ADC A, (HL)
             0x8E => {
                 let addr = self.registers.hl();
-                adc_a_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
+                adc_a_r(self, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
             //ADC A, A
             0x8F => {
-                let value = self.registers.a;
-                adc_a_r(&mut self.f, &mut self.registers.a, value);
+                adc_a_r(self, self.registers.a);
                 self.pc += 1;
             }
 
             //SUB A, B
             0x90 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.b);
+                sub_r_r(self, self.registers.b);
                 self.pc += 1;
             }
 
             //SUB A, C
             0x91 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.c);
+                sub_r_r(self, self.registers.c);
                 self.pc += 1;
             }
 
             //SUB A, D
             0x92 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.d);
+                sub_r_r(self, self.registers.d);
                 self.pc += 1;
             }
 
             //SUB A, E
             0x93 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.e);
+                sub_r_r(self, self.registers.e);
                 self.pc += 1;
             }
 
             //SUB A, H
             0x94 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.h);
+                sub_r_r(self, self.registers.h);
                 self.pc += 1;
             }
 
             //SUB A, L
             0x95 => {
-                sub_r_r(&mut self.f, &mut self.registers.a, self.registers.l);
+                sub_r_r(self, self.registers.l);
                 self.pc += 1;
             }
 
             //SUB A, (HL)
             0x96 => {
                 let addr: u16 = self.registers.hl();
-                sub_r_r(&mut self.f, &mut self.registers.a, mmu.read_mem(addr));
+                sub_r_r(self, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
             //SUB  A, A
             0x97 => {
-                let a: u8 = self.registers.a;
-                sub_r_r(&mut self.f, &mut self.registers.a, a);
+                sub_r_r(self, self.registers.a);
                 self.pc += 1;
             }
 
             //SBC A, B
-            0x98 => {}
+            0x98 => {
+                sbc_r_r(self, self.registers.b);
+                self.pc += 1;
+            }
 
             //SBC A, C
             0x99 => {}
