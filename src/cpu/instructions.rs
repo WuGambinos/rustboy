@@ -145,6 +145,9 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
     //Update Half Carry
     cpu.f.update_half_carry_flag_sub_8bit(a, operand);
 
+    //Update Carry(Borrow) Flag
+    cpu.f.update_carry_flag_8bit(a, operand);
+
     //a = a - r
     a = a.wrapping_sub(operand);
 
@@ -153,9 +156,6 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
 
     //Update Zero Flag
     cpu.f.update_zero_flag(a);
-
-    //Update Carry(Borrow) Flag
-    cpu.f.update_carry_flag_8bit(a, operand);
 
     //Set actual accumulator equal to resulting value
     cpu.registers.a = a;
@@ -170,6 +170,9 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     //Update Half Carry
     cpu.f.update_half_carry_flag_sub_8bit(a, 1);
 
+    //Update Carry(Borrow) Flag
+    cpu.f.update_carry_flag_sub_8bit(cpu.registers.a, 1);
+
     //a = a - r - c
     a = a.wrapping_sub(1);
 
@@ -178,9 +181,6 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
 
     //Update Zero Flag
     cpu.f.update_zero_flag(a);
-
-    //Update Carry(Borrow) Flag
-    cpu.f.update_carry_flag_sub_8bit(cpu.registers.a, 1);
 
     //Set actual accumulator equal to resulting value
     cpu.registers.a = a;

@@ -182,6 +182,21 @@ fn add_r() {
     assert_eq!(cpu.registers.a, 0x04);
 }
 
+//Test For Overflow with ADD r r instruction
+#[test]
+fn add_r_overflow() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0xFF;
+    cpu.registers.b = 0xF0;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::add_a_r(&mut cpu, b);
+
+    assert_eq!(cpu.f.carry_flag, 1);
+}
+
 ///Basic test for ADC r r instruction
 #[test]
 fn adc_r() {
@@ -213,6 +228,7 @@ fn sub_r() {
     assert_eq!(cpu.registers.a, 0x02);
 }
 
+///Basic test for SBC r r instruction
 #[test]
 fn sbc_r() {
     let mut cpu = Cpu::new();
@@ -226,6 +242,37 @@ fn sbc_r() {
     instructions::sbc_r_r(&mut cpu, b);
 
     assert_eq!(cpu.registers.a, 0x05);
+}
+
+//Testing for correct borrow detection
+#[test]
+fn sub_r_borrow() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x07;
+    cpu.registers.b = 0x10;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::sub_r_r(&mut cpu, b);
+
+    assert_eq!(cpu.f.carry_flag, 1);
+}
+
+///Testing for correct result when borrow(carry) is set
+#[test]
+fn sbc_r_borrow_set() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x08;
+    cpu.registers.b = 0x03;
+    cpu.f.carry_flag = 1;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::sbc_r_r(&mut cpu, b);
+
+    assert_eq!(cpu.registers.a, 0x04);
 }
 
 /*************************************************************************
