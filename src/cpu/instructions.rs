@@ -92,6 +92,9 @@ pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
     //Update Half Carry
     cpu.f.update_half_carry_flag_sum_8bit(a, operand);
 
+    //Update Carry Flag
+    cpu.f.update_carry_flag_sum_8bit(a, operand);
+
     //a = r + a
     a = a.wrapping_add(operand);
 
@@ -100,9 +103,6 @@ pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
 
     //Update Zero Flag
     cpu.f.update_zero_flag(a);
-
-    //Update Carry Flag
-    cpu.f.update_carry_flag_8bit(a, operand);
 
     //Set Actual accumulator equal to resulting value
     cpu.registers.a = a;
@@ -120,6 +120,9 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     //Update Half Carry
     cpu.f.update_half_carry_flag_sum_8bit(a, new_operand);
 
+    //Update Carry Flag
+    cpu.f.update_carry_flag_sum_8bit(a, new_operand);
+
     //a = r + a + c
     a = a.wrapping_add(new_operand);
 
@@ -128,9 +131,6 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
 
     //Update Zero Flag
     cpu.f.update_zero_flag(a);
-
-    //Update Carry Flag
-    cpu.f.update_carry_flag_8bit(a, new_operand);
 
     //Set actual accumulator equal to resulting value
     cpu.registers.a = a;
@@ -146,7 +146,7 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.f.update_half_carry_flag_sub_8bit(a, operand);
 
     //Update Carry(Borrow) Flag
-    cpu.f.update_carry_flag_8bit(a, operand);
+    cpu.f.update_carry_flag_sub_8bit(a, operand);
 
     //a = a - r
     a = a.wrapping_sub(operand);

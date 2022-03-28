@@ -56,23 +56,24 @@ impl Flags {
     ///Updates Carry flag
     ///
     /// Carry flag is set when operation results in overflow
-    fn update_carry_flag_8bit(&mut self, register: u8, operand: u8) {
-        let mut res: u8 = 0;
+    fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+        let mut res: u16 = (register as u16) + (operand as u16);
 
-        //Set res equal to 1 if there is carry
+        /*//Set res equal to 1 if there is carry
         match register.checked_add(operand) {
             Some(_v) => res = 1,
             None => res = 0,
-        }
+        }*/
 
-        self.carry_flag = res;
+        self.carry_flag = (res > 255) as u8;
     }
-
-    fn update_carry_flag_16bit(&mut self, register: u16, operand: u16) {}
+    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
 
     fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
         self.carry_flag = (register < operand) as u8;
     }
+
+    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {}
 
     ///Updates the half carry flag when there is an addition
     ///
@@ -81,12 +82,12 @@ impl Flags {
         self.half_carry_flag = ((register & 0xF) + (operand & 0xF) > 0xF) as u8;
     }
 
+    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
+
     //Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
         self.half_carry_flag = ((register & 0xF) < (operand & 0xF)) as u8;
     }
-
-    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
 
     pub fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
         self.half_carry_flag = ((register & 0xFFF) < (operand & 0xFFF)) as u8;
