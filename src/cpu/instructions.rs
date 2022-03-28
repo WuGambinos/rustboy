@@ -165,13 +165,13 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //Need to subtract operand and carry for the half carry to be calculated correctly
-    let new_operand: u8 = operand.wrapping_sub(cpu.f.carry_flag);
+    a = a.wrapping_sub(operand);
 
     //Update Half Carry
-    cpu.f.update_half_carry_flag_sub_8bit(a, new_operand);
+    cpu.f.update_half_carry_flag_sub_8bit(a, 1);
 
     //a = a - r - c
-    a = a.wrapping_sub(new_operand);
+    a = a.wrapping_sub(1);
 
     //Set Sub Flag
     cpu.f.set_sub_flag();
@@ -180,8 +180,7 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.f.update_zero_flag(a);
 
     //Update Carry(Borrow) Flag
-    cpu.f
-        .update_carry_flag_sub_8bit(cpu.registers.a, new_operand);
+    cpu.f.update_carry_flag_sub_8bit(cpu.registers.a, 1);
 
     //Set actual accumulator equal to resulting value
     cpu.registers.a = a;
