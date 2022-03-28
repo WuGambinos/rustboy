@@ -10,6 +10,7 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     //Update Half Carry
     flags.update_half_carry_flag_sum_8bit(value, 1);
 
+    //r = r + 1
     value = value.wrapping_add(1);
 
     //Update Zero Flag
@@ -21,103 +22,25 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     *register = value;
 }
 
-/*pub fn inc_8bit(cpu: &mut Cpu, register: char) {
-    match register {
-        'A' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.a, 1);
+pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
+    let mut value = *register;
 
-            //A = A + 1
-            cpu.registers.a = cpu.registers.a.wrapping_add(1);
+    //Update Half Carry
+    flags.update_half_carry_flag_sub_8bit(value, 1);
 
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.a);
+    //r = r - 1
+    value = value.wrapping_sub(1);
 
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'B' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.b, 1);
+    //Update Zero Flag
+    flags.update_zero_flag(value);
 
-            //B = B + 1
-            cpu.registers.b = cpu.registers.b.wrapping_add(1);
+    //Set Sub Flag
+    flags.set_sub_flag();
 
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.b);
+    *register = value;
+}
 
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'C' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.c, 1);
-
-            //C = C + 1
-            cpu.registers.c = cpu.registers.c.wrapping_add(1);
-
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.c);
-
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'D' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.d, 1);
-
-            //D = D + 1
-            cpu.registers.d = cpu.registers.d.wrapping_add(1);
-
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.d);
-
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'E' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.e, 1);
-
-            //E = E + 1
-            cpu.registers.e = cpu.registers.e.wrapping_add(1);
-
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.e);
-
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'H' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.h, 1);
-
-            //H = H + 1
-            cpu.registers.h = cpu.registers.h.wrapping_add(1);
-
-            //Update Zero Flag
-            cpu.update_zero_flag(cpu.registers.h);
-
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        'L' => {
-            //Update Half Carry
-            cpu.update_half_carry_flag_sum_8bit(cpu.registers.l, 1);
-
-            //L = L + 1
-            cpu.registers.l = cpu.registers.l.wrapping_add(1);
-
-            //Updafte Zero Flag
-            cpu.update_zero_flag(cpu.registers.l);
-
-            //Clear Sub Flag
-            cpu.f.sub_flag = 0;
-        }
-        _ => println!("NOT A REGISTER!"),
-    }
-}*/
-
+/*
 pub fn dec_8bit(cpu: &mut Cpu, register: char) {
     match register {
         'A' => {
@@ -164,7 +87,7 @@ pub fn dec_8bit(cpu: &mut Cpu, register: char) {
         }
         _ => println!("NOT A REGISTER"),
     }
-}
+}*/
 
 ///Increment vlaue in memory using HL pointer
 pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
