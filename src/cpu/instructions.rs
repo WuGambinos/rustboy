@@ -40,55 +40,6 @@ pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     *register = value;
 }
 
-/*
-pub fn dec_8bit(cpu: &mut Cpu, register: char) {
-    match register {
-        'A' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.a, 1);
-            cpu.registers.a = cpu.registers.a.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.a);
-            cpu.f.sub_flag = 1;
-        }
-        'B' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.b, 1);
-            cpu.registers.b = cpu.registers.b.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.b);
-            cpu.f.sub_flag = 1;
-        }
-        'C' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.c, 1);
-            cpu.registers.c = cpu.registers.c.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.c);
-            cpu.f.sub_flag = 1;
-        }
-        'D' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.d, 1);
-            cpu.registers.d = cpu.registers.d.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.d);
-            cpu.f.sub_flag = 1;
-        }
-        'E' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.e, 1);
-            cpu.registers.e = cpu.registers.e.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.e);
-            cpu.f.sub_flag = 1;
-        }
-        'H' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.h, 1);
-            cpu.registers.h = cpu.registers.h.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.h);
-            cpu.f.sub_flag = 1;
-        }
-        'L' => {
-            cpu.update_half_carry_flag_sub_8bit(cpu.registers.l, 1);
-            cpu.registers.l = cpu.registers.l.wrapping_sub(1);
-            cpu.update_zero_flag(cpu.registers.l);
-            cpu.f.sub_flag = 1;
-        }
-        _ => println!("NOT A REGISTER"),
-    }
-}*/
-
 ///Increment vlaue in memory using HL pointer
 pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     //Grab value in memory
