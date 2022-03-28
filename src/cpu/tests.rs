@@ -167,6 +167,7 @@ fn dec_l() {
     assert_eq!(cpu.registers.l, 0x04);
 }
 
+///Basic test for ADD r r instruction
 #[test]
 fn add_r() {
     let mut cpu = Cpu::new();
@@ -179,6 +180,52 @@ fn add_r() {
 
     assert_eq!(cpu.f.carry_flag, 1);
     assert_eq!(cpu.registers.a, 0x04);
+}
+
+///Basic test for ADC r r instruction
+#[test]
+fn adc_r() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x02;
+    cpu.registers.b = 0x25;
+    cpu.f.carry_flag = 1;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::adc_a_r(&mut cpu, b);
+
+    assert_eq!(cpu.registers.a, 0x28);
+}
+
+///Basic test for SUB r r instruction
+#[test]
+fn sub_r() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x05;
+    cpu.registers.b = 0x03;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::sub_r_r(&mut cpu, b);
+
+    assert_eq!(cpu.registers.a, 0x02);
+}
+
+#[test]
+fn sbc_r() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x08;
+    cpu.registers.b = 0x02;
+    cpu.f.carry_flag = 1;
+
+    let b: u8 = cpu.registers.b;
+
+    instructions::sbc_r_r(&mut cpu, b);
+
+    assert_eq!(cpu.registers.a, 0x05);
 }
 
 /*************************************************************************
