@@ -188,7 +188,7 @@ fn add_r_overflow() {
     let mut cpu = Cpu::new();
 
     cpu.registers.a = 0xFF;
-    cpu.registers.b = 0x10;
+    cpu.registers.b = 0x80;
 
     let b: u8 = cpu.registers.b;
 
@@ -360,7 +360,7 @@ fn carry() {
     cpu.registers.set_hl(0x0001);
 
     cpu.f
-        .update_carry_flag_16bit(cpu.registers.bc(), cpu.registers.hl());
+        .update_carry_flag_sum_16bit(cpu.registers.bc(), cpu.registers.hl());
 
     //assert_eq!(cpu.f.carry_flag, 1);
     assert_eq!(cpu.registers.bc(), 0xFFFF);
