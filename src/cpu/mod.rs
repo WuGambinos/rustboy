@@ -1228,10 +1228,47 @@ impl Cpu {
             }
 
             //SBC A, C
-            0x99 => {}
+            0x99 => {
+                sbc_r_r(self, self.registers.c);
+                self.pc += 1;
+            }
 
             //SBC A, D
-            0x9A => {}
+            0x9A => {
+                sbc_r_r(self, self.registers.d);
+                self.pc += 1;
+            }
+
+            //SBC A, E
+            0x9B => {
+                sbc_r_r(self, self.registers.e);
+                self.pc += 1;
+            }
+
+            //SBC A, H
+            0x9C => {
+                sbc_r_r(self, self.registers.h);
+                self.pc += 1;
+            }
+
+            //SBC A, L
+            0x9D => {
+                sbc_r_r(self, self.registers.l);
+                self.pc += 1;
+            }
+
+            //SBC A, (HL)
+            0x9E => {
+                let addr: u16 = self.registers.hl();
+                sbc_r_r(self, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //SBC A, A
+            0x9F => {
+                sbc_r_r(self, self.registers.a);
+                self.pc += 1;
+            }
 
             _ => println!("NOT AN OPCODE"),
         }
