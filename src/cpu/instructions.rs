@@ -46,7 +46,7 @@ pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     let mut value = mmu.read_mem(cpu.registers.hl());
 
     //Check for Half Carry
-    cpu.update_half_carry_flag_sum_8bit(value, 1);
+    cpu.f.update_half_carry_flag_sum_8bit(value, 1);
 
     //Increment value
     value = value.wrapping_add(1);
@@ -55,7 +55,7 @@ pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     mmu.write_mem(cpu.registers.hl(), value);
 
     //Update Zero Flag
-    cpu.update_zero_flag(value);
+    cpu.f.update_zero_flag(value);
 
     //Clear Sub Flag
     cpu.f.sub_flag = 0;
@@ -67,7 +67,7 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     let mut value: u8 = mmu.read_mem(cpu.registers.hl());
 
     //Check for Half Carry
-    cpu.update_half_carry_flag_sub_8bit(value, 1);
+    cpu.f.update_half_carry_flag_sub_8bit(value, 1);
 
     //Decrement Value
     value = value.wrapping_sub(1);
@@ -76,7 +76,7 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     mmu.write_mem(cpu.registers.hl(), value);
 
     //Update Zero Flag
-    cpu.update_zero_flag(value);
+    cpu.f.update_zero_flag(value);
 
     //Set sub flag
     cpu.f.sub_flag = 1;
@@ -304,21 +304,24 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
 pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
+            cpu.f
+                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
             cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
             cpu.f.sub_flag = 0;
         }
         "DE" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+            cpu.f
+                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
             cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
             cpu.f.sub_flag = 0;
         }
         "HL" => {
-            cpu.update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+            cpu.f
+                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
             cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
