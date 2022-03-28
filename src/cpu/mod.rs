@@ -247,7 +247,7 @@ impl Cpu {
 
             //DEC B: Flags Z1H
             0x05 => {
-                dec_8bit(self, 'B');
+                dec_8bit(&mut self.f, &mut self.registers.b);
                 self.pc += 1;
             }
 
@@ -330,7 +330,7 @@ impl Cpu {
 
             //DEC C
             0x0D => {
-                dec_8bit(self, 'C');
+                dec_8bit(&mut self.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -399,7 +399,7 @@ impl Cpu {
 
             //DEC D
             0x15 => {
-                dec_8bit(self, 'D');
+                dec_8bit(&mut self.f, &mut self.registers.d);
                 //Inrease Program Counter
                 self.pc += 1;
             }
@@ -464,7 +464,7 @@ impl Cpu {
 
             //DEC E
             0x1D => {
-                dec_8bit(self, 'E');
+                dec_8bit(&mut self.f, &mut self.registers.e);
                 self.pc += 1;
             }
 
@@ -519,7 +519,7 @@ impl Cpu {
 
             //DEC H
             0x25 => {
-                dec_8bit(self, 'H');
+                dec_8bit(&mut self.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
@@ -568,7 +568,7 @@ impl Cpu {
 
             //DEC L
             0x2D => {
-                dec_8bit(self, 'L');
+                dec_8bit(&mut self.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
@@ -683,7 +683,7 @@ impl Cpu {
 
             //DEC A
             0x3D => {
-                dec_8bit(self, 'A');
+                dec_8bit(&mut self.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
