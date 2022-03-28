@@ -111,7 +111,7 @@ fn dec_b() {
     let mut cpu = Cpu::new();
 
     cpu.registers.b = 0x02;
-    instructions::dec_8bit(&mut cpu, 'B');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.b);
 
     assert_eq!(cpu.registers.b, 0x01);
 }
@@ -121,7 +121,7 @@ fn dec_c() {
     let mut cpu = Cpu::new();
 
     cpu.registers.c = 0x05;
-    instructions::dec_8bit(&mut cpu, 'C');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.c);
 
     assert_eq!(cpu.registers.c, 0x04);
 }
@@ -131,7 +131,7 @@ fn dec_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x03;
-    instructions::dec_8bit(&mut cpu, 'D');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.d);
 
     assert_eq!(cpu.registers.d, 0x02);
 }
@@ -141,7 +141,7 @@ fn dec_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x01;
-    instructions::dec_8bit(&mut cpu, 'E');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.e);
 
     assert_eq!(cpu.registers.e, 0x00);
     assert_eq!(cpu.f.zero_flag, 1);
@@ -152,7 +152,7 @@ fn dec_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x00;
-    instructions::dec_8bit(&mut cpu, 'H');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.h);
 
     assert_eq!(cpu.registers.h, 0xFF);
 }
@@ -162,7 +162,7 @@ fn dec_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    instructions::dec_8bit(&mut cpu, 'L');
+    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.l);
 
     assert_eq!(cpu.registers.l, 0x04);
 }
