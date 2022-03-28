@@ -178,8 +178,15 @@ fn add_r() {
 
     instructions::add_a_r(&mut cpu, b);
 
-    assert_eq!(cpu.f.carry_flag, 1);
-    assert_eq!(cpu.registers.a, 0x04);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+    assert_eq!(check, [0x04, 0, 0, 1, 1]);
 }
 
 //Test For Overflow with ADD r r instruction
