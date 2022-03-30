@@ -1280,22 +1280,55 @@ impl Cpu {
             }
 
             //AND A, B
-            0xA0 => {}
+            0xA0 => {
+                and_r_r(self, self.registers.b);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA1 => {}
+            //AND A, C
+            0xA1 => {
+                and_r_r(self, self.registers.c);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA2 => {}
+            //AND A, D
+            0xA2 => {
+                and_r_r(self, self.registers.d);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA3 => {}
+            //AND A, E
+            0xA3 => {
+                and_r_r(self, self.registers.e);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA4 => {}
+            //AND A, H
+            0xA4 => {
+                and_r_r(self, self.registers.h);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA5 => {}
+            //AND A. L
+            0xA5 => {
+                and_r_r(self, self.registers.l);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA6 => {}
+            //AND A, (HL)
+            0xA6 => {
+                let addr: u16 = self.registers.hl();
+                and_r_r(self, mmu.read_mem(addr));
+                self.pc = self.pc.wrapping_add(1);
+            }
 
-            0xA7 => {}
+            //AND A, A
+            0xA7 => {
+                and_r_r(self, self.registers.a);
+                self.pc = self.pc.wrapping_add(1);
+            }
 
+            //XOR A, B
             0xA8 => {}
 
             0xA9 => {}

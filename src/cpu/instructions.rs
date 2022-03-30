@@ -189,8 +189,11 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
 pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
-    //a = a & operand
+    //and
     a = a & operand;
+
+    //Update Zero Flag
+    cpu.f.update_zero_flag(a);
 
     //Clear Sub Flag
     cpu.f.clear_sub_flag();
@@ -205,11 +208,36 @@ pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.a = a;
 }
 
+pub fn xor_r_r(cpu: &mut Cpu, operand: u8) {
+    let mut a: u8 = cpu.registers.a;
+
+    //xor
+    a = a ^ operand;
+
+    //Update Zero Flag
+    cpu.f.update_zero_flag(a);
+
+    //Clear Sub Flag
+    cpu.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.f.clear_half_carry_flag();
+
+    //Clear Carry
+    cpu.f.clear_carry_flag();
+
+    //Set actual accumualtor equal to resulting value
+    cpu.registers.a = a;
+}
+
 pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
-    //a = a | operand
+    //or
     a = a | operand;
+
+    //Update Zero Flag
+    cpu.f.update_zero_flag(a);
 
     //Clear Sub Flag
     cpu.f.clear_sub_flag();
@@ -222,6 +250,24 @@ pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
 
     //Set actual accumualtor equal to resulting value
     cpu.registers.a = a;
+}
+
+pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
+    let a: u8 = cpu.registers.a;
+
+    let res = a - operand;
+
+    //Update Zero Flag
+    cpu.f.update_zero_flag(res);
+
+    //Set Sub Flag
+    cpu.f.set_sub_flag();
+
+    //Update Half Carry
+    cpu.f.update_half_carry_flag_sub_8bit(a, operand);
+
+    //Update Carry(Borrow) Flag
+    cpu.f.update_carry_flag_sub_8bit(a, operand);
 }
 
 /************************************************************************
