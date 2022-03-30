@@ -455,7 +455,6 @@ fn inc_de() {
     let mut cpu = Cpu::new();
     cpu.registers.set_de(0xFFFF);
     instructions::inc_16bit(&mut cpu, "DE");
-    assert_eq!(cpu.f.sub_flag, 0);
     assert_eq!(cpu.registers.de(), 0);
 }
 
