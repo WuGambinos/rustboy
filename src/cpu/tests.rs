@@ -37,9 +37,16 @@ fn inc_b() {
 
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.b);
 
-    //cpu.registers.b = cpu.registers.b.wrapping_add(1);
+    //ZNHC
+    let check = vec![
+        cpu.registers.b,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
 
-    assert_eq!(cpu.registers.b, 0x02);
+    assert_eq!(check, [0x02, 0, 0, 0, 0]);
 }
 
 #[test]
@@ -50,7 +57,16 @@ fn inc_c() {
 
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.c);
 
-    assert_eq!(cpu.registers.c, 0x02);
+    //ZNHC
+    let check = vec![
+        cpu.registers.c,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x02, 0, 0, 0, 0]);
 }
 
 #[test]
@@ -60,7 +76,16 @@ fn inc_d() {
     cpu.registers.d = 0x05;
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.d);
 
-    assert_eq!(cpu.registers.d, 0x06);
+    //ZNHC
+    let check = vec![
+        cpu.registers.d,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x06, 0, 0, 0, 0]);
 }
 
 #[test]
@@ -70,7 +95,16 @@ fn inc_e() {
     cpu.registers.e = 0x05;
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.e);
 
-    assert_eq!(cpu.registers.e, 0x06);
+    //ZNHC
+    let check = vec![
+        cpu.registers.e,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x06, 0, 0, 0, 0]);
 }
 
 #[test]
@@ -80,7 +114,16 @@ fn inc_h() {
     cpu.registers.h = 0x05;
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.h);
 
-    assert_eq!(cpu.registers.h, 0x06);
+    //ZNHC
+    let check = vec![
+        cpu.registers.h,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x06, 0, 0, 0, 0]);
 }
 
 #[test]
@@ -100,10 +143,16 @@ fn inc_8bit_overflow() {
     cpu.registers.b = 0xFF;
     instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.b);
 
-    assert_eq!(cpu.registers.l, 0x00);
-    assert_eq!(cpu.f.zero_flag, 0x01);
-    assert_eq!(cpu.f.sub_flag, 0x00);
-    assert_eq!(cpu.f.half_carry_flag, 0x01);
+    //ZNHC
+    let check = vec![
+        cpu.registers.l,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x00, 1, 0, 1, 0]);
 }
 
 #[test]
@@ -113,7 +162,16 @@ fn dec_b() {
     cpu.registers.b = 0x02;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.b);
 
-    assert_eq!(cpu.registers.b, 0x01);
+    //ZNHC
+    let check = vec![
+        cpu.registers.b,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x01, 0, 1, 0, 0]);
 }
 
 #[test]
@@ -123,7 +181,16 @@ fn dec_c() {
     cpu.registers.c = 0x05;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.c);
 
-    assert_eq!(cpu.registers.c, 0x04);
+    //ZNHC
+    let check = vec![
+        cpu.registers.c,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x04, 0, 1, 0, 0]);
 }
 
 #[test]
@@ -133,7 +200,16 @@ fn dec_d() {
     cpu.registers.d = 0x03;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.d);
 
-    assert_eq!(cpu.registers.d, 0x02);
+    //Flags : ZNHC
+    let check = vec![
+        cpu.registers.d,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x02, 0, 1, 0, 0])
 }
 
 #[test]
@@ -143,8 +219,16 @@ fn dec_e() {
     cpu.registers.e = 0x01;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.e);
 
-    assert_eq!(cpu.registers.e, 0x00);
-    assert_eq!(cpu.f.zero_flag, 1);
+    //ZNHC
+    let check = vec![
+        cpu.registers.e,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x00, 1, 1, 0, 0]);
 }
 
 #[test]
@@ -154,7 +238,16 @@ fn dec_h() {
     cpu.registers.h = 0x00;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.h);
 
-    assert_eq!(cpu.registers.h, 0xFF);
+    //ZNHC
+    let check = vec![
+        cpu.registers.h,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0xFF, 0, 1, 1, 0]);
 }
 
 #[test]
@@ -164,7 +257,16 @@ fn dec_l() {
     cpu.registers.l = 0x05;
     instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.l);
 
-    assert_eq!(cpu.registers.l, 0x04);
+    //ZNHC
+    let check = vec![
+        cpu.registers.l,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x04, 0, 1, 0, 0]);
 }
 
 ///Basic test for ADD r r instruction
@@ -226,7 +328,16 @@ fn adc_r() {
 
     instructions::adc_a_r(&mut cpu, b);
 
-    assert_eq!(cpu.registers.a, 0x28);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x28, 0, 0, 0, 0]);
 }
 
 ///Basic test for SUB r r instruction
@@ -241,7 +352,16 @@ fn sub_r() {
 
     instructions::sub_r_r(&mut cpu, b);
 
-    assert_eq!(cpu.registers.a, 0x02);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x02, 0, 1, 0, 0]);
 }
 
 ///Basic test for SBC r r instruction
@@ -257,7 +377,16 @@ fn sbc_r() {
 
     instructions::sbc_r_r(&mut cpu, b);
 
-    assert_eq!(cpu.registers.a, 0x05);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x05, 0, 1, 0, 0]);
 }
 
 //Testing for correct borrow detection
@@ -272,7 +401,16 @@ fn sub_r_borrow() {
 
     instructions::sub_r_r(&mut cpu, b);
 
-    assert_eq!(cpu.f.carry_flag, 1);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0xF7, 0, 1, 0, 1])
 }
 
 ///Testing for correct result when borrow(carry) is set
@@ -288,7 +426,16 @@ fn sbc_r_borrow_set() {
 
     instructions::sbc_r_r(&mut cpu, b);
 
-    assert_eq!(cpu.registers.a, 0x04);
+    //ZNHC
+    let check = vec![
+        cpu.registers.a,
+        cpu.f.zero_flag,
+        cpu.f.sub_flag,
+        cpu.f.half_carry_flag,
+        cpu.f.carry_flag,
+    ];
+
+    assert_eq!(check, [0x04, 0, 1, 0, 0]);
 }
 
 /*************************************************************************
