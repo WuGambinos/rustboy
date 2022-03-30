@@ -186,6 +186,44 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.a = a;
 }
 
+pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
+    let mut a: u8 = cpu.registers.a;
+
+    //a = a & operand
+    a = a & operand;
+
+    //Clear Sub Flag
+    cpu.f.clear_sub_flag();
+
+    //Set Half Carry
+    cpu.f.set_half_carry_flag();
+
+    //Clear Carry Flag
+    cpu.f.clear_carry_flag();
+
+    //Set actual accumualtor equal to resulting value
+    cpu.registers.a = a;
+}
+
+pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
+    let mut a: u8 = cpu.registers.a;
+
+    //a = a | operand
+    a = a | operand;
+
+    //Clear Sub Flag
+    cpu.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.f.clear_half_carry_flag();
+
+    //Clear Carry Flag
+    cpu.f.clear_carry_flag();
+
+    //Set actual accumualtor equal to resulting value
+    cpu.registers.a = a;
+}
+
 /************************************************************************
  * 8-bit Rotate instructions
  * *********************************************************************/
