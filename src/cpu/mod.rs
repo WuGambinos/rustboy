@@ -1329,9 +1329,105 @@ impl Cpu {
             }
 
             //XOR A, B
-            0xA8 => {}
+            0xA8 => {
+                xor_r_r(self, self.registers.b);
+                self.pc += 1;
+            }
 
-            0xA9 => {}
+            //XOR A, C
+            0xA9 => {
+                xor_r_r(self, self.registers.c);
+                self.pc += 1
+            }
+
+            //XOR A, D
+            0xAA => {
+                xor_r_r(self, self.registers.d);
+                self.pc += 1
+            }
+
+            //XOR A, E
+            0xAB => {
+                xor_r_r(self, self.registers.e);
+                self.pc += 1
+            }
+
+            //XOR A, H
+            0xAC => {
+                xor_r_r(self, self.registers.h);
+                self.pc += 1
+            }
+
+            //XOR A, L
+            0xAD => {
+                xor_r_r(self, self.registers.l);
+                self.pc += 1
+            }
+
+            //XOR A, (HL)
+            0xAE => {
+                let addr: u16 = self.registers.hl();
+                xor_r_r(self, mmu.read_mem(addr));
+                self.pc += 1
+            }
+
+            //XOR A, A
+            0xAF => {
+                xor_r_r(self, self.registers.a);
+                self.pc += 1
+            }
+
+            //OR A, B
+            0xB0 => {
+                or_r_r(self, self.registers.b);
+                self.pc += 1;
+            }
+
+            //OR A, C
+            0xB1 => {
+                or_r_r(self, self.registers.c);
+                self.pc += 1;
+            }
+
+            //OR A, D
+            0xB2 => {
+                or_r_r(self, self.registers.d);
+                self.pc += 1;
+            }
+
+            //OR A, E
+            0xB3 => {
+                or_r_r(self, self.registers.e);
+                self.pc += 1;
+            }
+
+            //OR A, H
+            0xB4 => {
+                or_r_r(self, self.registers.h);
+                self.pc += 1;
+            }
+
+            //OR A, L
+            0xB5 => {
+                or_r_r(self, self.registers.l);
+                self.pc += 1;
+            }
+
+            //OR A, (HL)
+            0xB6 => {
+                let addr: u16 = self.registers.hl();
+                or_r_r(self, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //OR A, A
+            0xB7 => {
+                or_r_r(self, self.registers.a);
+                self.pc += 1;
+            }
+
+            //CP A, B
+            0xB8 => {}
 
             _ => println!("NOT AN OPCODE"),
         }
