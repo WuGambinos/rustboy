@@ -1427,7 +1427,80 @@ impl Cpu {
             }
 
             //CP A, B
-            0xB8 => {}
+            0xB8 => {
+                cp_r_r(self, self.registers.b);
+                self.pc += 1;
+            }
+
+            //CP A, C
+            0xB9 => {
+                cp_r_r(self, self.registers.c);
+                self.pc += 1;
+            }
+
+            //CP A, D
+            0xBA => {
+                cp_r_r(self, self.registers.d);
+                self.pc += 1;
+            }
+
+            //CP A, E
+            0xBB => {
+                cp_r_r(self, self.registers.e);
+                self.pc += 1;
+            }
+
+            //CP A, H
+            0xBC => {
+                cp_r_r(self, self.registers.h);
+                self.pc += 1;
+            }
+
+            //CP A, L
+            0xBD => {
+                cp_r_r(self, self.registers.l);
+                self.pc += 1;
+            }
+
+            //CP A, (HL)
+            0xBE => {
+                let addr: u16 = self.registers.hl();
+                cp_r_r(self, mmu.read_mem(addr));
+                self.pc += 1;
+            }
+
+            //CP A, A
+            0xBF => {
+                cp_r_r(self, self.registers.a);
+                self.pc += 1;
+            }
+
+            //RET NZ
+            0xC0 => {
+                ret(self, mmu);
+                self.pc += 1;
+            }
+
+            //POP BC
+            0xC1 => {}
+
+            0xC2 => {}
+
+            0xC3 => {}
+
+            0xC4 => {}
+
+            0xC5 => {}
+
+            0xC6 => {}
+
+            0xC7 => {}
+
+            0xC8 => {}
+
+            0xC9 => {}
+
+            0xCA => {}
 
             _ => println!("NOT AN OPCODE"),
         }

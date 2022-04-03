@@ -270,6 +270,27 @@ pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.f.update_carry_flag_sub_8bit(a, operand);
 }
 
+pub fn daa(cpu: &mut Cpu) {
+    if (cpu.registers.a & 0x0F) > 0x09 || cpu.f.half_carry_flag == 1 {
+        cpu.registers.a += 0x06;
+    }
+
+    let upper_nibble = cpu.registers.a & 0xF0 >> 4;
+    let mut reached = false;
+
+    if upper_nibble > 9 || cpu.f.carry_flag == 1 {
+        cpu.registers.a += 0x60;
+        reached = true;
+    }
+
+    //Set carry if second addition was needed, otherwise reset carry
+    if reached {
+        cpu.f.carry_flag = 1;
+    } else {
+        cpu.f.carry_flag = 0;
+    }
+}
+
 /************************************************************************
  * 8-bit Rotate instructions
  * *********************************************************************/
@@ -415,6 +436,9 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     }
 }
 
+/************************************************************************
+ * Jump Instructions
+ * *********************************************************************/
 ///
 /// Relative Jump
 /// PC = PC + 8bit signed
@@ -464,25 +488,17 @@ pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
     }
 }
 
-pub fn daa(cpu: &mut Cpu) {
-    if (cpu.registers.a & 0x0F) > 0x09 || cpu.f.half_carry_flag == 1 {
-        cpu.registers.a += 0x06;
-    }
+///Return
+pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
+    let mut sp = cpu.sp;
 
-    let upper_nibble = cpu.registers.a & 0xF0 >> 4;
-    let mut reached = false;
+    //PC = (SP)
+    cpu.pc = mmu.read_mem(sp) as u16;
 
-    if upper_nibble > 9 || cpu.f.carry_flag == 1 {
-        cpu.registers.a += 0x60;
-        reached = true;
-    }
+    //SP = SP + 2
+    sp += 2;
 
-    //Set carry if second addition was needed, otherwise reset carry
-    if reached {
-        cpu.f.carry_flag = 1;
-    } else {
-        cpu.f.carry_flag = 0;
-    }
+    cpu.sp = sp;
 }
 
 /************************************************************************
@@ -494,4 +510,17 @@ pub fn daa(cpu: &mut Cpu) {
 pub fn ld_8bit(r: &mut u8, data: u8) {
     //Rd = Rr
     *r = data;
+}
+
+/************************************************************************
+ * 16-bit LOAD instructions
+ * *********************************************************************/
+pub fn pop_rr(cpu: &mut Cpu, mmu: &Mmu) {
+    let mut sp = cpu.sp;
+    let value = mmu.read_mem(sp);
+
+    //SP = SP + 2
+    sp = sp + 2;
+
+    cpu.sp = sp;
 }
