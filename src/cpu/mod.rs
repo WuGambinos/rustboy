@@ -1482,14 +1482,35 @@ impl Cpu {
             }
 
             //POP BC
-            0xC1 => {}
+            0xC1 => pop_rr(
+                mmu,
+                &mut self.registers.b,
+                &mut self.registers.c,
+                &mut self.sp,
+            ),
 
-            0xC2 => {}
+            //JP NZ, u16
+            0xC2 => {
+                let nn: u16 =
+                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                jp_nz(self, nn);
+            }
 
-            0xC3 => {}
+            //JP u16
+            0xC3 => {
+                let nn: u16 =
+                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                jp(self, nn)
+            }
 
-            0xC4 => {}
+            //CALL NZ, u16
+            0xC4 => {
+                let nn: u16 =
+                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                call(self, mmu, nn);
+            }
 
+            //PUSH BC
             0xC5 => {}
 
             0xC6 => {}
