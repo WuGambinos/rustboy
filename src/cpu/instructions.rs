@@ -506,8 +506,8 @@ pub fn jp(cpu: &mut Cpu, nn: u16) {
 
 ///
 /// Call to nn
-pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, sp: &mut u16, nn: u16) {
-    let mut stack_pointer = *sp;
+pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+    let mut stack_pointer = cpu.sp;
 
     //SP = SP - 2
     stack_pointer = stack_pointer - 2;
@@ -519,7 +519,7 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, sp: &mut u16, nn: u16) {
     //PC = nn
     cpu.pc = nn;
 
-    *sp = stack_pointer;
+    cpu.sp = stack_pointer;
 }
 
 ///Return
@@ -527,7 +527,8 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     let mut sp = cpu.sp;
 
     //PC = (SP)
-    cpu.pc = mmu.read_mem(sp) as u16;
+    let pc = (mmu.read_mem(sp) as u16) << 8 | (mmu.read_mem(sp + 1) as u16);
+    cpu.pc = pc;
 
     //SP = SP + 2
     sp += 2;
