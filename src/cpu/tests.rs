@@ -597,7 +597,6 @@ fn call_test() {
     );
 }
 
-/*
 #[test]
 fn ret_test() {
     let mut cpu = Cpu::new();
@@ -610,6 +609,7 @@ fn ret_test() {
 
     instructions::ret(&mut cpu, &mmu);
 
-    assert_eq!(cpu.pc, 0x18B5);
+    let check: Vec<u16> = vec![0x2002, 0x18B5];
+
+    assert_eq!(check, [cpu.sp, cpu.pc]);
 }
-*/
