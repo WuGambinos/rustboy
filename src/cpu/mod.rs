@@ -128,6 +128,9 @@ struct Registers {
 
     //L Register
     l: u8,
+
+    //F Register(Flags)
+    f: u8,
 }
 
 impl Registers {
@@ -140,6 +143,7 @@ impl Registers {
             e: 0,
             h: 0,
             l: 0,
+            f: 0,
         }
     }
 
@@ -174,6 +178,57 @@ impl Registers {
     fn set_hl(&mut self, data: u16) {
         self.h = ((data & 0xFF00) >> 8) as u8;
         self.l = (data & 0x00FF) as u8;
+    }
+
+    ///Get Register Pair AF
+    fn af(&self) -> u16 {
+        (self.a as u16) << 8 | self.f as u16
+    }
+
+    ///Store value in register pair AF
+    fn set_af(&mut self, data: u16) {
+        self.a = ((data & 0xFF00) >> 8) as u8;
+        self.f = (data & 0x00FF) as u8;
+    }
+
+    ///Set Zero Flag
+    fn set_zero_flag(&mut self) {
+        self.f |= 1 << 7;
+    }
+
+    ///Clear Zero Flag
+    fn clear_zero_flag(&mut self) {
+        self.f &= !(1 << 7);
+    }
+
+    ///Set Sub Flag
+    fn set_sub_flag(&mut self) {
+        self.f |= 1 << 6;
+    }
+
+    ///Clear Sub Flag
+    fn clear_sub_flag(&mut self) {
+        self.f &= !(1 << 6);
+    }
+
+    ///Set Half Carry Flag
+    fn set_hc_flag(&mut self) {
+        self.f |= 1 << 5;
+    }
+
+    /// Clear Half Carry Flag
+    fn clear_hc_flag(&mut self) {
+        self.f &= !(1 << 5)
+    }
+
+    ///Set Carry Flag
+    fn set_carry_flag(&mut self) {
+        self.f |= 1 << 4;
+    }
+
+    ///Clear Carry Flag
+    fn clear_carry_flag(&mut self) {
+        self.f &= !(1 << 4);
     }
 }
 
