@@ -550,6 +550,8 @@ pub fn ld_8bit(r: &mut u8, data: u8) {
 /************************************************************************
  * 16-bit LOAD instructions
  * *********************************************************************/
+///
+/// Contents of Register Pair are popped off stack
 pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
     //Stack Pointer
     let mut stack_pointer = *sp;
@@ -564,6 +566,22 @@ pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
 
     //SP = SP + 2
     stack_pointer = stack_pointer + 2;
+
+    *sp = stack_pointer;
+}
+
+///
+/// Contents of Register Pair are pushed onto stack
+pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
+    //Stack Pointer
+    let mut stack_pointer = *sp;
+
+    //SP = SP - 2
+    stack_pointer -= 2;
+
+    //mem[sp] = rr
+    mmu.write_mem(stack_pointer, lower);
+    mmu.write_mem(stack_pointer + 1, upper);
 
     *sp = stack_pointer;
 }
