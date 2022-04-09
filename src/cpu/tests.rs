@@ -570,8 +570,8 @@ fn pop_rr_test() {
 
 #[test]
 fn call_test() {
-    let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut cpu: Cpu = Cpu::new();
+    let mut mmu: Mmu = Mmu::new();
 
     cpu.pc = 0x1A47;
     cpu.sp = 0x3002;
@@ -580,9 +580,11 @@ fn call_test() {
     mmu.write_mem(cpu.pc + 1, 0x35);
     mmu.write_mem(cpu.pc + 2, 0x21);
 
-    instructions::call(&mut cpu, &mut mmu, 0x2135);
+    let nn: u16 = (mmu.read_mem(cpu.pc + 2) as u16) << 8 | mmu.read_mem(cpu.pc + 1) as u16;
 
-    let check: Vec<u16> = vec![0x001A, 0x004A, 0x3000, 0x2135];
+    instructions::call(&mut cpu, &mut mmu, nn);
+
+    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
 
     assert_eq!(
         check,
