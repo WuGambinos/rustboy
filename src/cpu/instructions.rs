@@ -514,7 +514,7 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, sp: &mut u16, nn: u16) {
 
     //mem[sp] = pc
     mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
-    mmu.write_mem(stack_pointer, ((cpu.pc & 0xFF00) >> 8) as u8);
+    mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
     //PC = nn
     cpu.pc = nn;
