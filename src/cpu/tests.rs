@@ -540,3 +540,26 @@ fn load_8bit_test() {
     cpu.registers.c = 5;
     ld_8bit(&mut (cpu.registers.b), cpu.registers.c);
 }
+
+/*************************************************************************
+ * 16-bit Load Tests
+ *************************************************************************/
+#[test]
+fn pop_rr_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    cpu.sp = 0x1000;
+
+    mmu.write_mem(cpu.sp, 0x55);
+    mmu.write_mem(cpu.sp + 1, 0x33);
+
+    instructions::pop_rr(
+        &mmu,
+        &mut cpu.registers.b,
+        &mut cpu.registers.c,
+        &mut cpu.sp,
+    );
+
+    assert_eq!(cpu.registers.bc(), 0x3355);
+}

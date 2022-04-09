@@ -488,6 +488,40 @@ pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
     }
 }
 
+///
+/// Jump to nn if zero flag is clear
+pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
+    if cpu.f.zero_flag == 0 {
+        jp(cpu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+
+///
+/// Jump to nn
+pub fn jp(cpu: &mut Cpu, nn: u16) {
+    cpu.pc = nn;
+}
+
+///
+/// Call to nn
+pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, sp: &mut u16, nn: u16) {
+    let mut stack_pointer = *sp;
+
+    //SP = SP - 2
+    stack_pointer = stack_pointer - 2;
+
+    //mem[sp] = pc
+    mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
+    mmu.write_mem(stack_pointer, ((cpu.pc & 0xFF00) >> 8) as u8);
+
+    //PC = nn
+    cpu.pc = nn;
+
+    *sp = stack_pointer;
+}
+
 ///Return
 pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     let mut sp = cpu.sp;
@@ -515,12 +549,20 @@ pub fn ld_8bit(r: &mut u8, data: u8) {
 /************************************************************************
  * 16-bit LOAD instructions
  * *********************************************************************/
-pub fn pop_rr(cpu: &mut Cpu, mmu: &Mmu) {
-    let mut sp = cpu.sp;
-    let value = mmu.read_mem(sp);
+pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
+    //Stack Pointer
+    let mut stack_pointer = *sp;
+
+    //Value in memory (mem[sp])
+    let low: u8 = mmu.read_mem(stack_pointer);
+    let up: u8 = mmu.read_mem(stack_pointer + 1);
+
+    //rr = mem[sp]
+    *lower = low;
+    *upper = up;
 
     //SP = SP + 2
-    sp = sp + 2;
+    stack_pointer = stack_pointer + 2;
 
-    cpu.sp = sp;
+    *sp = stack_pointer;
 }
