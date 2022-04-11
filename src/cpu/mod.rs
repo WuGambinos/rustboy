@@ -241,15 +241,14 @@ impl Registers {
 
     ///Get Register Pair AF
     fn af(&self) -> u16 {
-        //(self.a as u16) << 8 | self.f as u16
-        //u16::from_be_bytes([self.a, self.f])
-        0
+        u16::from_be_bytes([self.a, self.f.data])
     }
 
     ///Store value in register pair AF
     fn set_af(&mut self, data: u16) {
-        self.a = ((data & 0xFF00) >> 8) as u8;
-        //self.f = (data & 0x00FF) as u8;
+        let [a, f] = data.to_be_bytes();
+        self.a = a;
+        self.f.data = f;
     }
 }
 
