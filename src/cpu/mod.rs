@@ -237,6 +237,19 @@ impl Registers {
     fn clear_carry_flag(&mut self) {
         self.f &= !(1 << 4);
     }
+
+    ///Updates Carry flag
+    ///
+    /// Carry flag is set when operation results in overflow
+    fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+        let mut res: u16 = (register as u16) + (operand as u16);
+
+        if (res > 255) {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
 }
 
 ///Struct that represents the gameboy cpu
