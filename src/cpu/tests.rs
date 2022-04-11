@@ -35,10 +35,10 @@ fn inc_b() {
 
     cpu.registers.b = 0x01;
 
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.b);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.b, cpu.f.data];
+    let check = vec![cpu.registers.b, cpu.registers.f.data];
 
     assert_eq!(check, [0x02, 0x00]);
 }
@@ -49,10 +49,10 @@ fn inc_c() {
 
     cpu.registers.c = 0x01;
 
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.c);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.c);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.c, cpu.f.data];
+    let check = vec![cpu.registers.c, cpu.registers.f.data];
 
     assert_eq!(check, [0x02, 0x00]);
 }
@@ -62,10 +62,10 @@ fn inc_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x05;
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.d);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.d, cpu.f.data];
+    let check = vec![cpu.registers.d, cpu.registers.f.data];
 
     assert_eq!(check, [0x06, 0x00]);
 }
@@ -75,10 +75,10 @@ fn inc_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x05;
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.e);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.e, cpu.f.data];
+    let check = vec![cpu.registers.e, cpu.registers.f.data];
 
     assert_eq!(check, [0x06, 0x00]);
 }
@@ -88,10 +88,10 @@ fn inc_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x05;
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.h);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.h, cpu.f.data];
+    let check = vec![cpu.registers.h, cpu.registers.f.data];
 
     assert_eq!(check, [0x06, 0x00]);
 }
@@ -101,10 +101,10 @@ fn inc_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.l);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.l, cpu.f.data];
+    let check = vec![cpu.registers.l, cpu.registers.f.data];
 
     assert_eq!(cpu.registers.l, 0x06);
 }
@@ -114,10 +114,10 @@ fn inc_8bit_overflow() {
     let mut cpu = Cpu::new();
 
     cpu.registers.b = 0xFF;
-    instructions::inc_8bit(&mut cpu.f, &mut cpu.registers.b);
+    instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
 
     //Check resulting register value and flags
-    let check = vec![cpu.registers.b, cpu.f.data];
+    let check = vec![cpu.registers.b, cpu.registers.f.data];
 
     assert_eq!(check, [0x00, 0xA0]);
 }
