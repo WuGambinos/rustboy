@@ -4,13 +4,15 @@ use crate::Mmu;
 use self::instructions::*;
 
 ///Struct that represents flags of the Gameboy CPU
+/*
 pub struct Flags {
     zero_flag: u8,
     sub_flag: u8,
     half_carry_flag: u8,
     carry_flag: u8,
-}
+}*/
 
+/*
 impl Flags {
     fn new() -> Self {
         Flags {
@@ -104,7 +106,7 @@ impl Flags {
         }
     }
 }
-
+*/
 ///Struct that represents registers for the Gameboy CPU
 #[derive(Copy, Clone)]
 struct Registers {
@@ -244,10 +246,77 @@ impl Registers {
     fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         let mut res: u16 = (register as u16) + (operand as u16);
 
-        if (res > 255) {
+        if res > 0xFF {
             self.set_carry_flag();
         } else {
             self.clear_carry_flag();
+        }
+    }
+
+    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
+        let res: u32 = (register as u32) + (operand as u32);
+
+        if res > 0xFFFF {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
+
+    fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+        if register < operand {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
+
+    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
+        if register < operand {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
+
+    /// Updates the half carry flag when there is an addition
+    ///
+    ///In 8bit addition, half carry is set when there is a carry from bit 3 to bit
+    fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+        if ((register & 0xF) + (operand & 0xF)) > 0xF {
+            self.set_hc_flag();
+        } else {
+            self.clear_hc_flag();
+        }
+    }
+
+    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
+
+    //Updates the half carry flag where there is a subtraction
+    fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+        if (register & 0xF) < (operand * 0xF) {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
+
+    pub fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
+        if (register & 0xFFF) < (operand & 0xFFF) {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
+
+    /// Updates the zero flag
+    ///
+    /// Zero flag is set when operation results in 0
+    fn update_zero_flag(&mut self, v: u8) {
+        if v == 0 {
+            self.set_zero_flag();
+        } else {
+            self.clear_zero_flag();
         }
     }
 }
