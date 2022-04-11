@@ -122,24 +122,17 @@ fn inc_8bit_overflow() {
     assert_eq!(check, [0x00, 0xA0]);
 }
 
-/*
 #[test]
 fn dec_b() {
     let mut cpu = Cpu::new();
 
     cpu.registers.b = 0x02;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.b);
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.b,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.b, cpu.registers.f.data];
 
-    assert_eq!(check, [0x01, 0, 1, 0, 0]);
+    assert_eq!(check, [0x01, 0x40]);
 }
 
 #[test]
@@ -147,18 +140,14 @@ fn dec_c() {
     let mut cpu = Cpu::new();
 
     cpu.registers.c = 0x05;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.c);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.c,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.c);
 
-    assert_eq!(check, [0x04, 0, 1, 0, 0]);
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.c, cpu.registers.f.data];
+
+    //0x04 0x40
+    assert_eq!(check, [0x04, 0x40]);
 }
 
 #[test]
@@ -166,18 +155,12 @@ fn dec_d() {
     let mut cpu = Cpu::new();
 
     cpu.registers.d = 0x03;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.d);
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
 
-    //Flags : ZNHC
-    let check = vec![
-        cpu.registers.d,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.d, cpu.registers.f.data];
 
-    assert_eq!(check, [0x02, 0, 1, 0, 0])
+    assert_eq!(check, [0x02, 0x40]);
 }
 
 #[test]
@@ -185,18 +168,12 @@ fn dec_e() {
     let mut cpu = Cpu::new();
 
     cpu.registers.e = 0x01;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.e);
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.e,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.e, cpu.registers.f.data];
 
-    assert_eq!(check, [0x00, 1, 1, 0, 0]);
+    assert_eq!(check, [0x00, 0xC0]);
 }
 
 #[test]
@@ -204,18 +181,12 @@ fn dec_h() {
     let mut cpu = Cpu::new();
 
     cpu.registers.h = 0x00;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.h);
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.h,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.h, cpu.registers.f.data];
 
-    assert_eq!(check, [0xFF, 0, 1, 1, 0]);
+    assert_eq!(check, [0xFF, 0x60]);
 }
 
 #[test]
@@ -223,18 +194,12 @@ fn dec_l() {
     let mut cpu = Cpu::new();
 
     cpu.registers.l = 0x05;
-    instructions::dec_8bit(&mut cpu.f, &mut cpu.registers.l);
+    instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.l,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.l, cpu.registers.f.data];
 
-    assert_eq!(check, [0x04, 0, 1, 0, 0]);
+    assert_eq!(check, [0x04, 0x40]);
 }
 
 ///Basic test for ADD r r instruction
@@ -248,15 +213,10 @@ fn add_r() {
 
     instructions::add_a_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
-    assert_eq!(check, [0x04, 0, 0, 1, 1]);
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
+
+    assert_eq!(check, [0x04, 0x30]);
 }
 
 //Test For Overflow with ADD r r instruction
@@ -271,16 +231,10 @@ fn add_r_overflow() {
 
     instructions::add_a_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [127, 0, 0, 0, 1]);
+    assert_eq!(check, [127, 0x10]);
 }
 
 ///Basic test for ADC r r instruction
@@ -290,22 +244,16 @@ fn adc_r() {
 
     cpu.registers.a = 0x02;
     cpu.registers.b = 0x25;
-    cpu.f.carry_flag = 1;
+    cpu.registers.f.set_carry_flag();
 
     let b: u8 = cpu.registers.b;
 
     instructions::adc_a_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [0x28, 0, 0, 0, 0]);
+    assert_eq!(check, [0x28, 0x00]);
 }
 
 ///Basic test for SUB r r instruction
@@ -320,16 +268,10 @@ fn sub_r() {
 
     instructions::sub_r_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [0x02, 0, 1, 0, 0]);
+    assert_eq!(check, [0x02, 0x40]);
 }
 
 ///Basic test for SBC r r instruction
@@ -339,22 +281,16 @@ fn sbc_r() {
 
     cpu.registers.a = 0x08;
     cpu.registers.b = 0x02;
-    cpu.f.carry_flag = 1;
+    cpu.registers.f.set_carry_flag();
 
     let b: u8 = cpu.registers.b;
 
     instructions::sbc_r_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [0x05, 0, 1, 0, 0]);
+    assert_eq!(check, [0x05, 0x40]);
 }
 
 //Testing for correct borrow detection
@@ -369,16 +305,10 @@ fn sub_r_borrow() {
 
     instructions::sub_r_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [0xF7, 0, 1, 0, 1])
+    assert_eq!(check, [0xF7, 0x50])
 }
 
 ///Testing for correct result when borrow(carry) is set
@@ -388,22 +318,16 @@ fn sbc_r_borrow_set() {
 
     cpu.registers.a = 0x08;
     cpu.registers.b = 0x03;
-    cpu.f.carry_flag = 1;
+    cpu.registers.f.set_carry_flag();
 
     let b: u8 = cpu.registers.b;
 
     instructions::sbc_r_r(&mut cpu, b);
 
-    //ZNHC
-    let check = vec![
-        cpu.registers.a,
-        cpu.f.zero_flag,
-        cpu.f.sub_flag,
-        cpu.f.half_carry_flag,
-        cpu.f.carry_flag,
-    ];
+    //Check resulting register value and flags
+    let check = vec![cpu.registers.a, cpu.registers.f.data];
 
-    assert_eq!(check, [0x04, 0, 1, 0, 0]);
+    assert_eq!(check, [0x04, 0x40]);
 }
 
 /*************************************************************************
@@ -475,10 +399,11 @@ fn half_carry() {
 
     let operand: u8 = 0x0A;
 
-    cpu.f
+    cpu.registers
+        .f
         .update_half_carry_flag_sum_8bit(cpu.registers.b, operand);
 
-    assert_eq!(cpu.f.half_carry_flag(), 1);
+    assert_eq!(cpu.registers.f.half_carry_flag(), 1);
 }
 
 #[test]
@@ -488,13 +413,14 @@ fn carry() {
     cpu.registers.set_bc(0xFFFF);
     cpu.registers.set_hl(0x0001);
 
-    cpu.f
+    cpu.registers
+        .f
         .update_carry_flag_sum_16bit(cpu.registers.bc(), cpu.registers.hl());
 
     //assert_eq!(cpu.f.carry_flag, 1);
     assert_eq!(cpu.registers.bc(), 0xFFFF);
     assert_eq!(cpu.registers.hl(), 0x0001);
-}*/
+}
 
 /*************************************************************************
  * 8-bit Load Tests
