@@ -484,6 +484,81 @@ fn push_rr_test() {
 /*************************************************************************
  * Jump Instructions Tests
  *************************************************************************/
+#[test]
+fn jp_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    let nn: u16 = 0xFF00;
+
+    instructions::jp(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, nn);
+}
+
+#[test]
+fn jp_z_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    let nn: u16 = 0xFF00;
+
+    cpu.registers.f.set_zero_flag();
+
+    instructions::jp_z(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, nn);
+}
+
+#[test]
+fn jp_nz_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    let nn: u16 = 0xFF00;
+
+    cpu.registers.f.clear_zero_flag();
+
+    instructions::jp_nz(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, nn);
+}
+
+#[test]
+fn jp_c_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    let nn: u16 = 0xFF00;
+
+    cpu.registers.f.set_carry_flag();
+
+    instructions::jp_c(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, nn);
+}
+
+#[test]
+fn jp_nc_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    let nn: u16 = 0xFF00;
+
+    cpu.registers.f.clear_carry_flag();
+
+    instructions::jp_nc(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, nn);
+}
+
+#[test]
+fn jp_hl_test() {
+    let mut cpu: Cpu = Cpu::new();
+
+    cpu.registers.set_hl(0xAB00);
+
+    let nn: u16 = cpu.registers.hl();
+
+    instructions::jp(&mut cpu, nn);
+
+    assert_eq!(cpu.pc, cpu.registers.hl());
+}
 
 #[test]
 fn call_test() {
@@ -524,6 +599,44 @@ fn ret_test() {
     mmu.write_mem(cpu.sp + 1, 0x18);
 
     instructions::ret(&mut cpu, &mmu);
+
+    let check: Vec<u16> = vec![0x2002, 0x18B5];
+
+    assert_eq!(check, [cpu.sp, cpu.pc]);
+}
+
+#[test]
+fn ret_z_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    cpu.registers.f.set_zero_flag();
+
+    cpu.pc = 0x3535;
+    cpu.sp = 0x2000;
+    mmu.write_mem(cpu.sp, 0xB5);
+    mmu.write_mem(cpu.sp + 1, 0x18);
+
+    instructions::ret_z(&mut cpu, &mmu);
+
+    let check: Vec<u16> = vec![0x2002, 0x18B5];
+
+    assert_eq!(check, [cpu.sp, cpu.pc]);
+}
+
+#[test]
+fn ret_nz_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    cpu.registers.f.clear_zero_flag();
+
+    cpu.pc = 0x3535;
+    cpu.sp = 0x2000;
+    mmu.write_mem(cpu.sp, 0xB5);
+    mmu.write_mem(cpu.sp + 1, 0x18);
+
+    instructions::ret_nz(&mut cpu, &mmu);
 
     let check: Vec<u16> = vec![0x2002, 0x18B5];
 
