@@ -1558,8 +1558,7 @@ impl Cpu {
 
             //RET NZ
             0xC0 => {
-                ret(self, mmu);
-                self.pc += 1;
+                ret_nz(self, mmu);
             }
 
             //POP BC
@@ -1592,16 +1591,35 @@ impl Cpu {
             }
 
             //PUSH BC
-            0xC5 => {}
+            0xC5 => {
+                push_rr(mmu, self.registers.b, self.registers.c, &mut self.sp);
+                self.pc += 1;
+            }
 
-            0xC6 => {}
+            //ADD A, u8
+            0xC6 => {
+                let addr = self.pc + 1;
+                add_a_r(self, mmu.read_mem(addr));
+                self.pc += 1;
+            }
 
-            0xC7 => {}
+            //RST 0x00(CAll to n)
+            0xC7 => {
+                rst(self, mmu, mmu.read_mem(self.pc + 1));
+                self.pc += 1;
+            }
 
-            0xC8 => {}
+            //RET Z
+            0xC8 => {
+                ret_z(self, mmu);
+            }
 
-            0xC9 => {}
+            //RET
+            0xC9 => {
+                ret(self, mmu);
+            }
 
+            //JP Z, u16
             0xCA => {}
 
             _ => println!("NOT AN OPCODE"),

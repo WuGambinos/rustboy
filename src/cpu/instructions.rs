@@ -561,6 +561,24 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     cpu.sp = stack_pointer;
 }
 
+///
+/// Call to 00, 08, 10, 18, 20, 28, 30, 38(hex)
+pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
+    let mut stack_pointer: u16 = cpu.sp;
+
+    //SP = SP - 2
+    stack_pointer -= 2;
+
+    //mem[SP] = lower byte of program counter
+    mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
+
+    //mem[SP+1] = upper byte of program counter (its + 1 below because we already moved the stack pointer)
+    mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
+
+    //PC = n
+    cpu.pc = u16::from_be_bytes([0, n]);
+}
+
 ///Return
 pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     let mut sp = cpu.sp;
@@ -574,6 +592,21 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     sp += 2;
 
     cpu.sp = sp;
+}
+
+pub fn ret_z(cpu: &mut Cpu, mmu: &Mmu) {
+    if cpu.registers.f.zero_flag() == 1 {
+        ret(cpu, mmu)
+    } else {
+        cpu.pc += 1;
+    }
+}
+pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
+    if cpu.registers.f.zero_flag() == 0 {
+        ret(cpu, mmu);
+    } else {
+        cpu.pc += 1;
+    }
 }
 
 /************************************************************************
