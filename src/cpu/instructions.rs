@@ -528,6 +528,21 @@ pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
 }
 
 ///
+/// Jump to nn
+pub fn jp(cpu: &mut Cpu, nn: u16) {
+    cpu.pc = nn;
+}
+
+///
+/// Jump to nn if zero flag is set
+pub fn jp_z(cpu: &mut Cpu, nn: u16) {
+    if cpu.registers.f.zero_flag() == 1 {
+        jp(cpu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+///
 /// Jump to nn if zero flag is clear
 pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
@@ -538,9 +553,23 @@ pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
 }
 
 ///
-/// Jump to nn
-pub fn jp(cpu: &mut Cpu, nn: u16) {
-    cpu.pc = nn;
+/// Jump to nn if carry flag is set
+pub fn jp_c(cpu: &mut Cpu, nn: u16) {
+    if cpu.registers.f.carry_flag() == 1 {
+        jp(cpu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+
+///
+/// Jump to nn if carry flag is clear
+pub fn jp_nc(cpu: &mut Cpu, nn: u16) {
+    if cpu.registers.f.carry_flag() == 0 {
+        jp(cpu, nn);
+    } else {
+        cpu.pc += 3;
+    }
 }
 
 ///
@@ -559,6 +588,43 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     cpu.pc = nn;
 
     cpu.sp = stack_pointer;
+}
+
+///
+/// Call to nn if zero flag is set
+pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+    if cpu.registers.f.zero_flag() == 1 {
+        call(cpu, mmu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+
+/// Call to nn if zero flag is clear
+pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+    if cpu.registers.f.zero_flag() == 0 {
+        call(cpu, mmu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+
+/// Call to nn if carry flag is set
+pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+    if cpu.registers.f.carry_flag() == 1 {
+        call(cpu, mmu, nn);
+    } else {
+        cpu.pc += 3;
+    }
+}
+
+/// Call to nn if carry flag is clear
+pub fn call_nc(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+    if cpu.registers.f.carry_flag() == 0 {
+        call(cpu, mmu, nn);
+    } else {
+        cpu.pc += 3;
+    }
 }
 
 ///
@@ -603,6 +669,22 @@ pub fn ret_z(cpu: &mut Cpu, mmu: &Mmu) {
 }
 pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.zero_flag() == 0 {
+        ret(cpu, mmu);
+    } else {
+        cpu.pc += 1;
+    }
+}
+
+pub fn ret_c(cpu: &mut Cpu, mmu: &Mmu) {
+    if cpu.registers.f.carry_flag() == 1 {
+        ret(cpu, mmu);
+    } else {
+        cpu.pc += 1;
+    }
+}
+
+pub fn ret_nc(cpu: &mut Cpu, mmu: &Mmu) {
+    if cpu.registers.f.carry_flag() == 0 {
         ret(cpu, mmu);
     } else {
         cpu.pc += 1;

@@ -1605,7 +1605,7 @@ impl Cpu {
 
             //RST 0x00(CAll to n)
             0xC7 => {
-                rst(self, mmu, mmu.read_mem(self.pc + 1));
+                rst(self, mmu, 0x00);
                 self.pc += 1;
             }
 
@@ -1620,7 +1620,129 @@ impl Cpu {
             }
 
             //JP Z, u16
-            0xCA => {}
+            0xCA => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                jp_z(self, nn);
+            }
+
+            //PREFIX CB
+            0xCB => {}
+
+            //CALL Z, u16
+            0xCC => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                call_z(self, mmu, nn);
+            }
+
+            //CALL u16
+            0xCD => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                call(self, mmu, nn);
+            }
+
+            //ADC A, u8
+            0xCE => {
+                let operand = mmu.read_mem(self.pc + 1);
+                adc_a_r(self, operand);
+                self.pc += 2;
+            }
+
+            //RST 0x08
+            0xCF => {
+                rst(self, mmu, 0x08);
+                self.pc += 1;
+            }
+
+            //RET NC
+            0xD0 => {
+                ret_nc(self, mmu);
+            }
+
+            //POP DE
+            0xD1 => {
+                pop_rr(
+                    mmu,
+                    &mut self.registers.d,
+                    &mut self.registers.e,
+                    &mut self.sp,
+                );
+            }
+
+            //JP NC, u16
+            0xD2 => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                jp_nc(self, nn);
+            }
+
+            //Invalid Opcode
+            0xD3 => {}
+
+            //CALL NC, u16
+            0xD4 => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                call_nc(self, mmu, nn);
+            }
+
+            //PUSH DE
+            0xD5 => {}
+
+            //SUB A, u8
+            0xD6 => {
+                let operand = mmu.read_mem(self.pc + 1);
+                sub_r_r(self, operand);
+                self.pc += 2;
+            }
+
+            //RST 0x10
+            0xD7 => {
+                rst(self, mmu, 0x10);
+                self.pc += 1;
+            }
+
+            //RET C
+            0xD8 => ret_c(self, mmu),
+
+            //RETI (NEED TO FIX)
+            0xD9 => {}
+
+            //JP C, u16
+            0xDA => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+
+                jp_c(self, nn);
+            }
+
+            //Invalid Opcode
+            0xDB => {}
+
+            //CALL C, u16
+            0xDC => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                call_c(self, mmu, nn);
+            }
+
+            //Invalid Opcode
+            0xDD => {}
+
+            //SBC A, u8
+            0xDE => {
+                let operand = mmu.read_mem(self.pc + 1);
+                sbc_r_r(self, operand);
+                self.pc += 2;
+            }
+
+            //RST 0x18
+            0xDF => {
+                rst(self, mmu, 0x18);
+                self.pc += 1;
+            }
 
             _ => println!("NOT AN OPCODE"),
         }
