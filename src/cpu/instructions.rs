@@ -58,7 +58,7 @@ pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     cpu.f.update_zero_flag(value);
 
     //Clear Sub Flag
-    cpu.f.sub_flag = 0;
+    cpu.f.clear_sub_flag();
 }
 
 ///Decrement value in memory using HL pointer
@@ -79,7 +79,7 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     cpu.f.update_zero_flag(value);
 
     //Set sub flag
-    cpu.f.sub_flag = 1;
+    cpu.f.set_sub_flag();
 }
 
 ///Adds Accumulator(register A) and another register together, storing result in the accumulator
@@ -115,7 +115,7 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //Need to sum operand and carry for the half carry to be calculated correctly
-    let new_operand: u8 = operand.wrapping_add(cpu.f.carry_flag);
+    let new_operand: u8 = operand.wrapping_add(cpu.f.carry_flag());
 
     //Update Half Carry
     cpu.f.update_half_carry_flag_sum_8bit(a, new_operand);
@@ -271,23 +271,23 @@ pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
 }
 
 pub fn daa(cpu: &mut Cpu) {
-    if (cpu.registers.a & 0x0F) > 0x09 || cpu.f.half_carry_flag == 1 {
+    if (cpu.registers.a & 0x0F) > 0x09 || cpu.f.half_carry_flag() == 1 {
         cpu.registers.a += 0x06;
     }
 
     let upper_nibble = cpu.registers.a & 0xF0 >> 4;
     let mut reached = false;
 
-    if upper_nibble > 9 || cpu.f.carry_flag == 1 {
+    if upper_nibble > 9 || cpu.f.carry_flag() == 1 {
         cpu.registers.a += 0x60;
         reached = true;
     }
 
     //Set carry if second addition was needed, otherwise reset carry
     if reached {
-        cpu.f.carry_flag = 1;
+        cpu.f.set_carry_flag();
     } else {
-        cpu.f.carry_flag = 0;
+        cpu.f.clear_carry_flag();
     }
 }
 
@@ -308,7 +308,11 @@ pub fn rlca(cpu: &mut Cpu) {
     cpu.registers.a |= (1 << 0) & lmb;
 
     //Store original 7th bit in carry
-    cpu.f.carry_flag = lmb;
+    if lmb == 0 {
+        cpu.f.clear_carry_flag();
+    } else {
+        cpu.f.set_carry_flag();
+    }
 }
 
 ///Rotate Right Circular Accumulator
@@ -324,7 +328,11 @@ pub fn rrca(cpu: &mut Cpu) {
     cpu.registers.a |= (1 << 7) & rmb;
 
     //Store original 0th bit in carry
-    cpu.f.carry_flag = rmb;
+    if rmb == 0 {
+        cpu.f.clear_carry_flag();
+    } else {
+        cpu.f.set_carry_flag();
+    }
 }
 
 /// Rotate Left Accumulator
@@ -337,10 +345,15 @@ pub fn rla(cpu: &mut Cpu) {
     cpu.registers.a <<= 1;
 
     //Store carry into 0th bit of Accumulator
-    cpu.registers.a |= (1 << 0) & (cpu.f.carry_flag);
+    cpu.registers.a |= (1 << 0) & (cpu.f.carry_flag());
 
     //Move 7th bit into carry
-    cpu.f.carry_flag = lmb;
+
+    if lmb == 0 {
+        cpu.f.clear_carry_flag();
+    } else {
+        cpu.f.set_carry_flag();
+    }
 }
 
 /// Rotate Right Accumulator
@@ -353,10 +366,14 @@ pub fn rra(cpu: &mut Cpu) {
     cpu.registers.a >>= 1;
 
     //Store carry in 7th bit of A
-    cpu.registers.a |= (1 << 7) & cpu.f.carry_flag;
+    cpu.registers.a |= (1 << 7) & cpu.f.carry_flag();
 
     //Store original 0th bit in carry
-    cpu.f.carry_flag = rmb;
+    if rmb == 0 {
+        cpu.f.clear_carry_flag();
+    } else {
+        cpu.f.set_carry_flag();
+    }
 }
 
 /************************************************************************
@@ -413,24 +430,39 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
-            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
-            cpu.f.sub_flag = 0;
+
+            if cpu.registers.hl() == 0 {
+                cpu.f.set_zero_flag();
+            } else {
+                cpu.f.clear_zero_flag();
+            }
+            cpu.f.clear_sub_flag();
         }
         "DE" => {
             cpu.f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
-            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
-            cpu.f.sub_flag = 0;
+
+            if cpu.registers.hl() == 0 {
+                cpu.f.set_zero_flag();
+            } else {
+                cpu.f.clear_zero_flag();
+            }
+            cpu.f.clear_sub_flag();
         }
         "HL" => {
             cpu.f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
-            cpu.f.zero_flag = (cpu.registers.hl() == 0) as u8;
-            cpu.f.sub_flag = 0;
+
+            if cpu.registers.hl() == 0 {
+                cpu.f.set_zero_flag();
+            } else {
+                cpu.f.clear_zero_flag();
+            }
+            cpu.f.clear_sub_flag();
         }
         _ => println!("NOT A REGISTER PAIR"),
     }
@@ -451,7 +483,7 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 ///
 /// Relative Jump if Zero flag is set
 pub fn jr_z(cpu: &mut Cpu, dd: u8) {
-    if cpu.f.zero_flag == 1 {
+    if cpu.f.zero_flag() == 1 {
         jr(cpu, dd);
     } else {
         cpu.pc += 2;
@@ -461,7 +493,7 @@ pub fn jr_z(cpu: &mut Cpu, dd: u8) {
 ///
 /// Relative Jump if Zero flag is clear
 pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
-    if cpu.f.zero_flag == 0 {
+    if cpu.f.zero_flag() == 0 {
         jr(cpu, dd);
     } else {
         cpu.pc += 2;
@@ -471,7 +503,7 @@ pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
 ///
 /// Relative Jump if Carry flag is Set
 pub fn jr_c(cpu: &mut Cpu, dd: u8) {
-    if cpu.f.carry_flag == 1 {
+    if cpu.f.carry_flag() == 1 {
         jr(cpu, dd);
     } else {
         cpu.pc += 2;
@@ -481,7 +513,7 @@ pub fn jr_c(cpu: &mut Cpu, dd: u8) {
 ///
 /// Relative Jump if Carry flag is clear
 pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
-    if cpu.f.carry_flag == 0 {
+    if cpu.f.carry_flag() == 0 {
         jr(cpu, dd);
     } else {
         cpu.pc += 2;
@@ -491,7 +523,7 @@ pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
 ///
 /// Jump to nn if zero flag is clear
 pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
-    if cpu.f.zero_flag == 0 {
+    if cpu.f.zero_flag() == 0 {
         jp(cpu, nn);
     } else {
         cpu.pc += 3;

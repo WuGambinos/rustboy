@@ -12,47 +12,69 @@ pub struct Flags {
     carry_flag: u8,
 }*/
 
-/*
+pub struct Flags {
+    data: u8,
+}
+
 impl Flags {
     fn new() -> Self {
-        Flags {
-            zero_flag: 0,
-            sub_flag: 0,
-            half_carry_flag: 0,
-            carry_flag: 0,
-        }
+        Flags { data: 0 }
     }
 
+    fn zero_flag(&self) -> u8 {
+        (self.data >> 7) & 1
+    }
+
+    fn sub_flag(&self) -> u8 {
+        (self.data >> 6) & 1
+    }
+
+    fn half_carry_flag(&self) -> u8 {
+        (self.data >> 5) & 1
+    }
+
+    fn carry_flag(&self) -> u8 {
+        (self.data >> 4) & 1
+    }
+
+    ///Set Zero Flag
     fn set_zero_flag(&mut self) {
-        self.zero_flag = 1;
+        self.data |= 1 << 7;
     }
 
+    ///Clear Zero Flag
     fn clear_zero_flag(&mut self) {
-        self.zero_flag = 0;
+        self.data &= !(1 << 7);
     }
 
+    ///Set Sub Flag
     fn set_sub_flag(&mut self) {
-        self.sub_flag = 1;
+        self.data |= 1 << 6;
     }
 
+    ///Clear Sub Flag
     fn clear_sub_flag(&mut self) {
-        self.sub_flag = 0;
+        self.data &= !(1 << 6);
     }
 
+    ///Set Half Carry Flag
     fn set_half_carry_flag(&mut self) {
-        self.half_carry_flag = 1;
+        self.data |= 1 << 5;
     }
 
+    /// Clear Half Carry Flag
     fn clear_half_carry_flag(&mut self) {
-        self.half_carry_flag = 0;
+        self.data &= !(1 << 5)
     }
 
+    ///Set Carry Flag
     fn set_carry_flag(&mut self) {
-        self.carry_flag = 1;
+        self.data |= 1 << 4;
     }
 
+    ///Clear Carry Flag
     fn clear_carry_flag(&mut self) {
-        self.carry_flag = 0;
+        self.data &= !(1 << 4);
     }
 
     ///Updates Carry flag
@@ -61,38 +83,67 @@ impl Flags {
     fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         let mut res: u16 = (register as u16) + (operand as u16);
 
-        /*//Set res equal to 1 if there is carry
-        match register.checked_add(operand) {
-            Some(_v) => res = 1,
-            None => res = 0,
-        }*/
-
-        self.carry_flag = (res > 255) as u8;
+        if res > 0xFF {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
     }
-    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
+
+    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
+        let res: u32 = (register as u32) + (operand as u32);
+
+        if res > 0xFFFF {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
 
     fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
-        self.carry_flag = (register < operand) as u8;
+        if register < operand {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
     }
 
-    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {}
+    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
+        if register < operand {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
+    }
 
-    ///Updates the half carry flag when there is an addition
+    /// Updates the half carry flag when there is an addition
     ///
-    /// In 8 bit additoin, half carry is set when there is a carry  from bit 3 to bit 4
+    ///In 8bit addition, half carry is set when there is a carry from bit 3 to bit
     fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
-        self.half_carry_flag = ((register & 0xF) + (operand & 0xF) > 0xF) as u8;
+        if ((register & 0xF) + (operand & 0xF)) > 0xF {
+            self.set_half_carry_flag();
+        } else {
+            self.clear_half_carry_flag();
+        }
     }
 
     fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
 
     //Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
-        self.half_carry_flag = ((register & 0xF) < (operand & 0xF)) as u8;
+        if (register & 0xF) < (operand * 0xF) {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
     }
 
     pub fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
-        self.half_carry_flag = ((register & 0xFFF) < (operand & 0xFFF)) as u8;
+        if (register & 0xFFF) < (operand & 0xFFF) {
+            self.set_carry_flag();
+        } else {
+            self.clear_carry_flag();
+        }
     }
 
     /// Updates the zero flag
@@ -100,13 +151,13 @@ impl Flags {
     /// Zero flag is set when operation results in 0
     fn update_zero_flag(&mut self, v: u8) {
         if v == 0 {
-            self.zero_flag = 1;
+            self.set_zero_flag();
         } else {
-            self.zero_flag = 0;
+            self.clear_zero_flag();
         }
     }
 }
-*/
+
 ///Struct that represents registers for the Gameboy CPU
 #[derive(Copy, Clone)]
 struct Registers {
@@ -418,13 +469,13 @@ impl Cpu {
                 rlca(self);
 
                 //Clear Zero Flag
-                self.f.zero_flag = 0;
+                self.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.sub_flag = 0;
+                self.f.set_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.half_carry_flag = 0;
+                self.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -505,13 +556,13 @@ impl Cpu {
                 rrca(self);
 
                 //Clear Zero Flag
-                self.f.zero_flag = 0;
+                self.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.sub_flag = 0;
+                self.f.clear_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.half_carry_flag = 0;
+                self.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -574,13 +625,13 @@ impl Cpu {
                 rla(self);
 
                 //Clear Zero Flag
-                self.f.zero_flag = 0;
+                self.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.sub_flag = 0;
+                self.f.clear_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.half_carry_flag = 0;
+                self.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -632,9 +683,9 @@ impl Cpu {
             0x1F => {
                 rra(self);
 
-                self.f.zero_flag = 0;
-                self.f.sub_flag = 0;
-                self.f.half_carry_flag = 0;
+                self.f.clear_zero_flag();
+                self.f.clear_sub_flag();
+                self.f.clear_half_carry_flag();
 
                 self.pc += 1;
             }
@@ -686,8 +737,13 @@ impl Cpu {
             //DAA MAY need to check
             0x27 => {
                 daa(self);
-                self.f.zero_flag = (self.registers.a == 0) as u8;
-                self.f.half_carry_flag = 0;
+                //Temproary Fix
+                if self.registers.a == 0 {
+                    self.f.set_zero_flag();
+                } else {
+                    self.f.clear_carry_flag();
+                }
+                self.f.clear_half_carry_flag();
             }
 
             //JR Z, i8
@@ -734,8 +790,8 @@ impl Cpu {
 
             //CPL
             0x2F => {
-                self.f.sub_flag = 1;
-                self.f.half_carry_flag = 1;
+                self.f.set_sub_flag();
+                self.f.set_half_carry_flag();
                 //A = A xor FF
                 self.registers.a = self.registers.a ^ 0xFF;
             }
@@ -793,7 +849,7 @@ impl Cpu {
 
             //Set Carry Flag(SCF)
             0x37 => {
-                self.f.carry_flag = 1;
+                self.f.set_carry_flag();
                 self.pc += 1;
             }
 
@@ -849,7 +905,7 @@ impl Cpu {
 
             //Clear Carry Flag(CCF)
             0x3F => {
-                self.f.carry_flag = 0;
+                self.f.clear_carry_flag();
                 self.pc += 1;
             }
 
