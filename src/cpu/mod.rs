@@ -159,7 +159,7 @@ impl Flags {
 }
 
 ///Struct that represents registers for the Gameboy CPU
-#[derive(Copy, Clone)]
+
 struct Registers {
     //Accumulator
     a: u8,
@@ -181,6 +181,9 @@ struct Registers {
 
     //L Register
     l: u8,
+
+    //F Register (FLAGS)
+    f: Flags,
 }
 
 impl Registers {
@@ -193,6 +196,7 @@ impl Registers {
             e: 0,
             h: 0,
             l: 0,
+            f: Flags::new(),
         }
     }
 
@@ -254,7 +258,7 @@ pub struct Cpu {
     memory: [u8; 65536],
 
     ///Flags
-    f: Flags,
+    //f: Flags,
 
     //Registers
     registers: Registers,
@@ -281,7 +285,7 @@ impl Cpu {
         Cpu {
             memory: [0; 65536],
             registers: Registers::new(),
-            f: Flags::new(),
+            //f: Flags::new(),
             sp: 0,
             pc: 0,
             opcode: 0,
@@ -322,13 +326,13 @@ impl Cpu {
 
             //INC B: Flags:Z0H
             0x04 => {
-                inc_8bit(&mut self.f, &mut self.registers.b);
+                inc_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
             }
 
             //DEC B: Flags Z1H
             0x05 => {
-                dec_8bit(&mut self.f, &mut self.registers.b);
+                dec_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
             }
 
@@ -346,13 +350,13 @@ impl Cpu {
                 rlca(self);
 
                 //Clear Zero Flag
-                self.f.clear_zero_flag();
+                self.registers.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.set_sub_flag();
+                self.registers.f.set_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.clear_half_carry_flag();
+                self.registers.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -405,14 +409,14 @@ impl Cpu {
 
             //INC C
             0x0C => {
-                inc_8bit(&mut self.f, &mut self.registers.c);
+                inc_8bit(&mut self.registers.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
             }
 
             //DEC C
             0x0D => {
-                dec_8bit(&mut self.f, &mut self.registers.c);
+                dec_8bit(&mut self.registers.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -433,13 +437,13 @@ impl Cpu {
                 rrca(self);
 
                 //Clear Zero Flag
-                self.f.clear_zero_flag();
+                self.registers.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.clear_sub_flag();
+                self.registers.f.clear_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.clear_half_carry_flag();
+                self.registers.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -474,14 +478,14 @@ impl Cpu {
 
             //INC D
             0x14 => {
-                inc_8bit(&mut self.f, &mut self.registers.d);
+                inc_8bit(&mut self.registers.f, &mut self.registers.d);
                 //Increase Program counter
                 self.pc += 1;
             }
 
             //DEC D
             0x15 => {
-                dec_8bit(&mut self.f, &mut self.registers.d);
+                dec_8bit(&mut self.registers.f, &mut self.registers.d);
                 //Inrease Program Counter
                 self.pc += 1;
             }
@@ -502,13 +506,13 @@ impl Cpu {
                 rla(self);
 
                 //Clear Zero Flag
-                self.f.clear_zero_flag();
+                self.registers.f.clear_zero_flag();
 
                 //Clear Sub Flag
-                self.f.clear_sub_flag();
+                self.registers.f.clear_sub_flag();
 
                 //Clear Half Carry Flag
-                self.f.clear_half_carry_flag();
+                self.registers.f.clear_half_carry_flag();
 
                 //Increase Program Counter
                 self.pc += 1;
@@ -540,13 +544,13 @@ impl Cpu {
 
             //INC E
             0x1C => {
-                inc_8bit(&mut self.f, &mut self.registers.e);
+                inc_8bit(&mut self.registers.f, &mut self.registers.e);
                 self.pc += 1;
             }
 
             //DEC E
             0x1D => {
-                dec_8bit(&mut self.f, &mut self.registers.e);
+                dec_8bit(&mut self.registers.f, &mut self.registers.e);
                 self.pc += 1;
             }
 
@@ -560,9 +564,9 @@ impl Cpu {
             0x1F => {
                 rra(self);
 
-                self.f.clear_zero_flag();
-                self.f.clear_sub_flag();
-                self.f.clear_half_carry_flag();
+                self.registers.f.clear_zero_flag();
+                self.registers.f.clear_sub_flag();
+                self.registers.f.clear_half_carry_flag();
 
                 self.pc += 1;
             }
@@ -595,13 +599,13 @@ impl Cpu {
 
             //INC H
             0x24 => {
-                inc_8bit(&mut self.f, &mut self.registers.h);
+                inc_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
             //DEC H
             0x25 => {
-                dec_8bit(&mut self.f, &mut self.registers.h);
+                dec_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
@@ -616,11 +620,11 @@ impl Cpu {
                 daa(self);
                 //Temproary Fix
                 if self.registers.a == 0 {
-                    self.f.set_zero_flag();
+                    self.registers.f.set_zero_flag();
                 } else {
-                    self.f.clear_carry_flag();
+                    self.registers.f.clear_carry_flag();
                 }
-                self.f.clear_half_carry_flag();
+                self.registers.f.clear_half_carry_flag();
             }
 
             //JR Z, i8
@@ -649,13 +653,13 @@ impl Cpu {
 
             //INC L
             0x2C => {
-                inc_8bit(&mut self.f, &mut self.registers.l);
+                inc_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
             //DEC L
             0x2D => {
-                dec_8bit(&mut self.f, &mut self.registers.l);
+                dec_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
@@ -667,8 +671,8 @@ impl Cpu {
 
             //CPL
             0x2F => {
-                self.f.set_sub_flag();
-                self.f.set_half_carry_flag();
+                self.registers.f.set_sub_flag();
+                self.registers.f.set_half_carry_flag();
                 //A = A xor FF
                 self.registers.a = self.registers.a ^ 0xFF;
             }
@@ -726,7 +730,7 @@ impl Cpu {
 
             //Set Carry Flag(SCF)
             0x37 => {
-                self.f.set_carry_flag();
+                self.registers.f.set_carry_flag();
                 self.pc += 1;
             }
 
@@ -764,13 +768,13 @@ impl Cpu {
 
             //INC A
             0x3C => {
-                inc_8bit(&mut self.f, &mut self.registers.a);
+                inc_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
             //DEC A
             0x3D => {
-                dec_8bit(&mut self.f, &mut self.registers.a);
+                dec_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
@@ -782,7 +786,7 @@ impl Cpu {
 
             //Clear Carry Flag(CCF)
             0x3F => {
-                self.f.clear_carry_flag();
+                self.registers.f.clear_carry_flag();
                 self.pc += 1;
             }
 
