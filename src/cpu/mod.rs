@@ -131,18 +131,18 @@ impl Flags {
 
     //Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
-        if (register & 0xF) < (operand * 0xF) {
-            self.set_carry_flag();
+        if (register & 0xF) < (operand & 0xF) {
+            self.set_half_carry_flag();
         } else {
-            self.clear_carry_flag();
+            self.clear_half_carry_flag();
         }
     }
 
     pub fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
         if (register & 0xFFF) < (operand & 0xFFF) {
-            self.set_carry_flag();
+            self.set_half_carry_flag();
         } else {
-            self.clear_carry_flag();
+            self.clear_half_carry_flag();
         }
     }
 
