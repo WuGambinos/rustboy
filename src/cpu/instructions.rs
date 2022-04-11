@@ -484,7 +484,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 pub fn jr(cpu: &mut Cpu, dd: u8) {
     let offset = dd as i8;
 
-    cpu.pc += cpu.pc.wrapping_add(offset as u16);
+    cpu.pc = cpu.pc.wrapping_add(offset as u16);
 }
 
 ///
@@ -700,6 +700,34 @@ pub fn ret_nc(cpu: &mut Cpu, mmu: &Mmu) {
 pub fn ld_8bit(r: &mut u8, data: u8) {
     //Rd = Rr
     *r = data;
+}
+
+///
+/// Load data from io-port 'n' into A register
+pub fn ld_a_from_io(cpu: &mut Cpu, mmu: &Mmu, n: u8) {
+    let addr: u16 = 0xFF00 + (n as u16);
+    cpu.registers.a = mmu.read_mem(addr);
+}
+
+///
+/// Load data from A register into io-port 'n'
+pub fn ld_io_from_a(cpu: &Cpu, mmu: &mut Mmu, n: u8) {
+    let addr: u16 = 0xFF00 + (n as u16);
+    mmu.write_mem(addr, cpu.registers.a);
+}
+
+///
+/// Load data from io-port C into A register
+pub fn ld_a_from_io_c(cpu: &mut Cpu, mmu: &Mmu) {
+    let addr: u16 = 0xFF00 + 0x000C;
+    cpu.registers.a = mmu.read_mem(addr);
+}
+
+///
+/// Load data from register A into io-port C
+pub fn ld_io_c_from_a(cpu: &Cpu, mmu: &mut Mmu) {
+    let addr: u16 = 0xFF00 + 0x000C;
+    mmu.write_mem(addr, cpu.registers.a);
 }
 
 /************************************************************************

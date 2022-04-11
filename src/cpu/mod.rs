@@ -1669,6 +1669,7 @@ impl Cpu {
                     &mut self.registers.e,
                     &mut self.sp,
                 );
+                self.pc += 1;
             }
 
             //JP NC, u16
@@ -1743,6 +1744,97 @@ impl Cpu {
                 rst(self, mmu, 0x18);
                 self.pc += 1;
             }
+
+            //LD (0xFF00 + u8), A
+            0xE0 => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                ld_io_from_a(self, mmu, n);
+                self.pc += 2;
+            }
+
+            //POP HL
+            0xE1 => {
+                pop_rr(
+                    mmu,
+                    &mut self.registers.h,
+                    &mut self.registers.l,
+                    &mut self.sp,
+                );
+                self.pc += 1;
+            }
+
+            //LD (0xFF00 + C), A
+            0xE2 => {
+                ld_io_c_from_a(self, mmu);
+                self.pc += 2;
+            }
+
+            //Invalid Opcode
+            0xE3 => {}
+
+            //Invalid Opcode
+            0xE4 => {}
+
+            //PUSH HL
+            0xE5 => {
+                push_rr(mmu, self.registers.h, self.registers.l, &mut self.sp);
+                self.pc += 1;
+            }
+
+            //AND A, u8
+            0xE6 => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                and_r_r(self, n);
+                self.pc += 2;
+            }
+
+            //RST 0x20
+            0xE7 => {
+                rst(self, mmu, 0x20);
+                self.pc += 1;
+            }
+
+            //ADD SP, i8  MAY NEED TO CHECK
+            0xE8 => {
+                let d: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.sp = self.sp.wrapping_add(d as u16);
+                self.pc += 2;
+            }
+
+            //JP HL
+            0xE9 => {
+                jp(self, self.registers.hl());
+            }
+
+            //LD (u16), A
+            0xEA => {
+                let nn: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
+                mmu.write_mem(nn, self.registers.a);
+            }
+
+            //Invalid Opcode
+            0xEB => {}
+
+            //Invalid Opcode
+            0xEC => {}
+
+            //Invalid Opcode
+            0xED => {}
+
+            //XOR A, u8
+            0xEE => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                xor_r_r(self, n);
+                self.pc += 2;
+            }
+
+            //RST 0x28
+            0xEF => {
+                rst(self, mmu, 0x28);
+            }
+
+            0xF0 => {}
 
             _ => println!("NOT AN OPCODE"),
         }
