@@ -155,8 +155,9 @@ impl Registers {
 
     ///Store value in register pair BC
     fn set_bc(&mut self, data: u16) {
-        self.b = ((data & 0xFF00) >> 8) as u8;
-        self.c = (data & 0x00FF) as u8;
+        let [b, c] = data.to_be_bytes();
+        self.b = b;
+        self.c = c;
     }
 
     ///Get register pair DE
@@ -167,8 +168,9 @@ impl Registers {
 
     ///Store value in register pair DE
     fn set_de(&mut self, data: u16) {
-        self.d = ((data & 0xFF00) >> 8) as u8;
-        self.e = (data & 0x00FF) as u8;
+        let [d, e] = data.to_be_bytes();
+        self.d = d;
+        self.e = e;
     }
 
     ///Get register pair HL
@@ -179,8 +181,9 @@ impl Registers {
 
     ///Store value in register pair HL
     fn set_hl(&mut self, data: u16) {
-        self.h = ((data & 0xFF00) >> 8) as u8;
-        self.l = (data & 0x00FF) as u8;
+        let [h, l] = data.to_be_bytes();
+        self.h = h;
+        self.l = l;
     }
 
     ///Get Register Pair AF
