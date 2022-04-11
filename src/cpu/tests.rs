@@ -604,8 +604,7 @@ fn call_test() {
     mmu.write_mem(cpu.pc + 1, 0x35);
     mmu.write_mem(cpu.pc + 2, 0x21);
 
-    let nn: u16 = (mmu.read_mem(cpu.pc + 2) as u16) << 8 | mmu.read_mem(cpu.pc + 1) as u16;
-
+    let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
     instructions::call(&mut cpu, &mut mmu, nn);
 
     let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];

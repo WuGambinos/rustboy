@@ -527,7 +527,8 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     let mut sp = cpu.sp;
 
     //PC = (SP)
-    let pc = (mmu.read_mem(sp + 1) as u16) << 8 | (mmu.read_mem(sp) as u16);
+    let pc = u16::from_be_bytes([mmu.read_mem(sp + 1), mmu.read_mem(sp)]);
+
     cpu.pc = pc;
 
     //SP = SP + 2
