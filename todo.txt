@@ -1,1 +1,5 @@
 Need to fix opcode 0x76
+
+Need to write tests for CALL, JR, PUSH, POP, RST,  and io port instructions
+
+Start CB prefix instructions
