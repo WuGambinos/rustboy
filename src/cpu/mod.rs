@@ -181,9 +181,6 @@ struct Registers {
 
     //L Register
     l: u8,
-
-    //F Register(Flags)
-    f: u8,
 }
 
 impl Registers {
@@ -196,7 +193,6 @@ impl Registers {
             e: 0,
             h: 0,
             l: 0,
-            f: 0,
         }
     }
 
@@ -242,133 +238,14 @@ impl Registers {
     ///Get Register Pair AF
     fn af(&self) -> u16 {
         //(self.a as u16) << 8 | self.f as u16
-        u16::from_be_bytes([self.a, self.f])
+        //u16::from_be_bytes([self.a, self.f])
+        0
     }
 
     ///Store value in register pair AF
     fn set_af(&mut self, data: u16) {
         self.a = ((data & 0xFF00) >> 8) as u8;
-        self.f = (data & 0x00FF) as u8;
-    }
-
-    ///Set Zero Flag
-    fn set_zero_flag(&mut self) {
-        self.f |= 1 << 7;
-    }
-
-    ///Clear Zero Flag
-    fn clear_zero_flag(&mut self) {
-        self.f &= !(1 << 7);
-    }
-
-    ///Set Sub Flag
-    fn set_sub_flag(&mut self) {
-        self.f |= 1 << 6;
-    }
-
-    ///Clear Sub Flag
-    fn clear_sub_flag(&mut self) {
-        self.f &= !(1 << 6);
-    }
-
-    ///Set Half Carry Flag
-    fn set_hc_flag(&mut self) {
-        self.f |= 1 << 5;
-    }
-
-    /// Clear Half Carry Flag
-    fn clear_hc_flag(&mut self) {
-        self.f &= !(1 << 5)
-    }
-
-    ///Set Carry Flag
-    fn set_carry_flag(&mut self) {
-        self.f |= 1 << 4;
-    }
-
-    ///Clear Carry Flag
-    fn clear_carry_flag(&mut self) {
-        self.f &= !(1 << 4);
-    }
-
-    ///Updates Carry flag
-    ///
-    /// Carry flag is set when operation results in overflow
-    fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
-        let mut res: u16 = (register as u16) + (operand as u16);
-
-        if res > 0xFF {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
-        let res: u32 = (register as u32) + (operand as u32);
-
-        if res > 0xFFFF {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
-        if register < operand {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
-        if register < operand {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    /// Updates the half carry flag when there is an addition
-    ///
-    ///In 8bit addition, half carry is set when there is a carry from bit 3 to bit
-    fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
-        if ((register & 0xF) + (operand & 0xF)) > 0xF {
-            self.set_hc_flag();
-        } else {
-            self.clear_hc_flag();
-        }
-    }
-
-    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
-
-    //Updates the half carry flag where there is a subtraction
-    fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
-        if (register & 0xF) < (operand * 0xF) {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    pub fn update_half_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
-        if (register & 0xFFF) < (operand & 0xFFF) {
-            self.set_carry_flag();
-        } else {
-            self.clear_carry_flag();
-        }
-    }
-
-    /// Updates the zero flag
-    ///
-    /// Zero flag is set when operation results in 0
-    fn update_zero_flag(&mut self, v: u8) {
-        if v == 0 {
-            self.set_zero_flag();
-        } else {
-            self.clear_zero_flag();
-        }
+        //self.f = (data & 0x00FF) as u8;
     }
 }
 
