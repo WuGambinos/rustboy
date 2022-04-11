@@ -149,7 +149,8 @@ impl Registers {
 
     ///Get register pair BC
     fn bc(&self) -> u16 {
-        (self.b as u16) << 8 | self.c as u16
+        //(self.b as u16) << 8 | self.c as u16
+        u16::from_be_bytes([self.b, self.c])
     }
 
     ///Store value in register pair BC
@@ -160,7 +161,8 @@ impl Registers {
 
     ///Get register pair DE
     fn de(&self) -> u16 {
-        (self.d as u16) << 8 | self.e as u16
+        //(self.d as u16) << 8 | self.e as u16
+        u16::from_be_bytes([self.d, self.e])
     }
 
     ///Store value in register pair DE
@@ -171,7 +173,8 @@ impl Registers {
 
     ///Get register pair HL
     fn hl(&self) -> u16 {
-        (self.h as u16) << 8 | self.l as u16
+        // (self.h as u16) << 8 | self.l as u16
+        u16::from_be_bytes([self.h, self.l])
     }
 
     ///Store value in register pair HL
@@ -182,7 +185,8 @@ impl Registers {
 
     ///Get Register Pair AF
     fn af(&self) -> u16 {
-        (self.a as u16) << 8 | self.f as u16
+        //(self.a as u16) << 8 | self.f as u16
+        u16::from_be_bytes([self.a, self.f])
     }
 
     ///Store value in register pair AF
@@ -344,7 +348,8 @@ impl Cpu {
             //LD (u16), SP
             0x08 => {
                 //memory[u16] = SP
-                let addr: u16 = ((self.pc + 1) as u16) << 8 | (self.pc + 2) as u16;
+                let addr: u16 =
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 1), mmu.read_mem(self.pc + 2)]);
 
                 //Lower byte of stack pointer
                 let lower_sp: u8 = (self.sp & 0x00FF) as u8;
@@ -1547,21 +1552,21 @@ impl Cpu {
             //JP NZ, u16
             0xC2 => {
                 let nn: u16 =
-                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
                 jp_nz(self, nn);
             }
 
             //JP u16
             0xC3 => {
                 let nn: u16 =
-                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
                 jp(self, nn)
             }
 
             //CALL NZ, u16
             0xC4 => {
                 let nn: u16 =
-                    (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16;
+                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
                 call(self, mmu, nn);
             }
 
@@ -1587,10 +1592,8 @@ impl Cpu {
     }
 
     fn get_u16(&mut self, mmu: &Mmu) -> u16 {
-        /*(self.memory[(self.pc + 1) as usize] as u16) << 8
-        | (self.memory[(self.pc + 2) as usize]) as u16*/
-
-        (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
+        // (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
+        u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
     }
 }
 
