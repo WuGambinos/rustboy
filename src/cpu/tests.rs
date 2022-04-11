@@ -611,27 +611,27 @@ fn ret_test() {
 fn set_flags() {
     let mut cpu = Cpu::new();
 
-    cpu.registers.set_zero_flag();
-    cpu.registers.set_sub_flag();
-    cpu.registers.set_hc_flag();
-    cpu.registers.set_carry_flag();
+    cpu.f.set_zero_flag();
+    cpu.f.set_sub_flag();
+    cpu.f.set_half_carry_flag();
+    cpu.f.set_carry_flag();
 
-    assert_eq!(cpu.registers.f, 0b11110000);
+    assert_eq!(cpu.f.data, 0b11110000);
 }
 
 #[test]
 fn clear_flags() {
     let mut cpu = Cpu::new();
 
-    cpu.registers.set_zero_flag();
-    cpu.registers.set_sub_flag();
-    cpu.registers.set_hc_flag();
-    cpu.registers.set_carry_flag();
+    cpu.f.set_zero_flag();
+    cpu.f.set_sub_flag();
+    cpu.f.set_half_carry_flag();
+    cpu.f.set_carry_flag();
 
-    cpu.registers.clear_zero_flag();
-    cpu.registers.clear_sub_flag();
-    cpu.registers.clear_hc_flag();
-    cpu.registers.clear_carry_flag();
+    cpu.f.clear_zero_flag();
+    cpu.f.clear_sub_flag();
+    cpu.f.clear_half_carry_flag();
+    cpu.f.clear_carry_flag();
 
-    assert_eq!(cpu.registers.f, 0b00000000);
+    assert_eq!(cpu.f.data, 0b00000000);
 }
