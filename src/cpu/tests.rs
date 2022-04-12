@@ -589,6 +589,65 @@ fn call_test() {
 }
 
 #[test]
+fn call_z_test() {
+    let mut cpu: Cpu = Cpu::new();
+    let mut mmu: Mmu = Mmu::new();
+
+    cpu.pc = 0x1A47;
+    cpu.sp = 0x3002;
+
+    cpu.registers.f.set_zero_flag();
+
+    mmu.write_mem(cpu.pc, 0xCD);
+    mmu.write_mem(cpu.pc + 1, 0x35);
+    mmu.write_mem(cpu.pc + 2, 0x21);
+
+    let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
+    instructions::call_z(&mut cpu, &mut mmu, nn);
+
+    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
+
+    assert_eq!(
+        check,
+        [
+            mmu.read_mem(0x3001) as u16,
+            mmu.read_mem(0x3000) as u16,
+            cpu.sp,
+            cpu.pc
+        ]
+    );
+}
+
+#[test]
+fn call_nz_test() {
+    let mut cpu: Cpu = Cpu::new();
+    let mut mmu: Mmu = Mmu::new();
+
+    cpu.pc = 0x1A47;
+    cpu.sp = 0x3002;
+
+    cpu.registers.f.clear_zero_flag();
+
+    mmu.write_mem(cpu.pc, 0xCD);
+    mmu.write_mem(cpu.pc + 1, 0x35);
+    mmu.write_mem(cpu.pc + 2, 0x21);
+
+    let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
+    instructions::call_nz(&mut cpu, &mut mmu, nn);
+
+    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
+
+    assert_eq!(
+        check,
+        [
+            mmu.read_mem(0x3001) as u16,
+            mmu.read_mem(0x3000) as u16,
+            cpu.sp,
+            cpu.pc
+        ]
+    );
+}
+#[test]
 fn ret_test() {
     let mut cpu = Cpu::new();
     let mut mmu = Mmu::new();
