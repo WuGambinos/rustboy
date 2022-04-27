@@ -1629,8 +1629,60 @@ impl Cpu {
             //PREFIX CB
             0xCB => {
                 let addr: u16 = self.pc + 1;
+
+                //Opcode
                 let op = mmu.read_mem(addr);
                 match op {
+                    //RLC B
+                    0x00 => {
+                        rlc(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //RLC C
+                    0x01 => {
+                        rlc(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //RLC D
+                    0x02 => {
+                        rlc(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //RLC E
+                    0x03 => {
+                        rlc(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //RLC H
+                    0x04 => {
+                        rlc(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //RLC L
+                    0x05 => {
+                        rlc(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //RLC (HL)
+                    0x06 => {
+                        let addr = self.registers.hl();
+                        rlc(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //RLC A
+                    0x07 => {
+                        rlc(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
+
+                    //RRC B
                     _ => (),
                 }
             }

@@ -733,3 +733,19 @@ fn clear_flags() {
 
     assert_eq!(cpu.registers.f.data, 0b00000000);
 }
+
+/*************************************************************************
+ * Rotate and Shift Tests
+ *************************************************************************/
+
+#[test]
+fn rlc_r_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0x88;
+
+    rlc(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    //assert_eq!(cpu.registers.f.carry_flag(), 1);
+    assert_eq!(cpu.registers.b, 0x11);
+}
