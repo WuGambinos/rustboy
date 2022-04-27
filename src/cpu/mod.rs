@@ -1627,7 +1627,13 @@ impl Cpu {
             }
 
             //PREFIX CB
-            0xCB => {}
+            0xCB => {
+                let addr: u16 = self.pc + 1;
+                let op = mmu.read_mem(addr);
+                match op {
+                    _ => (),
+                }
+            }
 
             //CALL Z, u16
             0xCC => {
