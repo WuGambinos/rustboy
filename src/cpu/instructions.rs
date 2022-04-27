@@ -380,6 +380,26 @@ pub fn rra(cpu: &mut Cpu) {
     }
 }
 
+/// Rotate Left Register
+///
+/// 7th bit is moved into carry, and the carry is moved into the 0th bit
+pub fn rlc(cpu: &mut Cpu, r: &mut u8) {
+    let lmb: u8 = *r & 0x80;
+
+    //Rotate Accumulator Left
+    *r <<= 1;
+
+    //Store carry into 0th bit of Accumulator
+    *r |= (1 << 0) & (cpu.registers.f.carry_flag());
+
+    //Move 7th bit into carry
+    if lmb == 0 {
+        cpu.registers.f.clear_carry_flag();
+    } else {
+        cpu.registers.f.set_carry_flag();
+    }
+}
+
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
