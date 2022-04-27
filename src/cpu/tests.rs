@@ -739,13 +739,24 @@ fn clear_flags() {
  *************************************************************************/
 
 #[test]
+fn rlca_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x88;
+
+    rlca(&mut cpu);
+
+    assert_eq!(cpu.registers.a, 0x11);
+}
+#[test]
 fn rlc_r_test() {
     let mut cpu = Cpu::new();
 
+    //136
     cpu.registers.b = 0x88;
 
     rlc(&mut cpu.registers.f, &mut cpu.registers.b);
 
-    //assert_eq!(cpu.registers.f.carry_flag(), 1);
+    assert_eq!(cpu.registers.f.carry_flag(), 1);
     assert_eq!(cpu.registers.b, 0x11);
 }

@@ -303,7 +303,7 @@ pub fn daa(cpu: &mut Cpu) {
 ///
 /// 7th bit of Accumulator is copied into carry and into the 0th bit of A
 pub fn rlca(cpu: &mut Cpu) {
-    let lmb: u8 = cpu.registers.a & 0x80;
+    let lmb: u8 = (cpu.registers.a & 0x80) >> 7;
 
     //Rotate Accumulator to left
     cpu.registers.a <<= 1;
@@ -388,13 +388,13 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
     let mut reg: u8 = *r;
 
     //Content of 7th bit
-    let lmb: u8 = reg & 0x80;
+    let lmb: u8 = (reg & 0x80) >> 7;
 
     //Rotate Accumulator Left
     reg <<= 1;
 
     //Store 7th bit into 0th bit of Register
-    // reg |= (1 << 0) & (lmb);
+    reg |= (1 << 0) & (lmb);
 
     //Move 7th bit into carry
     if lmb == 0 {
