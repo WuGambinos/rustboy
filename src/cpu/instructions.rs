@@ -329,7 +329,7 @@ pub fn rrca(cpu: &mut Cpu) {
     cpu.registers.a >>= 1;
 
     //Store previous 0th bit in 7th bit of A
-    cpu.registers.a |= (1 << 7) & rmb;
+    cpu.registers.a |= (1 << 7) & (rmb << 7);
 
     //Store original 0th bit in carry
     if rmb == 0 {
