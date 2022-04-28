@@ -760,3 +760,17 @@ fn rlc_r_test() {
     assert_eq!(cpu.registers.f.carry_flag(), 1);
     assert_eq!(cpu.registers.b, 0x11);
 }
+
+#[test]
+fn rrca_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0x11;
+
+    rrca(&mut cpu);
+
+    assert_eq!(cpu.registers.a, 0b10001000);
+}
+
+#[test]
+fn rra_test() {}
