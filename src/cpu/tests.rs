@@ -748,6 +748,17 @@ fn rlca_test() {
 
     assert_eq!(cpu.registers.a, 0x11);
 }
+
+#[test]
+fn rla_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.f.set_carry_flag();
+    cpu.registers.a = 0x76;
+    rla(&mut cpu);
+
+    assert_eq!(cpu.registers.a, 0b11101101);
+}
 #[test]
 fn rlc_r_test() {
     let mut cpu = Cpu::new();
@@ -783,3 +794,6 @@ fn rra_test() {
     assert_eq!(cpu.registers.a, 0x70);
     assert_eq!(cpu.registers.f.carry_flag(), 0x01);
 }
+
+#[test]
+fn rrc_test() {}
