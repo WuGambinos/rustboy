@@ -773,4 +773,13 @@ fn rrca_test() {
 }
 
 #[test]
-fn rra_test() {}
+fn rra_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.a = 0xE1;
+
+    rra(&mut cpu);
+
+    assert_eq!(cpu.registers.a, 0x70);
+    assert_eq!(cpu.registers.f.carry_flag(), 0x01);
+}
