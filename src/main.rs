@@ -24,6 +24,8 @@ fn main() {
 
     //Mapped Memory Unit
     let mut mmu: Mmu = Mmu::new();
+
+    cpu.emulate_cycle(&mut mmu);
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
