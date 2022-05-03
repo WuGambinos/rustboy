@@ -1683,6 +1683,53 @@ impl Cpu {
                     }
 
                     //RRC B
+                    0x08 => {
+                        rrc(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //RRC C
+                    0x09 => {
+                        rrc(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //RRC D
+                    0x0A => {
+                        rrc(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //RRC E
+                    0x0B => {
+                        rrc(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //RRC H
+                    0x0C => {
+                        rrc(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //RRC L
+                    0x0D => {
+                        rrc(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //RRC (HL)
+                    0x0E => {
+                        let addr = self.registers.hl();
+                        rrc(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //RRC A
+                    0x0F => {
+                        rrc(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
                     _ => (),
                 }
             }
