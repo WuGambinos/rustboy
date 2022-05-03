@@ -348,15 +348,6 @@ impl Cpu {
             0x07 => {
                 rlca(self);
 
-                //Clear Zero Flag
-                self.registers.f.clear_zero_flag();
-
-                //Clear Sub Flag
-                self.registers.f.set_sub_flag();
-
-                //Clear Half Carry Flag
-                self.registers.f.clear_half_carry_flag();
-
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -434,16 +425,6 @@ impl Cpu {
             0x0F => {
                 //Rotate
                 rrca(self);
-
-                //Clear Zero Flag
-                self.registers.f.clear_zero_flag();
-
-                //Clear Sub Flag
-                self.registers.f.clear_sub_flag();
-
-                //Clear Half Carry Flag
-                self.registers.f.clear_half_carry_flag();
-
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -504,15 +485,6 @@ impl Cpu {
                 //Rotate
                 rla(self);
 
-                //Clear Zero Flag
-                self.registers.f.clear_zero_flag();
-
-                //Clear Sub Flag
-                self.registers.f.clear_sub_flag();
-
-                //Clear Half Carry Flag
-                self.registers.f.clear_half_carry_flag();
-
                 //Increase Program Counter
                 self.pc += 1;
             }
@@ -562,11 +534,6 @@ impl Cpu {
             //RRA
             0x1F => {
                 rra(self);
-
-                self.registers.f.clear_zero_flag();
-                self.registers.f.clear_sub_flag();
-                self.registers.f.clear_half_carry_flag();
-
                 self.pc += 1;
             }
 

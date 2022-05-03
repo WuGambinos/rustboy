@@ -317,6 +317,15 @@ pub fn rlca(cpu: &mut Cpu) {
     } else {
         cpu.registers.f.set_carry_flag();
     }
+
+    //Clear Zero Flag
+    cpu.registers.f.update_zero_flag(cpu.registers.a);
+
+    //Clear Sub Flag
+    cpu.registers.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
 }
 
 ///Rotate Right Circular Accumulator
@@ -337,6 +346,15 @@ pub fn rrca(cpu: &mut Cpu) {
     } else {
         cpu.registers.f.set_carry_flag();
     }
+
+    //Clear Zero Flag
+    cpu.registers.f.clear_zero_flag();
+
+    //Clear Sub Flag
+    cpu.registers.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
 }
 
 /// Rotate Left Accumulator
@@ -358,6 +376,15 @@ pub fn rla(cpu: &mut Cpu) {
     } else {
         cpu.registers.f.set_carry_flag();
     }
+
+    //Clear Zero Flag
+    cpu.registers.f.clear_zero_flag();
+
+    //Clear Sub Flag
+    cpu.registers.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
 }
 
 /// Rotate Right Accumulator
@@ -378,6 +405,15 @@ pub fn rra(cpu: &mut Cpu) {
     } else {
         cpu.registers.f.set_carry_flag();
     }
+
+    //Clear Zero Flag
+    cpu.registers.f.clear_zero_flag();
+
+    //Clear Sub Flag
+    cpu.registers.f.clear_sub_flag();
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
 }
 
 /// Rotate Left Register
