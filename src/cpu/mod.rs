@@ -1894,6 +1894,55 @@ impl Cpu {
                         self.pc += 2;
                     }
 
+                    //SWAP B
+                    0x30 => {
+                        swap(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //SWAP C
+                    0x31 => {
+                        swap(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //SWAP D
+                    0x32 => {
+                        swap(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //SWAP E
+                    0x33 => {
+                        swap(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //SWAP H
+                    0x34 => {
+                        swap(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //SWAP L
+                    0x35 => {
+                        swap(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //SWAP (HL)
+                    0x36 => {
+                        let addr = self.registers.hl();
+                        swap(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //SWAP A
+                    0x37 => {
+                        swap(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
+
                     _ => (),
                 }
             }
