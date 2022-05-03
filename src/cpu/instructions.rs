@@ -593,6 +593,31 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
+///Swap r
+///
+/// Exchange lower and higher nibbles
+pub fn swap(f: &mut Flags, r: &mut u8) {
+    let mut reg = *r;
+
+    //Lower Nibble
+    let low: u8 = reg & 0x0F;
+
+    //Upper Nibble
+    let up: u8 = reg & 0xF0;
+
+    reg = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
+
+    f.update_zero_flag(reg);
+
+    f.clear_carry_flag();
+
+    f.clear_sub_flag();
+
+    f.clear_half_carry_flag();
+
+    *r = reg;
+}
+
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
