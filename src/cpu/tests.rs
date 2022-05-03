@@ -820,3 +820,29 @@ fn rl_test() {
 
     assert_eq!(check, [0x1E, 0x01]);
 }
+
+fn rr_test() {}
+
+#[test]
+fn sla_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.l = 0xB1;
+    sla(&mut cpu.registers.f, &mut cpu.registers.l);
+
+    let check = vec![cpu.registers.l, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x62, 0x01]);
+}
+
+#[test]
+fn sra_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0xB8;
+    sra(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    let check = vec![cpu.registers.b, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0xDC, 0x00]);
+}
