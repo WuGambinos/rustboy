@@ -789,11 +789,21 @@ fn rra_test() {
 
     cpu.registers.a = 0xE1;
 
+    cpu.registers.f.set_carry_flag();
+
     rra(&mut cpu);
 
-    assert_eq!(cpu.registers.a, 0x70);
+    assert_eq!(cpu.registers.a, 0xF0);
     assert_eq!(cpu.registers.f.carry_flag(), 0x01);
 }
 
 #[test]
-fn rrc_test() {}
+fn rrc_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0x31;
+
+    rrc(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    assert_eq!(cpu.registers.b, 0x98);
+}
