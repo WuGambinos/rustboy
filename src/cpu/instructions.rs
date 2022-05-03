@@ -404,6 +404,16 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
     } else {
         f.set_carry_flag();
     }
+
+    //Update Zero Flag
+    f.update_zero_flag(reg);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
     *r = reg;
 }
 
@@ -430,6 +440,16 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
     } else {
         f.set_carry_flag();
     }
+
+    //Update Zero Flag
+    f.update_zero_flag(reg);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
     *r = reg;
 }
 
@@ -457,6 +477,15 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
         f.set_carry_flag();
     }
 
+    //Update Zero Flag
+    f.update_zero_flag(reg);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
     *r = reg;
 }
 
@@ -482,6 +511,15 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
         f.set_carry_flag();
     }
 
+    //Update Zero Flag
+    f.update_zero_flag(reg);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
     *r = reg;
 }
 
@@ -506,6 +544,15 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
     } else {
         f.set_carry_flag();
     }
+
+    //Update Zero Flag
+    f.update_zero_flag(reg);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
 
     *r = reg;
 }
