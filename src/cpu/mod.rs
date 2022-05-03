@@ -291,7 +291,7 @@ impl Cpu {
         }
     }
 
-    fn emulate_cycle(&mut self, mmu: &mut Mmu) {
+    pub fn emulate_cycle(&mut self, mmu: &mut Mmu) {
         self.fetch(mmu);
 
         match self.opcode {
@@ -673,7 +673,7 @@ impl Cpu {
                 self.registers.f.set_sub_flag();
                 self.registers.f.set_half_carry_flag();
                 //A = A xor FF
-                self.registers.a = self.registers.a ^ 0xFF;
+                self.registers.a ^= 0xFF;
             }
 
             //JR NC, i8
