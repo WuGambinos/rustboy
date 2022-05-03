@@ -846,3 +846,14 @@ fn sra_test() {
 
     assert_eq!(check, [0xDC, 0x00]);
 }
+
+#[test]
+fn swap_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0xBC;
+
+    swap(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    assert_eq!(cpu.registers.b, 0xCB);
+}
