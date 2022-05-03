@@ -442,8 +442,22 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
     //Register
     let mut reg: u8 = *r;
 
+    //Contents of 7th bit
+    let lmb: u8 = (reg & 0x80) >> 7;
+
     //Rotate Regiter Left
     reg <<= 1;
+
+    //Copy carry to 0th bit
+    reg |= (1 << 0) & f.carry_flag();
+
+    if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    *r = reg;
 }
 
 pub fn rr(f: &mut Flags, r: &mut u8) {}
