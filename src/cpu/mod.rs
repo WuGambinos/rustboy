@@ -1796,6 +1796,104 @@ impl Cpu {
                         self.pc += 2;
                     }
 
+                    //SLA B
+                    0x20 => {
+                        sla(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //SLA C
+                    0x21 => {
+                        sla(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //SLA D
+                    0x22 => {
+                        sla(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //SLA E
+                    0x23 => {
+                        sla(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //SLA H
+                    0x24 => {
+                        sla(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //SLA L
+                    0x25 => {
+                        sla(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //SLA (HL)
+                    0x26 => {
+                        let addr = self.registers.hl();
+                        sla(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //SLA A
+                    0x27 => {
+                        sla(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
+
+                    //SRA B
+                    0x28 => {
+                        sra(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //SRA C
+                    0x29 => {
+                        sra(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //SRA D
+                    0x2A => {
+                        sra(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //SRA E
+                    0x2B => {
+                        sra(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //SRA H
+                    0x2C => {
+                        sra(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //SRA L
+                    0x2D => {
+                        sra(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //SRA (HL)
+                    0x2E => {
+                        let addr = self.registers.hl();
+                        sra(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //SRA A
+                    0x2F => {
+                        sra(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
+
                     _ => (),
                 }
             }
