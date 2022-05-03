@@ -807,3 +807,16 @@ fn rrc_test() {
 
     assert_eq!(cpu.registers.b, 0x98);
 }
+
+#[test]
+fn rl_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.d = 0x8F;
+
+    rl(&mut cpu.registers.f, &mut cpu.registers.d);
+
+    let check = vec![cpu.registers.d, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x1E, 0x01]);
+}
