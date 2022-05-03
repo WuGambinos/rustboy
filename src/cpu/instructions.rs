@@ -462,6 +462,54 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
 
 pub fn rr(f: &mut Flags, r: &mut u8) {}
 
+/// Shift Left Arithmetic
+///
+/// An arithmetic shift left 1 bit position is performed on conents of register
+///
+/// Contents of bit 7 are copied ot carry flag
+pub fn sla(f: &mut Flags, r: &mut u8) {
+    let mut reg: u8 = *r;
+
+    //7th bit
+    let lmb: u8 = (reg & 0x80) >> 7;
+
+    //shift left one bit position
+    reg <<= 1;
+
+    if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    *r = reg;
+}
+
+///Shift Right Arithmetic
+pub fn sra(f: &mut Flags, r: &mut u8) {
+    let mut reg: u8 = *r;
+
+    //7th bit
+    let lmb: u8 = reg & 0x80;
+
+    //0th bit
+    let rmb: u8 = reg & 0x01;
+
+    //shift right one bit position
+    reg >>= 1;
+
+    //put 7th bit back in
+    reg |= (1 << 7) & (lmb);
+
+    if rmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    *r = reg;
+}
+
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
