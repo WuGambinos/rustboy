@@ -433,6 +433,21 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
+/// Rotate Left
+///
+/// Contents of operand are roateted left 1 bit position
+///
+/// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
+pub fn rl(f: &mut Flags, r: &mut u8) {
+    //Register
+    let mut reg: u8 = *r;
+
+    //Rotate Regiter Left
+    reg <<= 1;
+}
+
+pub fn rr(f: &mut Flags, r: &mut u8) {}
+
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
