@@ -370,7 +370,7 @@ pub fn rra(cpu: &mut Cpu) {
     cpu.registers.a >>= 1;
 
     //Store carry in 7th bit of A
-    cpu.registers.a |= (1 << 7) & cpu.registers.f.carry_flag();
+    cpu.registers.a |= (1 << 7) & (cpu.registers.f.carry_flag() << 7);
 
     //Store original 0th bit in carry
     if rmb == 0 {
@@ -382,7 +382,9 @@ pub fn rra(cpu: &mut Cpu) {
 
 /// Rotate Left Register
 ///
-/// 7th bit is moved into carry, and the carry is moved into the 0th bit
+/// Contents of registert R are rotated to left 1 bit position.
+///
+/// Contents of 7th bit are into carry and also to 0th bit
 pub fn rlc(f: &mut Flags, r: &mut u8) {
     //Register
     let mut reg: u8 = *r;
@@ -390,14 +392,40 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
     //Content of 7th bit
     let lmb: u8 = (reg & 0x80) >> 7;
 
-    //Rotate Accumulator Left
+    //Rotate register left
     reg <<= 1;
 
-    //Store 7th bit into 0th bit of Register
+    //Store 7th bit into 0th bit of register
     reg |= (1 << 0) & (lmb);
 
     //Move 7th bit into carry
     if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+    *r = reg;
+}
+
+/// Rotate Register Right
+///
+/// Register is rotated to the right 1 bit position.
+///
+/// Contents of Bit 0 are copied to Carry Flag and also to bit 7.
+pub fn rrc(f: &mut Flags, r: &mut u8) {
+    //Register
+    let mut reg: u8 = *r;
+
+    //Content of 0th bit
+    let rmb: u8 = reg & 0x01;
+
+    //Rotate register right
+    reg >>= 1;
+
+    //Store 0th bit into 7th bit of register
+    reg |= (1 << 7) & (rmb << 7);
+
+    if rmb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
