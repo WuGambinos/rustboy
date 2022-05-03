@@ -194,7 +194,7 @@ pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //and
-    a = a & operand;
+    a &= operand;
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
@@ -216,7 +216,7 @@ pub fn xor_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //xor
-    a = a ^ operand;
+    a ^= operand;
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
@@ -238,7 +238,7 @@ pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //or
-    a = a | operand;
+    a |= operand;
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
@@ -660,7 +660,7 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     let mut stack_pointer = cpu.sp;
 
     //SP = SP - 2
-    stack_pointer = stack_pointer - 2;
+    stack_pointer -= 2;
 
     //mem[sp] = pc
     mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
@@ -830,7 +830,7 @@ pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
     *upper = up;
 
     //SP = SP + 2
-    stack_pointer = stack_pointer + 2;
+    stack_pointer += 2;
 
     *sp = stack_pointer;
 }
