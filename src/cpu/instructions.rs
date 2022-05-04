@@ -618,6 +618,40 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
+///Shift Right Logical
+///
+/// Perfroms right shift on operand. 0th bit is copied to carry
+///
+/// 7th bit is cleared
+pub fn srl(f: &mut Flags, r: &mut u8) {
+    //register
+    let mut reg: u8 = *r;
+
+    //0th bit
+    let rmb: u8 = reg & 0x01;
+
+    //Perform shift
+    reg >>= 1;
+
+    //Clear 7th bit
+    reg &= !(1 << 7);
+
+    //Copy 0th bit into carry
+    if rmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    f.update_zero_flag(reg);
+
+    f.clear_sub_flag();
+
+    f.clear_half_carry_flag();
+
+    *r = reg;
+}
+
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
