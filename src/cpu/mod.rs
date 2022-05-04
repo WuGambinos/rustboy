@@ -1943,6 +1943,54 @@ impl Cpu {
                         self.pc += 2;
                     }
 
+                    //SRL B
+                    0x38 => {
+                        srl(&mut self.registers.f, &mut self.registers.b);
+                        self.pc += 2;
+                    }
+
+                    //SRL C
+                    0x39 => {
+                        srl(&mut self.registers.f, &mut self.registers.c);
+                        self.pc += 2;
+                    }
+
+                    //SRL D
+                    0x3A => {
+                        srl(&mut self.registers.f, &mut self.registers.d);
+                        self.pc += 2;
+                    }
+
+                    //SRL E
+                    0x3B => {
+                        srl(&mut self.registers.f, &mut self.registers.e);
+                        self.pc += 2;
+                    }
+
+                    //SRL H
+                    0x3C => {
+                        srl(&mut self.registers.f, &mut self.registers.h);
+                        self.pc += 2;
+                    }
+
+                    //SRL L
+                    0x3D => {
+                        srl(&mut self.registers.f, &mut self.registers.l);
+                        self.pc += 2;
+                    }
+
+                    //SRL (HL)
+                    0x3E => {
+                        let addr = self.registers.hl();
+                        srl(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        self.pc += 2;
+                    }
+
+                    //SRL A
+                    0x3F => {
+                        srl(&mut self.registers.f, &mut self.registers.a);
+                        self.pc += 2;
+                    }
                     _ => (),
                 }
             }
