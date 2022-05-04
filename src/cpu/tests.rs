@@ -857,3 +857,16 @@ fn swap_test() {
 
     assert_eq!(cpu.registers.b, 0xCB);
 }
+
+#[test]
+fn srl_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0x8F;
+
+    srl(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    let check = [cpu.registers.b, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x47, 0x01]);
+}
