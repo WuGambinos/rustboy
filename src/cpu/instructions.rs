@@ -1055,7 +1055,7 @@ pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
 
     //Update Zero Flag
     if res == 0 {
-        f.set_carry_flag();
+        f.set_zero_flag();
     } else {
         f.clear_zero_flag();
     }
@@ -1065,4 +1065,26 @@ pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
 
     //Set Half CArry
     f.set_half_carry_flag();
+}
+
+///
+/// Sets the nth bit of r.
+pub fn set_n_r(r: &mut u8, n: u8) {
+    let mut reg: u8 = *r;
+
+    //Set the nth bit
+    reg |= 1 << n;
+
+    *r = reg;
+}
+
+///
+/// Clears the nth bit of r
+pub fn res_n_r(r: &mut u8, n: u8) {
+    let mut reg: u8 = *r;
+
+    //Clear the nth bit
+    reg &= !(1 << n);
+
+    *r = reg;
 }
