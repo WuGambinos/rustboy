@@ -2384,6 +2384,104 @@ impl Cpu {
                         self.pc += 2;
                     }
 
+                    //RES 0, B
+                    0x80 => {
+                        res_n_r(&mut self.registers.b, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, C
+                    0x81 => {
+                        res_n_r(&mut self.registers.c, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, D
+                    0x82 => {
+                        res_n_r(&mut self.registers.d, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, E
+                    0x83 => {
+                        res_n_r(&mut self.registers.e, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, H
+                    0x84 => {
+                        res_n_r(&mut self.registers.h, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, L
+                    0x85 => {
+                        res_n_r(&mut self.registers.l, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, (HL)
+                    0x86 => {
+                        let addr = self.registers.hl();
+                        res_n_r(&mut mmu.read_mem(addr), 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 0, A
+                    0x87 => {
+                        res_n_r(&mut self.registers.a, 0);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, B
+                    0x88 => {
+                        res_n_r(&mut self.registers.b, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, C
+                    0x89 => {
+                        res_n_r(&mut self.registers.c, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, D
+                    0x8A => {
+                        res_n_r(&mut self.registers.d, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, E
+                    0x8B => {
+                        res_n_r(&mut self.registers.e, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, H
+                    0x8C => {
+                        res_n_r(&mut self.registers.h, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, L
+                    0x8D => {
+                        res_n_r(&mut self.registers.l, 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, (HL)
+                    0x8E => {
+                        let addr = self.registers.hl();
+                        res_n_r(&mut mmu.read_mem(addr), 1);
+                        self.pc += 2;
+                    }
+
+                    //RES 1, A
+                    0x8F => {
+                        res_n_r(&mut self.registers.a, 1);
+                        self.pc += 2;
+                    }
+
                     _ => (),
                 }
             }
