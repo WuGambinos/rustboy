@@ -883,3 +883,14 @@ fn bit_n_r_test() {
 
     assert_eq!(check, [0x00, 0x01]);
 }
+
+#[test]
+fn res_n_r_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0x69;
+
+    res_n_r(&mut cpu.registers.b, 6);
+
+    assert_eq!(cpu.registers.b, 0x29)
+}
