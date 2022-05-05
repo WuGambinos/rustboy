@@ -1,4 +1,5 @@
 use super::*;
+use conditional::*;
 
 /************************************************************************
  * 8-bit Arithmetic instructions
@@ -1039,4 +1040,29 @@ pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
     mmu.write_mem(stack_pointer + 1, upper);
 
     *sp = stack_pointer;
+}
+
+/************************************************************************
+ * Single-bit Operation instructions
+ * *********************************************************************/
+
+///
+/// Checks the nth bit of r and stores the inverse in the zero flag.
+pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
+    let reg: u8 = *r;
+
+    let res = (reg >> n) & 0x01;
+
+    //Update Zero Flag
+    if res == 0 {
+        f.set_carry_flag();
+    } else {
+        f.clear_zero_flag();
+    }
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Set Half CArry
+    f.set_half_carry_flag();
 }
