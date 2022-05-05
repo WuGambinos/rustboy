@@ -870,3 +870,16 @@ fn srl_test() {
 
     assert_eq!(check, [0x47, 0x01]);
 }
+
+#[test]
+fn bit_n_r_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0;
+
+    bit_n_r(&mut cpu.registers.f, &mut cpu.registers.b, 2);
+
+    let check = vec![cpu.registers.b, cpu.registers.f.zero_flag()];
+
+    assert_eq!(check, [0x00, 0x01]);
+}
