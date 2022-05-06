@@ -454,6 +454,44 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
+/// Rotate Left Regsiter (mem[HL])
+///
+/// Contents of registert R are rotated to left 1 bit position.
+///
+/// Contents of 7th bit are into carry and also to 0th bit
+pub fn rlc_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    //Value in memory at addr
+    let mut value = mmu.read_mem(addr);
+
+    //Conent of 7th bit
+    let lmb: u8 = (value & 0x80) >> 7;
+
+    //Rotate mem[HL] left
+    value <<= 1;
+
+    //Store 7th bit in 0th bit of mem[HL]
+    value |= (1 << 0) & (lmb);
+
+    //Move 7th bit into carry
+    if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    //Update Zero Flag
+    f.update_zero_flag(value);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
+    //Write new value into memroy
+    mmu.write_mem(addr, value);
+}
+
 /// Rotate Register Right
 ///
 /// Register is rotated to the right 1 bit position.
