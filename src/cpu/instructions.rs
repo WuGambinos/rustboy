@@ -1068,6 +1068,31 @@ pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
 }
 
 ///
+///
+/// Checks the nth bit of mem[hl] and stores the inverse in the zero flag.
+pub fn bit_n_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16, n: u8) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    value = (value >> n) & 0x01;
+
+    //Update Zero Flag
+    if value == 0 {
+        f.set_zero_flag();
+    } else {
+        f.clear_zero_flag();
+    }
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Set Half Carry
+    f.set_half_carry_flag();
+
+    //Write new value to memory
+    mmu.write_mem(addr, value);
+}
+
+///
 /// Sets the nth bit of r.
 pub fn set_n_r(r: &mut u8, n: u8) {
     let mut reg: u8 = *r;
@@ -1076,6 +1101,15 @@ pub fn set_n_r(r: &mut u8, n: u8) {
     reg |= 1 << n;
 
     *r = reg;
+}
+
+pub fn set_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    //Set the nth bit
+    value |= 1 << n;
+
+    mmu.write_mem(addr, value);
 }
 
 ///
@@ -1092,6 +1126,7 @@ pub fn res_n_r(r: &mut u8, n: u8) {
 pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
     let mut value: u8 = mmu.read_mem(addr);
 
+    //Clear the nth bit
     value &= !(1 << n);
 
     mmu.write_mem(addr, value);
