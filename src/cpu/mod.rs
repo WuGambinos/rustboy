@@ -2031,7 +2031,7 @@ impl Cpu {
                     //BIT 0, (HL)
                     0x46 => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 0);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 0);
                         self.pc += 2;
                     }
 
@@ -2080,7 +2080,7 @@ impl Cpu {
                     //BIT 1, (HL)
                     0x4E => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 1);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 1);
                         self.pc += 2;
                     }
 
@@ -2129,7 +2129,7 @@ impl Cpu {
                     //BIT 2, (HL)
                     0x56 => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 2);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 2);
                         self.pc += 2;
                     }
 
@@ -2178,7 +2178,7 @@ impl Cpu {
                     //BIT 3, (HL)
                     0x5E => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 3);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 3);
                         self.pc += 2;
                     }
 
@@ -2227,7 +2227,7 @@ impl Cpu {
                     //BIT 4, (HL)
                     0x66 => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 4);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 4);
                         self.pc += 2;
                     }
 
@@ -2276,7 +2276,7 @@ impl Cpu {
                     //BIT 5, (HL)
                     0x6E => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 5);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 5);
                         self.pc += 2;
                     }
 
@@ -2325,7 +2325,7 @@ impl Cpu {
                     //BIT 6, (HL)
                     0x76 => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 6);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 6);
                         self.pc += 2;
                     }
 
@@ -2374,7 +2374,7 @@ impl Cpu {
                     //BIT 7, (HL)
                     0x7E => {
                         let addr = self.registers.hl();
-                        bit_n_r(&mut self.registers.f, &mut mmu.read_mem(addr), 7);
+                        bit_n_hl(&mut self.registers.f, mmu, addr, 7);
                         self.pc += 2;
                     }
 
@@ -2423,7 +2423,7 @@ impl Cpu {
                     //RES 0, (HL)
                     0x86 => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 0);
+                        res_n_hl(mmu, addr, 0);
                         self.pc += 2;
                     }
 
@@ -2472,7 +2472,7 @@ impl Cpu {
                     //RES 1, (HL)
                     0x8E => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 1);
+                        res_n_hl(mmu, addr, 1);
                         self.pc += 2;
                     }
 
@@ -2521,7 +2521,7 @@ impl Cpu {
                     //RES 2, (HL)
                     0x96 => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 2);
+                        res_n_hl(mmu, addr, 2);
                         self.pc += 2;
                     }
 
@@ -2570,7 +2570,7 @@ impl Cpu {
                     //RES 3, (HL)
                     0x9E => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 3);
+                        res_n_hl(mmu, addr, 3);
                         self.pc += 2;
                     }
 
@@ -2619,7 +2619,7 @@ impl Cpu {
                     //RES 4, (HL)
                     0xA6 => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 4);
+                        res_n_hl(mmu, addr, 4);
                         self.pc += 2;
                     }
 
@@ -2668,7 +2668,7 @@ impl Cpu {
                     //RES 5, (HL)
                     0xAE => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 5);
+                        res_n_hl(mmu, addr, 5);
                         self.pc += 2;
                     }
 
@@ -2717,7 +2717,7 @@ impl Cpu {
                     //RES 6, (HL)
                     0xB6 => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 6);
+                        res_n_hl(mmu, addr, 6);
                         self.pc += 2;
                     }
 
@@ -2766,7 +2766,7 @@ impl Cpu {
                     //RES 7, (HL)
                     0xBE => {
                         let addr = self.registers.hl();
-                        res_n_r(&mut mmu.read_mem(addr), 7);
+                        res_n_hl(mmu, addr, 7);
                         self.pc += 2;
                     }
 
@@ -2815,7 +2815,7 @@ impl Cpu {
                     //SET 0, (HL)
                     0xC6 => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 0);
+                        set_n_hl(mmu, addr, 0);
                         self.pc += 2;
                     }
 
@@ -2864,7 +2864,7 @@ impl Cpu {
                     //SET 1, (HL)
                     0xCE => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 1);
+                        set_n_hl(mmu, addr, 1);
                         self.pc += 2;
                     }
 
@@ -2913,7 +2913,7 @@ impl Cpu {
                     //SET 2, (HL)
                     0xD6 => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 2);
+                        set_n_hl(mmu, addr, 2);
                         self.pc += 2;
                     }
 
@@ -2962,7 +2962,7 @@ impl Cpu {
                     //SET 3, (HL)
                     0xDE => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 3);
+                        set_n_hl(mmu, addr, 3);
                         self.pc += 2;
                     }
 
@@ -3011,7 +3011,7 @@ impl Cpu {
                     //SET 4, (HL)
                     0xE6 => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 4);
+                        set_n_hl(mmu, addr, 4);
                         self.pc += 2;
                     }
 
@@ -3060,7 +3060,7 @@ impl Cpu {
                     //SET 5, (HL)
                     0xEE => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 5);
+                        set_n_hl(mmu, addr, 5);
                         self.pc += 2;
                     }
 
@@ -3109,7 +3109,7 @@ impl Cpu {
                     //SET 6, (HL)
                     0xF6 => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 6);
+                        set_n_hl(mmu, addr, 6);
                         self.pc += 2;
                     }
 
@@ -3158,7 +3158,7 @@ impl Cpu {
                     //SET 7, (HL)
                     0xFE => {
                         let addr = self.registers.hl();
-                        set_n_r(&mut mmu.read_mem(addr), 7);
+                        set_n_hl(mmu, addr, 7);
                         self.pc += 2;
                     }
 
