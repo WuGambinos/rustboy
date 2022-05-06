@@ -896,6 +896,19 @@ fn res_n_r_test() {
 }
 
 #[test]
+fn res_n_hl_test() {
+    let mut mmu = Mmu::new();
+
+    let addr: u16 = 0xFFF;
+
+    mmu.write_mem(addr, 0x69);
+
+    res_n_hl(&mut mmu, addr, 6);
+
+    assert_eq!(mmu.read_mem(addr), 0x29);
+}
+
+#[test]
 fn set_n_r_test() {
     let mut cpu = Cpu::new();
 

@@ -3375,7 +3375,61 @@ impl Cpu {
                 rst(self, mmu, 0x28);
             }
 
+            //LD A, (FF00+u8)
             0xF0 => {}
+
+            //POP AF
+            0xF1 => {
+                pop_rr(
+                    mmu,
+                    &mut self.registers.a,
+                    &mut self.registers.f.data,
+                    &mut self.sp,
+                );
+                self.pc += 1;
+            }
+
+            //LD (FF00 + C), A
+            0xF2 => {}
+
+            //DI
+            0xF3 => {}
+
+            //Invalid Opcode
+            0xF4 => {}
+
+            //PUSH AF
+            0xF5 => {}
+
+            //OR A, u8
+            0xF6 => {}
+
+            //RST 0x30
+            0xF7 => {}
+
+            //LD HL, SP+i8
+            0xF8 => {}
+
+            //LD SP, HL
+            0xF9 => {}
+
+            //LD A, (u16)
+            0xFA => {}
+
+            //EI
+            0xFB => {}
+
+            //Invalid Opcode
+            0xFC => {}
+
+            //Invalid Opcode
+            0xFD => {}
+
+            //CP A, u8
+            0xFE => {}
+
+            //RST 0x38
+            0xFF => {}
 
             _ => println!("NOT AN OPCODE"),
         }
