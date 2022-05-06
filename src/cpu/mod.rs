@@ -2778,11 +2778,395 @@ impl Cpu {
 
                     //SET 0, B
                     0xC0 => {
-                        res_n_r(&mut self.registers.b, 7);
+                        set_n_r(&mut self.registers.b, 0);
                         self.pc += 2;
                     }
 
-                    _ => (),
+                    //SET 0, C
+                    0xC1 => {
+                        set_n_r(&mut self.registers.c, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, D
+                    0xC2 => {
+                        set_n_r(&mut self.registers.d, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, E
+                    0xC3 => {
+                        set_n_r(&mut self.registers.e, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, H
+                    0xC4 => {
+                        set_n_r(&mut self.registers.h, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, L
+                    0xC5 => {
+                        set_n_r(&mut self.registers.l, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, (HL)
+                    0xC6 => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 0, A
+                    0xC7 => {
+                        set_n_r(&mut self.registers.a, 0);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, B
+                    0xC8 => {
+                        set_n_r(&mut self.registers.b, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, C
+                    0xC9 => {
+                        set_n_r(&mut self.registers.c, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, D
+                    0xCA => {
+                        set_n_r(&mut self.registers.d, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, E
+                    0xCB => {
+                        set_n_r(&mut self.registers.e, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, H
+                    0xCC => {
+                        set_n_r(&mut self.registers.h, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, L
+                    0xCD => {
+                        set_n_r(&mut self.registers.l, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, (HL)
+                    0xCE => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 1, A
+                    0xCF => {
+                        set_n_r(&mut self.registers.a, 1);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, B
+                    0xD0 => {
+                        set_n_r(&mut self.registers.b, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, C
+                    0xD1 => {
+                        set_n_r(&mut self.registers.c, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, D
+                    0xD2 => {
+                        set_n_r(&mut self.registers.d, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, E
+                    0xD3 => {
+                        set_n_r(&mut self.registers.e, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, H
+                    0xD4 => {
+                        set_n_r(&mut self.registers.h, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, L
+                    0xD5 => {
+                        set_n_r(&mut self.registers.l, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, (HL)
+                    0xD6 => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 2, A
+                    0xD7 => {
+                        set_n_r(&mut self.registers.a, 2);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, B
+                    0xD8 => {
+                        set_n_r(&mut self.registers.b, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, C
+                    0xD9 => {
+                        set_n_r(&mut self.registers.c, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, D
+                    0xDA => {
+                        set_n_r(&mut self.registers.d, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, E
+                    0xDB => {
+                        set_n_r(&mut self.registers.e, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, H
+                    0xDC => {
+                        set_n_r(&mut self.registers.h, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, L
+                    0xDD => {
+                        set_n_r(&mut self.registers.c, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, (HL)
+                    0xDE => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 3, A
+                    0xDF => {
+                        set_n_r(&mut self.registers.a, 3);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, B
+                    0xE0 => {
+                        set_n_r(&mut self.registers.b, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, C
+                    0xE1 => {
+                        set_n_r(&mut self.registers.c, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, D
+                    0xE2 => {
+                        set_n_r(&mut self.registers.d, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, E
+                    0xE3 => {
+                        set_n_r(&mut self.registers.e, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, H
+                    0xE4 => {
+                        set_n_r(&mut self.registers.h, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, L
+                    0xE5 => {
+                        set_n_r(&mut self.registers.l, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, (HL)
+                    0xE6 => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 4, A
+                    0xE7 => {
+                        set_n_r(&mut self.registers.a, 4);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, B
+                    0xE8 => {
+                        set_n_r(&mut self.registers.b, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, C
+                    0xE9 => {
+                        set_n_r(&mut self.registers.c, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, D
+                    0xEA => {
+                        set_n_r(&mut self.registers.d, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, E
+                    0xEB => {
+                        set_n_r(&mut self.registers.e, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, H
+                    0xEC => {
+                        set_n_r(&mut self.registers.h, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, L
+                    0xED => {
+                        set_n_r(&mut self.registers.l, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, (HL)
+                    0xEE => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 5, A
+                    0xEF => {
+                        set_n_r(&mut self.registers.a, 5);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, B
+                    0xF0 => {
+                        set_n_r(&mut self.registers.b, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, C
+                    0xF1 => {
+                        set_n_r(&mut self.registers.c, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, D
+                    0xF2 => {
+                        set_n_r(&mut self.registers.d, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, E
+                    0xF3 => {
+                        set_n_r(&mut self.registers.e, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, H
+                    0xF4 => {
+                        set_n_r(&mut self.registers.h, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, L
+                    0xF5 => {
+                        set_n_r(&mut self.registers.l, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, (HL)
+                    0xF6 => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 6, A
+                    0xF7 => {
+                        set_n_r(&mut self.registers.a, 6);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, B
+                    0xF8 => {
+                        set_n_r(&mut self.registers.b, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, C
+                    0xF9 => {
+                        set_n_r(&mut self.registers.c, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, D
+                    0xFA => {
+                        set_n_r(&mut self.registers.d, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, E
+                    0xFB => {
+                        set_n_r(&mut self.registers.e, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, H
+                    0xFC => {
+                        set_n_r(&mut self.registers.h, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, L
+                    0xFD => {
+                        set_n_r(&mut self.registers.l, 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, (HL)
+                    0xFE => {
+                        let addr = self.registers.hl();
+                        set_n_r(&mut mmu.read_mem(addr), 7);
+                        self.pc += 2;
+                    }
+
+                    //SET 7, A
+                    0xFF => {
+                        set_n_r(&mut self.registers.a, 7);
+                        self.pc += 2;
+                    }
                 }
             }
 
