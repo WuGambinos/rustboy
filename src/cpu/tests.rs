@@ -885,6 +885,22 @@ fn bit_n_r_test() {
 }
 
 #[test]
+fn bit_n_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+
+    mmu.write_mem(addr, 0);
+
+    bit_n_hl(&mut cpu.registers.f, &mut mmu, addr, 2);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.zero_flag()];
+
+    assert_eq!(check, [0x00, 0x01]);
+}
+
+#[test]
 fn res_n_r_test() {
     let mut cpu = Cpu::new();
 
@@ -917,4 +933,18 @@ fn set_n_r_test() {
     set_n_r(&mut cpu.registers.b, 7);
 
     assert_eq!(cpu.registers.b, 0xE9);
+}
+
+#[test]
+
+fn set_n_hl_test() {
+    let mut mmu = Mmu::new();
+
+    let addr: u16 = 0xFFF;
+
+    mmu.write_mem(addr, 0x69);
+
+    set_n_hl(&mut mmu, addr, 7);
+
+    assert_eq!(mmu.read_mem(addr), 0xE9);
 }
