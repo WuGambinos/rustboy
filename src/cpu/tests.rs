@@ -841,6 +841,21 @@ fn rrc_test() {
 }
 
 #[test]
+fn rrc_hl_test() {
+    let mut cpu = Cpu::new();
+
+    let mut mmu = Mmu::new();
+
+    let addr: u16 = 0xFFF;
+    let value: u8 = 0x31;
+    mmu.write_mem(addr, value);
+
+    rrc_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    assert_eq!(mmu.read_mem(addr), 0x98);
+}
+
+#[test]
 fn rl_test() {
     let mut cpu = Cpu::new();
 
