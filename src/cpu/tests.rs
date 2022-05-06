@@ -894,3 +894,14 @@ fn res_n_r_test() {
 
     assert_eq!(cpu.registers.b, 0x29)
 }
+
+#[test]
+fn set_n_r_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0x69;
+
+    set_n_r(&mut cpu.registers.b, 7);
+
+    assert_eq!(cpu.registers.b, 0xE9);
+}
