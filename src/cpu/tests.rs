@@ -330,6 +330,23 @@ fn sbc_r_borrow_set() {
     assert_eq!(check, [0x04, 0x40]);
 }
 
+#[test]
+fn and_a_hl_test() {
+    let mut cpu = Cpu::new();
+
+    let mut mmu = Mmu::new();
+
+    cpu.registers.a = 0xFF;
+
+    let addr = cpu.registers.hl();
+
+    mmu.write_mem(addr, 0xA0);
+
+    and_r_r(&mut cpu, mmu.read_mem(addr));
+
+    assert_eq!(cpu.registers.a, 0xA0);
+}
+
 /*************************************************************************
  * 16-bit Arithmetic Tests
  *************************************************************************/
@@ -770,6 +787,21 @@ fn rlc_r_test() {
 
     assert_eq!(cpu.registers.f.carry_flag(), 1);
     assert_eq!(cpu.registers.b, 0x11);
+}
+
+#[test]
+fn rlc_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+
+    mmu.write_mem(0xFFF, 0x88);
+
+    rlc_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(0xFFF), 1];
+    assert_eq!(check, [0x11, 1]);
 }
 
 #[test]
