@@ -2777,7 +2777,10 @@ impl Cpu {
                     }
 
                     //SET 0, B
-                    0xC0 => {}
+                    0xC0 => {
+                        res_n_r(&mut self.registers.b, 7);
+                        self.pc += 2;
+                    }
 
                     _ => (),
                 }
