@@ -1088,3 +1088,11 @@ pub fn res_n_r(r: &mut u8, n: u8) {
 
     *r = reg;
 }
+
+pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    value &= !(1 << n);
+
+    mmu.write_mem(addr, value);
+}
