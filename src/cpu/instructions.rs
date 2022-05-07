@@ -701,17 +701,17 @@ pub fn rr_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
 
 /// Shift Left Arithmetic
 ///
-/// An arithmetic shift left 1 bit position is performed on conents of register
+/// An arithmetic shift left 1 bit position is performed on contents of register
 ///
 /// Contents of bit 7 are copied ot carry flag
 pub fn sla(f: &mut Flags, r: &mut u8) {
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
     //7th bit
-    let lmb: u8 = (reg & 0x80) >> 7;
+    let lmb: u8 = (value & 0x80) >> 7;
 
     //shift left one bit position
-    reg <<= 1;
+    value <<= 1;
 
     if lmb == 0 {
         f.clear_carry_flag();
@@ -720,7 +720,7 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
     }
 
     //Update Zero Flag
-    f.update_zero_flag(reg);
+    f.update_zero_flag(value);
 
     //Clear Sub Flag
     f.clear_sub_flag();
@@ -728,7 +728,40 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
     //Clear Half Carry
     f.clear_half_carry_flag();
 
-    *r = reg;
+    *r = value;
+}
+
+/// Shift Left Arithmetic
+///
+/// An arithmetic shift left 1 bit position is performed on contents of mem[HL]
+///
+/// Contents of bit 7 are copied ot carry flag
+pub fn sla_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    //7th bit
+    let lmb: u8 = (value & 0x80) >> 7;
+
+    //shift left one bit position
+    value <<= 1;
+
+    if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    //Update Zero Flag
+    f.update_zero_flag(value);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
+    //Write new value into memory
+    mmu.write_mem(addr, value);
 }
 
 ///Shift Right Arithmetic
@@ -772,9 +805,7 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
     let mut reg = *r;
 
     //Lower Nibble
-    let low: u8 = reg & 0x0F;
-
-    //Upper Nibble
+    let low: u8 = reg & 0x0F; //Upper Nibble
     let up: u8 = reg & 0xF0;
 
     reg = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
