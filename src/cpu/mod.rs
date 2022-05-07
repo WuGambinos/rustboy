@@ -3360,7 +3360,11 @@ impl Cpu {
             }
 
             //LD A, (FF00+u8)
-            0xF0 => {}
+            0xF0 => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                ld_io_from_a(self, mmu, n);
+                self.pc += 2;
+            }
 
             //POP AF
             0xF1 => {
@@ -3374,7 +3378,10 @@ impl Cpu {
             }
 
             //LD (FF00 + C), A
-            0xF2 => {}
+            0xF2 => {
+                ld_a_from_io_c(self, mmu);
+                self.pc += 1;
+            }
 
             //DI
             0xF3 => {}
