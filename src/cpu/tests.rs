@@ -885,7 +885,18 @@ fn rl_hl_test() {
     assert_eq!(check, [0x1E, 0x01]);
 }
 
-fn rr_test() {}
+#[test]
+fn rr_test() {
+    let mut cpu = Cpu::new();
+
+    cpu.registers.b = 0xDD;
+
+    rr(&mut cpu.registers.f, &mut cpu.registers.b);
+
+    let check = vec![cpu.registers.b, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x6E, 0x01]);
+}
 
 #[test]
 fn sla_test() {
