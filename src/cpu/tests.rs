@@ -899,6 +899,23 @@ fn rr_test() {
 }
 
 #[test]
+fn rr_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+    let value = 0xDD;
+
+    mmu.write_mem(addr, value);
+
+    rr_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x6E, 0x01]);
+}
+
+#[test]
 fn sla_test() {
     let mut cpu = Cpu::new();
 
