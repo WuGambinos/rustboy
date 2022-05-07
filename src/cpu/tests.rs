@@ -498,6 +498,30 @@ fn push_rr_test() {
     );
 }
 
+#[test]
+fn push_af_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    cpu.registers.a = 0x22;
+    cpu.registers.f.data = 0x33;
+
+    cpu.sp = 0x1007;
+
+    instructions::push_rr(&mut mmu, cpu.registers.a, cpu.registers.f.data, &mut cpu.sp);
+
+    let check: Vec<u16> = vec![0x0022, 0x0033, 0x1005];
+
+    assert_eq!(
+        check,
+        [
+            mmu.read_mem(0x1006) as u16,
+            mmu.read_mem(0x1005) as u16,
+            cpu.sp
+        ]
+    )
+}
+
 /*************************************************************************
  * Jump Instructions Tests
  *************************************************************************/
