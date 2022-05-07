@@ -3399,22 +3399,36 @@ impl Cpu {
             0xF4 => {}
 
             //PUSH AF
-            0xF5 => {}
+            0xF5 => {
+                push_rr(mmu, self.registers.a, self.registers.f.data, &mut self.sp);
+                self.pc += 1;
+            }
 
             //OR A, u8
-            0xF6 => {}
+            0xF6 => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                or_r_r(self, n);
+                self.pc += 2;
+            }
 
             //RST 0x30
-            0xF7 => {}
+            0xF7 => rst(self, mmu, 0x30),
 
             //LD HL, SP+i8
             0xF8 => {}
 
             //LD SP, HL
-            0xF9 => {}
+            0xF9 => {
+                self.sp = self.registers.hl();
+                self.pc += 1;
+            }
 
             //LD A, (u16)
-            0xFA => {}
+            0xFA => {
+                let n = mmu.read_mem(self.pc + 1);
+                ld_8bit(&mut self.registers.a, n);
+                self.pc += 3;
+            }
 
             //EI
             0xFB => {}
@@ -3426,12 +3440,15 @@ impl Cpu {
             0xFD => {}
 
             //CP A, u8
-            0xFE => {}
+            0xFE => {
+                let n: u8 = mmu.read_mem(self.pc + 1);
+                cp_r_r(self, n);
+                self.pc += 2;
+            }
 
             //RST 0x38
-            0xFF => {}
-
-            _ => println!("NOT AN OPCODE"),
+            0xFF => rst(self, mmu, 0x38),
+            //_ => println!("NOT AN OPCODE"),
         }
     }
 
