@@ -49,4 +49,10 @@ impl Mmu {
     pub fn read_mem(&self, addr: u16) -> u8 {
         self.memory[addr as usize]
     }
+
+    pub fn read_rom(&mut self, rom: &Vec<u8>) {
+        for i in 0..rom.len() {
+            self.write_mem(i as u16, rom[i]);
+        }
+    }
 }

@@ -266,7 +266,7 @@ pub struct Cpu {
     sp: u16,
 
     ///Program counter
-    pc: u16,
+    pub pc: u16,
 
     ///Current opcode
     opcode: u8,
@@ -3224,7 +3224,10 @@ impl Cpu {
             }
 
             //PUSH DE
-            0xD5 => {}
+            0xD5 => {
+                push_rr(mmu, self.registers.d, self.registers.e, &mut self.sp);
+                self.pc += 1;
+            }
 
             //SUB A, u8
             0xD6 => {
