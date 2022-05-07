@@ -599,6 +599,38 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
+/// Rotate Left
+///
+/// Contents of mem[HL] are roateted left 1 bit position
+///
+/// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
+pub fn rl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    let lmb: u8 = (value & 0x80) >> 7;
+
+    //Rotate Register left
+    value <<= 1;
+
+    if lmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    //Update Zero Flag
+    f.update_zero_flag(value);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
+    //Write new value into memory
+    mmu.write_mem(addr, value);
+}
+
 pub fn rr(f: &mut Flags, r: &mut u8) {}
 
 /// Shift Left Arithmetic
