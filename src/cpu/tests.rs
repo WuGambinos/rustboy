@@ -928,6 +928,22 @@ fn sla_test() {
 }
 
 #[test]
+fn sla_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+    let value = 0xB1;
+    mmu.write_mem(addr, value);
+
+    sla_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x62, 0x01]);
+}
+
+#[test]
 fn sra_test() {
     let mut cpu = Cpu::new();
 
