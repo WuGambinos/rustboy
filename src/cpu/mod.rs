@@ -1571,11 +1571,7 @@ impl Cpu {
             }
 
             //RST 0x00(CAll to n)
-            0xC7 => {
-                rst(self, mmu, 0x00);
-                self.pc += 1;
-            }
-
+            0xC7 => rst(self, mmu, 0x00),
             //RET Z
             0xC8 => {
                 ret_z(self, mmu);
@@ -3192,10 +3188,7 @@ impl Cpu {
             }
 
             //RST 0x08
-            0xCF => {
-                rst(self, mmu, 0x08);
-                self.pc += 1;
-            }
+            0xCF => rst(self, mmu, 0x08),
 
             //RET NC
             0xD0 => {
@@ -3241,10 +3234,7 @@ impl Cpu {
             }
 
             //RST 0x10
-            0xD7 => {
-                rst(self, mmu, 0x10);
-                self.pc += 1;
-            }
+            0xD7 => rst(self, mmu, 0x10),
 
             //RET C
             0xD8 => ret_c(self, mmu),
@@ -3281,10 +3271,7 @@ impl Cpu {
             }
 
             //RST 0x18
-            0xDF => {
-                rst(self, mmu, 0x18);
-                self.pc += 1;
-            }
+            0xDF => rst(self, mmu, 0x18),
 
             //LD (0xFF00 + u8), A
             0xE0 => {
@@ -3330,10 +3317,7 @@ impl Cpu {
             }
 
             //RST 0x20
-            0xE7 => {
-                rst(self, mmu, 0x20);
-                self.pc += 1;
-            }
+            0xE7 => rst(self, mmu, 0x20),
 
             //ADD SP, i8  MAY NEED TO CHECK
             0xE8 => {
@@ -3431,7 +3415,9 @@ impl Cpu {
             }
 
             //EI
-            0xFB => {}
+            0xFB => {
+                self.pc += 1;
+            }
 
             //Invalid Opcode
             0xFC => {}
