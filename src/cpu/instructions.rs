@@ -883,23 +883,23 @@ pub fn swap_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     mmu.write_mem(addr, value);
 }
 
-///Shift Right Logical
+/// Shift Right Logical
 ///
-/// Perfroms right shift on operand. 0th bit is copied to carry
+/// Performs right shift on operand. 0th bit is copied to carry
 ///
 /// 7th bit is cleared
 pub fn srl(f: &mut Flags, r: &mut u8) {
     //register
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
     //0th bit
-    let rmb: u8 = reg & 0x01;
+    let rmb: u8 = value & 0x01;
 
     //Perform shift
-    reg >>= 1;
+    value >>= 1;
 
     //Clear 7th bit
-    reg &= !(1 << 7);
+    value &= !(1 << 7);
 
     //Copy 0th bit into carry
     if rmb == 0 {
@@ -908,15 +908,48 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
         f.set_carry_flag();
     }
 
-    f.update_zero_flag(reg);
+    f.update_zero_flag(value);
 
     f.clear_sub_flag();
 
     f.clear_half_carry_flag();
 
-    *r = reg;
+    *r = value;
 }
 
+///  Shift Right Logical
+///
+/// Performs right shift on operand. 0th bit is copied to carry
+///
+/// 7th bit is cleared
+pub fn srl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    //0th bit
+    let rmb: u8 = value & 0x01;
+
+    //Perform shift
+    value >>= 1;
+
+    //Clear 7th bit
+    value &= !(1 << 7);
+
+    //Copy 0th bit into carry
+    if rmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    f.update_zero_flag(value);
+
+    f.clear_sub_flag();
+
+    f.clear_half_carry_flag();
+
+    //Write new value to memory
+    mmu.write_mem(addr, value);
+}
 /************************************************************************
  * 16-bit Arithmetic instructions
  * *********************************************************************/
