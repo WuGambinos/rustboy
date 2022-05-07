@@ -766,19 +766,19 @@ pub fn sla_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
 
 ///Shift Right Arithmetic
 pub fn sra(f: &mut Flags, r: &mut u8) {
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
     //7th bit
-    let lmb: u8 = reg & 0x80;
+    let lmb: u8 = value & 0x80;
 
     //0th bit
-    let rmb: u8 = reg & 0x01;
+    let rmb: u8 = value & 0x01;
 
     //shift right one bit position
-    reg >>= 1;
+    value >>= 1;
 
     //put 7th bit back in
-    reg |= (1 << 7) & (lmb);
+    value |= (1 << 7) & (lmb);
 
     if rmb == 0 {
         f.clear_carry_flag();
@@ -787,7 +787,7 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
     }
 
     //Update Zero Flag
-    f.update_zero_flag(reg);
+    f.update_zero_flag(value);
 
     //Clear Sub Flag
     f.clear_sub_flag();
@@ -795,22 +795,58 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
     //Clear Half Carry
     f.clear_half_carry_flag();
 
-    *r = reg;
+    *r = value;
+}
+
+//Shift Right Arithmetic
+pub fn sra_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    //7th bit
+    let lmb: u8 = value & 0x80;
+
+    //0th bit
+    let rmb: u8 = value & 0x01;
+
+    //shift right one bit position
+    value >>= 1;
+
+    //put 7th bit back in
+    value |= (1 << 7) & (lmb);
+
+    if rmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    //Update Zero Flag
+    f.update_zero_flag(value);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
+    mmu.write_mem(addr, value);
 }
 
 ///Swap r
 ///
 /// Exchange lower and higher nibbles
 pub fn swap(f: &mut Flags, r: &mut u8) {
-    let mut reg = *r;
+    let mut value: u8 = *r;
 
     //Lower Nibble
-    let low: u8 = reg & 0x0F; //Upper Nibble
-    let up: u8 = reg & 0xF0;
+    let low: u8 = value & 0x0F;
+    //Upper Nibble
+    let up: u8 = value & 0xF0;
 
-    reg = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
+    //Swap
+    value = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
 
-    f.update_zero_flag(reg);
+    f.update_zero_flag(value);
 
     f.clear_carry_flag();
 
@@ -818,7 +854,33 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
 
     f.clear_half_carry_flag();
 
-    *r = reg;
+    *r = value;
+}
+
+///Swap mem[HL]
+///
+/// Exchange lower and higher nibbles
+pub fn swap_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value = mmu.read_mem(addr);
+
+    //Lower Nibble
+    let low: u8 = value & 0x0F;
+
+    //Upper Nibble
+    let up: u8 = value & 0xF0;
+
+    //Swap
+    value = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
+
+    f.update_zero_flag(value);
+
+    f.clear_carry_flag();
+
+    f.clear_sub_flag();
+
+    f.clear_half_carry_flag();
+
+    mmu.write_mem(addr, value);
 }
 
 ///Shift Right Logical
