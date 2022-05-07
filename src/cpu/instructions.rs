@@ -669,7 +669,35 @@ pub fn rr(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-pub fn rr_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {}
+pub fn rr_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+    let mut value: u8 = mmu.read_mem(addr);
+
+    let rmb: u8 = value & 0x01;
+
+    //Rotate Right
+    value >>= 1;
+
+    //Copy carry to 0th bit
+    value |= (1 << 7) & (f.carry_flag() << 7);
+
+    if rmb == 0 {
+        f.clear_carry_flag();
+    } else {
+        f.set_carry_flag();
+    }
+
+    //Update Zero Flag
+    f.update_zero_flag(value);
+
+    //Clear Sub Flag
+    f.clear_sub_flag();
+
+    //Clear Half Carry
+    f.clear_half_carry_flag();
+
+    //Write new value to memory
+    mmu.write_mem(addr, value);
+}
 
 /// Shift Left Arithmetic
 ///
