@@ -1004,7 +1004,24 @@ fn srl_test() {
 
     srl(&mut cpu.registers.f, &mut cpu.registers.b);
 
-    let check = [cpu.registers.b, cpu.registers.f.carry_flag()];
+    let check = vec![cpu.registers.b, cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x47, 0x01]);
+}
+
+#[test]
+fn srl_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+    let value = 0x8F;
+
+    mmu.write_mem(addr, value);
+
+    srl_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.carry_flag()];
 
     assert_eq!(check, [0x47, 0x01]);
 }
