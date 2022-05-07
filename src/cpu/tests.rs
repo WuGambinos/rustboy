@@ -868,6 +868,23 @@ fn rl_test() {
     assert_eq!(check, [0x1E, 0x01]);
 }
 
+#[test]
+fn rl_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+    let value = 0x8F;
+
+    mmu.write_mem(addr, value);
+
+    rl_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.carry_flag()];
+
+    assert_eq!(check, [0x1E, 0x01]);
+}
+
 fn rr_test() {}
 
 #[test]
