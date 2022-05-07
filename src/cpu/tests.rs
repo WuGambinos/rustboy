@@ -956,6 +956,21 @@ fn sra_test() {
 }
 
 #[test]
+fn sra_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFFF;
+    let value = 0xB8;
+    mmu.write_mem(addr, value);
+
+    sra_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    let check = vec![mmu.read_mem(addr), cpu.registers.f.carry_flag()];
+    assert_eq!(check, [0xDC, 0x00]);
+}
+
+#[test]
 fn swap_test() {
     let mut cpu = Cpu::new();
 
@@ -964,6 +979,21 @@ fn swap_test() {
     swap(&mut cpu.registers.f, &mut cpu.registers.b);
 
     assert_eq!(cpu.registers.b, 0xCB);
+}
+
+#[test]
+fn swap_hl_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let addr = 0xFF;
+    let value = 0xBC;
+
+    mmu.write_mem(addr, value);
+
+    swap_hl(&mut cpu.registers.f, &mut mmu, addr);
+
+    assert_eq!(mmu.read_mem(addr), 0xCB);
 }
 
 #[test]
