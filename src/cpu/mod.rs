@@ -4,14 +4,8 @@ use crate::Mmu;
 use self::instructions::*;
 
 ///Struct that represents flags of the Gameboy CPU
-/*
-pub struct Flags {
-    zero_flag: u8,
-    sub_flag: u8,
-    half_carry_flag: u8,
-    carry_flag: u8,
-}*/
 
+#[derive(Debug)]
 pub struct Flags {
     data: u8,
 }
@@ -160,6 +154,7 @@ impl Flags {
 
 ///Struct that represents registers for the Gameboy CPU
 
+#[derive(Debug)]
 struct Registers {
     //Accumulator
     a: u8,
@@ -253,12 +248,8 @@ impl Registers {
 }
 
 ///Struct that represents the gameboy cpu
+#[derive(Debug)]
 pub struct Cpu {
-    memory: [u8; 65536],
-
-    ///Flags
-    //f: Flags,
-
     //Registers
     registers: Registers,
 
@@ -282,7 +273,6 @@ impl Cpu {
     ///Create a new instance of the gameboy cpu
     pub fn new() -> Self {
         Cpu {
-            memory: [0; 65536],
             registers: Registers::new(),
             //f: Flags::new(),
             sp: 0,
@@ -430,7 +420,9 @@ impl Cpu {
             }
 
             //STOP
-            0x10 => {}
+            0x10 => {
+                //std::process::exit(0);
+            }
 
             // LD DE, u16
             0x11 => {
@@ -609,6 +601,7 @@ impl Cpu {
             0x2A => {
                 self.registers.a = mmu.read_mem(self.registers.hl());
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
+                self.pc += 1;
             }
 
             //DEC HL

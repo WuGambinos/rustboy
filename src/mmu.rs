@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub struct Mmu {
-    memory: [u8; 0xFFFF],
+    memory: [u8; 0x10000],
     //Interrupt Enable Register
     interrupt_en: u8,
     /*rom_bank: [u8; 16384],
@@ -37,7 +37,7 @@ impl Default for Mmu {
 impl Mmu {
     pub fn new() -> Self {
         Mmu {
-            memory: [0; 0xFFFF],
+            memory: [0; 0x10000],
             interrupt_en: 0,
         }
     }
