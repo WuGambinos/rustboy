@@ -29,8 +29,13 @@ fn main() {
     //Read Rom into memory
     mmu.read_rom(&rom);
 
+    cpu.pc = 0x100;
+
     //Emulate a cpu cycle
     while cpu.pc < 0xFFFF {
+        println!("{:?}", cpu);
+        println!();
+        println!();
         cpu.emulate_cycle(&mut mmu);
 
         if mmu.read_mem(0xFF02) == 0x81 {
