@@ -12,7 +12,7 @@ pub struct Flags {
 
 impl Flags {
     fn new() -> Self {
-        Flags { data: 0 }
+        Flags { data: 0x01 }
     }
 
     fn zero_flag(&self) -> u8 {
@@ -184,13 +184,13 @@ struct Registers {
 impl Registers {
     fn new() -> Self {
         Registers {
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 0,
-            e: 0,
-            h: 0,
-            l: 0,
+            a: 0xB0,
+            b: 0x13,
+            c: 0x00,
+            d: 0xD8,
+            e: 0x00,
+            h: 0x4D,
+            l: 0x01,
             f: Flags::new(),
         }
     }
@@ -275,8 +275,8 @@ impl Cpu {
         Cpu {
             registers: Registers::new(),
             //f: Flags::new(),
-            sp: 0,
-            pc: 0,
+            sp: 0xFFFE,
+            pc: 0x100,
             opcode: 0,
         }
     }
@@ -421,7 +421,7 @@ impl Cpu {
 
             //STOP
             0x10 => {
-                //std::process::exit(0);
+                std::process::exit(0);
             }
 
             // LD DE, u16
