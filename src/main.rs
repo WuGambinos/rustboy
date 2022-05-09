@@ -11,7 +11,7 @@ use std::path::Path;
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/09-op_rr.gb";
+    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -31,12 +31,14 @@ fn main() {
 
     cpu.pc = 0x100;
 
+    cpu.test_case();
+
     //Emulate a cpu cycle
-    while cpu.pc < 0xFFFF {
+    loop {
+        cpu.emulate_cycle(&mut mmu);
         println!("{:?}", cpu);
         println!();
         println!();
-        cpu.emulate_cycle(&mut mmu);
 
         if mmu.read_mem(0xFF02) == 0x81 {
             let c: char = mmu.read_mem(0xFF01) as char;
