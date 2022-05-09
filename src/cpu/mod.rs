@@ -3449,6 +3449,23 @@ impl Cpu {
         // (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
     }
+
+    pub fn test_case(&mut self) {
+        self.registers.a = 0;
+        self.registers.b = 176;
+        self.registers.c = 16;
+        self.registers.d = 2;
+        self.registers.e = 5;
+        self.registers.h = 130;
+        self.registers.l = 5;
+
+        self.registers.f.data = 1;
+
+        self.sp = 65534;
+        self.pc = 516;
+
+        self.opcode = 32;
+    }
 }
 
 #[cfg(test)]
