@@ -31,14 +31,12 @@ fn main() {
 
     cpu.pc = 0x100;
 
-    cpu.test_case();
-
     //Emulate a cpu cycle
     loop {
         cpu.emulate_cycle(&mut mmu);
-        println!("{:?}", cpu);
-        println!();
-        println!();
+        //println!("{:?}", cpu);
+        //println!();
+        //println!();
 
         if mmu.read_mem(0xFF02) == 0x81 {
             let c: char = mmu.read_mem(0xFF01) as char;

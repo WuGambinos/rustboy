@@ -1127,3 +1127,61 @@ fn set_n_hl_test() {
 
     assert_eq!(mmu.read_mem(addr), 0xE9);
 }
+
+/*************************************************************************
+ * IO TESTS
+ *************************************************************************/
+
+#[test]
+fn ld_a_from_io_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let offset: u8 = 0x02;
+    let value = 0xAB;
+    mmu.write_mem(0xFF00 + (offset as u16), value);
+
+    ld_a_from_io(&mut cpu, &mmu, offset);
+
+    assert_eq!(cpu.registers.a, mmu.read_mem(0xFF02));
+}
+
+#[test]
+fn ld_a_from_io_c_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let value = 0xAB;
+
+    mmu.write_mem(0xFF0C, value);
+
+    ld_a_from_io_c(&mut cpu, &mmu);
+
+    assert_eq!(cpu.registers.a, mmu.read_mem(0xFF0C));
+}
+
+#[test]
+fn ld_io_from_a_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    let offset = 0x02;
+
+    cpu.registers.a = 0x81;
+
+    ld_io_from_a(&cpu, &mut mmu, offset);
+
+    assert_eq!(cpu.registers.a, mmu.read_mem(0xFF02));
+}
+
+#[test]
+fn ld_io_c_from_a_test() {
+    let mut cpu = Cpu::new();
+    let mut mmu = Mmu::new();
+
+    cpu.registers.a = 0x81;
+
+    ld_io_c_from_a(&cpu, &mut mmu);
+
+    assert_eq!(cpu.registers.a, mmu.read_mem(0xFF0C));
+}
