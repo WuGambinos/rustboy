@@ -12,7 +12,7 @@ pub struct Flags {
 
 impl Flags {
     fn new() -> Self {
-        Flags { data: 0x01 }
+        Flags { data: 0 }
     }
 
     fn zero_flag(&self) -> u8 {
@@ -184,13 +184,13 @@ struct Registers {
 impl Registers {
     fn new() -> Self {
         Registers {
-            a: 0xB0,
-            b: 0x13,
-            c: 0x00,
-            d: 0xD8,
-            e: 0x00,
-            h: 0x4D,
-            l: 0x01,
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
             f: Flags::new(),
         }
     }
@@ -274,9 +274,8 @@ impl Cpu {
     pub fn new() -> Self {
         Cpu {
             registers: Registers::new(),
-            //f: Flags::new(),
-            sp: 0xFFFE,
-            pc: 0x100,
+            sp: 0,
+            pc: 0,
             opcode: 0,
         }
     }
@@ -302,7 +301,6 @@ impl Cpu {
 
             //LD (BC), A
             0x02 => {
-                //self.memory[self.registers.bc() as usize] = self.registers.a;
                 mmu.write_mem(self.registers.bc(), self.registers.a);
                 self.pc += 1;
             }
@@ -3358,7 +3356,7 @@ impl Cpu {
             //LD A, (FF00+u8)
             0xF0 => {
                 let n: u8 = mmu.read_mem(self.pc + 1);
-                ld_io_from_a(self, mmu, n);
+                ld_a_from_io(self, mmu, n);
                 self.pc += 2;
             }
 
@@ -3373,7 +3371,7 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            //LD (FF00 + C), A
+            //LD A, (FF00 + C)
             0xF2 => {
                 ld_a_from_io_c(self, mmu);
                 self.pc += 1;
@@ -3448,23 +3446,6 @@ impl Cpu {
     fn get_u16(&mut self, mmu: &Mmu) -> u16 {
         // (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
-    }
-
-    pub fn test_case(&mut self) {
-        self.registers.a = 0;
-        self.registers.b = 176;
-        self.registers.c = 16;
-        self.registers.d = 2;
-        self.registers.e = 5;
-        self.registers.h = 130;
-        self.registers.l = 5;
-
-        self.registers.f.data = 1;
-
-        self.sp = 65534;
-        self.pc = 516;
-
-        self.opcode = 32;
     }
 }
 
