@@ -31,6 +31,10 @@ fn main() {
 
     cpu.pc = 0x100;
 
+    for i in 0..u16::MAX {
+        cpu.emulate_cycle(&mut mmu);
+    }
+
     //Emulate a cpu cycle
     loop {
         cpu.emulate_cycle(&mut mmu);

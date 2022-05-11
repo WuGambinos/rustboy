@@ -1,0 +1,33 @@
+JP 0x213
+
+LD HL, 0x4000
+
+JP 0x200
+
+LD B, A
+
+LD DE, C0
+
+LD C, u8
+
+LD A, HL++
+
+LD (DE), A
+
+INC E
+ 
+JR NZ, i8
+
+LOOP Starts(wont end until zero flag is set)
+
+	LD C, u8
+
+	LD A, HL++
+
+	LD (DE), A
+
+	INC E
+
+	JR NZ, i8
+
+
