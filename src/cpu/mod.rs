@@ -12,7 +12,7 @@ pub struct Flags {
 
 impl Flags {
     fn new() -> Self {
-        Flags { data: 0 }
+        Flags { data: 0x80 }
     }
 
     fn zero_flag(&self) -> u8 {
@@ -184,13 +184,13 @@ struct Registers {
 impl Registers {
     fn new() -> Self {
         Registers {
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 0,
-            e: 0,
-            h: 0,
-            l: 0,
+            a: 0x11,
+            b: 0x00,
+            c: 0x00,
+            d: 0xFF,
+            e: 0x56,
+            h: 0x00,
+            l: 0x00,
             f: Flags::new(),
         }
     }
@@ -274,7 +274,7 @@ impl Cpu {
     pub fn new() -> Self {
         Cpu {
             registers: Registers::new(),
-            sp: 0,
+            sp: 0xFFFE,
             pc: 0,
             opcode: 0,
         }
@@ -3449,6 +3449,25 @@ impl Cpu {
     fn get_u16(&mut self, mmu: &Mmu) -> u16 {
         // (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
+    }
+
+    pub fn print_status(&self) {
+        println!("PC: {:#X}", self.pc);
+        println!("SP: {:#X}", self.sp);
+
+        let reg = format!(
+            "AF: {:#X}, BC: {:#X}, DE:{:#X}, HL: {:#X}",
+            self.registers.af(),
+            self.registers.bc(),
+            self.registers.de(),
+            self.registers.hl()
+        );
+
+        println!("{}", reg);
+
+        println!("FLAG: {:#X}", self.registers.f.data);
+
+        println!("OPCODE: {:#X}", self.opcode);
     }
 }
 

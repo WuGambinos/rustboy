@@ -31,24 +31,30 @@ fn main() {
 
     cpu.pc = 0x100;
 
-    for i in 0..u16::MAX {
-        cpu.emulate_cycle(&mut mmu);
-    }
-
     //Emulate a cpu cycle
-    loop {
-        cpu.emulate_cycle(&mut mmu);
-        //println!("{:?}", cpu);
-        //println!();
-        //println!();
+    //loop {
+    /*cpu.emulate_cycle(&mut mmu);
+    println!("{:?}", cpu);
+    println!();
+    //println!();*/
 
-        if mmu.read_mem(0xFF02) == 0x81 {
-            let c: char = mmu.read_mem(0xFF01) as char;
-            println!("{}", c);
-            mmu.write_mem(0xff02, 0x0);
+    for _ in 0..10 {
+        while cpu.pc != 0x20D {
+            cpu.emulate_cycle(&mut mmu);
         }
+
+        cpu.print_status();
+        cpu.emulate_cycle(&mut mmu);
+        println!();
     }
+
+    /*if mmu.read_mem(0xFF02) == 0x81 {
+        let c: char = mmu.read_mem(0xFF01) as char;
+        println!("{}", c);
+        mmu.write_mem(0xff02, 0x0);
+    }*/
 }
+//}
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector
