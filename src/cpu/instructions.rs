@@ -1054,7 +1054,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 pub fn jr(cpu: &mut Cpu, dd: u8) {
     let offset = dd as i8;
 
-    cpu.pc = cpu.pc.wrapping_add(offset as u16);
+    cpu.pc = cpu.pc.wrapping_add(offset as u16).wrapping_add(2);
 }
 
 ///
