@@ -3330,6 +3330,7 @@ impl Cpu {
                 let nn: u16 =
                     u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
                 mmu.write_mem(nn, self.registers.a);
+                self.pc += 3;
             }
 
             //Invalid Opcode
@@ -3378,7 +3379,9 @@ impl Cpu {
             }
 
             //DI
-            0xF3 => {}
+            0xF3 => {
+                self.pc += 1;
+            }
 
             //Invalid Opcode
             0xF4 => {}
