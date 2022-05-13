@@ -260,7 +260,7 @@ pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
 pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
     let a: u8 = cpu.registers.a;
 
-    let res = a - operand;
+    let res = a.wrapping_sub(operand);
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(res);
@@ -1314,14 +1314,14 @@ pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
 
     //Value in memory (mem[sp])
     let low: u8 = mmu.read_mem(stack_pointer);
-    let up: u8 = mmu.read_mem(stack_pointer + 1);
+    let up: u8 = mmu.read_mem(stack_pointer.wrapping_add(1));
 
     //rr = mem[sp]
     *lower = low;
     *upper = up;
 
     //SP = SP + 2
-    stack_pointer += 2;
+    stack_pointer = stack_pointer.wrapping_add(2);
 
     *sp = stack_pointer;
 }
