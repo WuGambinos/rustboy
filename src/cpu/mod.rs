@@ -260,7 +260,7 @@ pub struct Cpu {
     pub pc: u16,
 
     ///Current opcode
-    opcode: u8,
+    pub(crate) opcode: u8,
 }
 
 impl Default for Cpu {
@@ -1520,12 +1520,15 @@ impl Cpu {
             }
 
             //POP BC
-            0xC1 => pop_rr(
-                mmu,
-                &mut self.registers.b,
-                &mut self.registers.c,
-                &mut self.sp,
-            ),
+            0xC1 => {
+                pop_rr(
+                    mmu,
+                    &mut self.registers.b,
+                    &mut self.registers.c,
+                    &mut self.sp,
+                );
+                self.pc += 1;
+            }
 
             //JP NZ, u16
             0xC2 => {
