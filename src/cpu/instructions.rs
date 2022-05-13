@@ -1150,6 +1150,9 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     //SP = SP - 2
     stack_pointer -= 2;
 
+    //Increment PC by 3 before push
+    cpu.pc += 3;
+
     //mem[sp] = pc
     mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
     mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);

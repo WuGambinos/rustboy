@@ -738,7 +738,7 @@ impl Cpu {
             //LD A, u8
             0x3E => {
                 self.registers.a = mmu.read_mem(self.pc + 1);
-                self.pc += 1;
+                self.pc += 2;
             }
 
             //Clear Carry Flag(CCF)
@@ -3451,9 +3451,11 @@ impl Cpu {
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
     }
 
-    pub fn print_status(&self) {
+    pub fn print_status(&self, mmu: &Mmu) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
+        println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp - 1));
+        println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp - 2));
 
         let reg = format!(
             "AF: {:#X}, BC: {:#X}, DE:{:#X}, HL: {:#X}",
