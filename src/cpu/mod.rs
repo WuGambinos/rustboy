@@ -3454,8 +3454,8 @@ impl Cpu {
     pub fn print_status(&self, mmu: &Mmu) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
-        println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp - 1));
-        println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp - 2));
+        println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(1)));
+        println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(2)));
 
         let reg = format!(
             "AF: {:#X}, BC: {:#X}, DE:{:#X}, HL: {:#X}",
