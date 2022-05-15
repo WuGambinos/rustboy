@@ -1548,7 +1548,7 @@ impl Cpu {
             0xC4 => {
                 let nn: u16 =
                     u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call(self, mmu, nn);
+                call_nz(self, mmu, nn);
             }
 
             //PUSH BC
@@ -3457,8 +3457,15 @@ impl Cpu {
     pub fn print_status(&self, mmu: &Mmu) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
+
+        println!("MEM[SP+1]: {:#X}", mmu.read_mem(self.sp.wrapping_add(1)));
+        println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
         println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(1)));
         println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(2)));
+
+
+        println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
+        println!("MEM[0xDFE9]: {:#X}", mmu.read_mem(0xDFE9));
 
         let reg = format!(
             "AF: {:#X}, BC: {:#X}, DE:{:#X}, HL: {:#X}",
