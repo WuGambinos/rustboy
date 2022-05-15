@@ -1223,12 +1223,12 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     let mut sp = cpu.sp;
 
     //PC = (SP)
-    let pc = u16::from_be_bytes([mmu.read_mem(sp + 1), mmu.read_mem(sp)]);
+    let pc = u16::from_be_bytes([mmu.read_mem(sp.wrapping_add(1)), mmu.read_mem(sp)]);
 
     cpu.pc = pc;
 
     //SP = SP + 2
-    sp += 2;
+    sp =sp.wrapping_add( 2);
 
     cpu.sp = sp;
 }
