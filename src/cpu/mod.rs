@@ -624,6 +624,7 @@ impl Cpu {
             0x2E => {
                 let value = mmu.read_mem(self.pc + 1);
                 self.registers.l = value;
+                self.pc += 2;
             }
 
             //CPL
@@ -632,6 +633,7 @@ impl Cpu {
                 self.registers.f.set_half_carry_flag();
                 //A = A xor FF
                 self.registers.a ^= 0xFF;
+                self.pc += 1;
             }
 
             //JR NC, i8
@@ -3462,7 +3464,6 @@ impl Cpu {
         println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
         println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(1)));
         println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(2)));
-
 
         println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
         println!("MEM[0xDFE9]: {:#X}", mmu.read_mem(0xDFE9));
