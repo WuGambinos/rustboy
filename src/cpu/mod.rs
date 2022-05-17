@@ -15,7 +15,7 @@ impl Flags {
         Flags { data: 0x80 }
     }
 
-    fn zero_flag(&self) -> u8 {
+    pub(crate) fn zero_flag(&self) -> u8 {
         (self.data >> 7) & 1
     }
 
@@ -155,15 +155,15 @@ impl Flags {
 ///Struct that represents registers for the Gameboy CPU
 
 #[derive(Debug)]
-struct Registers {
+pub struct Registers {
     //Accumulator
-    a: u8,
+    pub(crate) a: u8,
 
     //B Register
-    b: u8,
+    pub(crate) b: u8,
 
     //C Register
-    c: u8,
+    pub(crate) c: u8,
 
     //D Register
     d: u8,
@@ -178,7 +178,7 @@ struct Registers {
     l: u8,
 
     //F Register (FLAGS)
-    f: Flags,
+    pub(crate) f: Flags,
 }
 
 impl Registers {
@@ -251,10 +251,10 @@ impl Registers {
 #[derive(Debug)]
 pub struct Cpu {
     //Registers
-    registers: Registers,
+    pub(crate) registers: Registers,
 
     ///Stack pointer
-    sp: u16,
+    pub(crate) sp: u16,
 
     ///Program counter
     pub pc: u16,
@@ -624,6 +624,7 @@ impl Cpu {
             0x2E => {
                 let value = mmu.read_mem(self.pc + 1);
                 self.registers.l = value;
+                self.pc += 2;
             }
 
             //CPL
@@ -632,6 +633,7 @@ impl Cpu {
                 self.registers.f.set_half_carry_flag();
                 //A = A xor FF
                 self.registers.a ^= 0xFF;
+                self.pc += 1;
             }
 
             //JR NC, i8
@@ -784,7 +786,8 @@ impl Cpu {
 
             //LD B, (HL)
             0x46 => {
-                ld_8bit(&mut self.registers.b, mmu.read_mem(self.pc + 1));
+                let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.b, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -831,7 +834,8 @@ impl Cpu {
 
             //LD C, (HL)
             0x4E => {
-                ld_8bit(&mut self.registers.c, mmu.read_mem(self.pc + 1));
+            let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.c, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -878,7 +882,8 @@ impl Cpu {
 
             //LD D, (HL)
             0x56 => {
-                ld_8bit(&mut self.registers.d, mmu.read_mem(self.pc + 1));
+                let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.d, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -925,7 +930,8 @@ impl Cpu {
 
             //LD E, (HL)
             0x5E => {
-                ld_8bit(&mut self.registers.e, mmu.read_mem(self.pc + 1));
+                let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.e, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -972,7 +978,8 @@ impl Cpu {
 
             //LD H, (HL)
             0x66 => {
-                ld_8bit(&mut self.registers.h, mmu.read_mem(self.pc + 1));
+                let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.h, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -1019,7 +1026,8 @@ impl Cpu {
 
             //LD L, (HL)
             0x6E => {
-                ld_8bit(&mut self.registers.l, mmu.read_mem(self.pc + 1));
+                let addr: u16 = self.registers.hl();
+                ld_8bit(&mut self.registers.l, mmu.read_mem(addr));
                 self.pc += 1;
             }
 
@@ -3406,7 +3414,13 @@ impl Cpu {
             0xF7 => rst(self, mmu, 0x30),
 
             //LD HL, SP+i8
-            0xF8 => {}
+            0xF8 => {
+                let d: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.sp = self.sp.wrapping_add(d as u16);
+                self.registers.set_hl(self.sp);
+                
+                self.pc += 2;
+            }
 
             //LD SP, HL
             0xF9 => {
@@ -3416,7 +3430,9 @@ impl Cpu {
 
             //LD A, (u16)
             0xFA => {
-                let n = mmu.read_mem(self.pc + 1);
+                println!("REACHED", self.pc);
+                let addr = 0;
+                let n = mmu.read_mem(addr);
                 ld_8bit(&mut self.registers.a, n);
                 self.pc += 3;
             }
@@ -3454,7 +3470,7 @@ impl Cpu {
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
     }
 
-    pub fn print_status(&self, mmu: &Mmu) {
+    pub fn print_state(&self, mmu: &Mmu) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
 
