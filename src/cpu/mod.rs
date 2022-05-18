@@ -574,14 +574,6 @@ impl Cpu {
             //DAA MAY need to check
             0x27 => {
                 daa(self);
-                //Temproary Fix
-                if self.registers.a == 0 {
-                    self.registers.f.set_zero_flag();
-                } else {
-                    self.registers.f.clear_carry_flag();
-                }
-                self.registers.f.clear_half_carry_flag();
-
                 self.pc += 1;
             }
 

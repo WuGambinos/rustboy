@@ -276,24 +276,33 @@ pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
 }
 
 pub fn daa(cpu: &mut Cpu) {
-    if (cpu.registers.a & 0x0F) > 0x09 || cpu.registers.f.half_carry_flag() == 1 {
-        cpu.registers.a = cpu.registers.a.wrapping_add( 0x06);
-    }
+    if cpu.registers.f.sub_flag() == 0 {
+        if cpu.registers.f.carry_flag() == 1 || cpu.registers.a > 0x99 {
+            cpu.registers.a = cpu.registers.a.wrapping_add(0x60);
+            cpu.registers.f.set_carry_flag();
+        }
 
-    let upper_nibble = cpu.registers.a & 0xF0 >> 4;
-    let mut reached = false;
+        if cpu.registers.f.half_carry_flag() == 1 || (cpu.registers.a & 0x0F) > 0x09 {
+            cpu.registers.a = cpu.registers.a.wrapping_add(0x6);
+        }
 
-    if upper_nibble > 9 || cpu.registers.f.carry_flag() == 1 {
-        cpu.registers.a = cpu.registers.a.wrapping_add( 0x06);
-        reached = true;
-    }
-
-    //Set carry if second addition was needed, otherwise reset carry
-    if reached {
-        cpu.registers.f.set_carry_flag();
     } else {
-        cpu.registers.f.clear_carry_flag();
+        if cpu.registers.f.carry_flag() == 1 {
+            cpu.registers.a = cpu.registers.a.wrapping_sub(0x60);
+        }
+
+        if cpu.registers.f.half_carry_flag() == 1 {
+            cpu.registers.a = cpu.registers.a.wrapping_sub(0x6);
+        }
     }
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
+
+    //Update Zero Flag
+    cpu.registers.f.update_zero_flag(cpu.registers.a);
+
+
 }
 
 /************************************************************************
