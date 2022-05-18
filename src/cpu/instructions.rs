@@ -1333,7 +1333,7 @@ pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
     let mut stack_pointer = *sp;
 
     //SP = SP - 2
-    stack_pointer -= 2;
+    stack_pointer = stack_pointer.wrapping_sub(2);
 
     //mem[sp] = rr
     mmu.write_mem(stack_pointer, lower);
