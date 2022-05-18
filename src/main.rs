@@ -12,7 +12,7 @@ use crate::cpu::instructions::{cp_r_r, inc_16bit, ld_8bit, ld_a_from_io, or_r_r}
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
+    let test_rom = "roms/cpu_instrs/individual/04-op r,imm.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -44,8 +44,8 @@ fn main() {
             print!("{}", c);
             mmu.write_mem(0xff02, 0x0);
         }
-       /*cpu.print_state(&mmu);
-       println!();*/
+       cpu.print_state(&mmu);
+       println!();
    }
 }
 
