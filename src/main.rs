@@ -34,6 +34,8 @@ fn main() {
 
     let mut counter = 0;
 
+    let mut cond = true;
+
 
    loop {
        cpu.emulate_cycle(&mut mmu);
@@ -42,6 +44,8 @@ fn main() {
             print!("{}", c);
             mmu.write_mem(0xff02, 0x0);
         }
+       /*cpu.print_state(&mmu);
+       println!();*/
    }
 }
 
