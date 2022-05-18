@@ -277,14 +277,14 @@ pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
 
 pub fn daa(cpu: &mut Cpu) {
     if (cpu.registers.a & 0x0F) > 0x09 || cpu.registers.f.half_carry_flag() == 1 {
-        cpu.registers.a += 0x06;
+        cpu.registers.a = cpu.registers.a.wrapping_add( 0x06);
     }
 
     let upper_nibble = cpu.registers.a & 0xF0 >> 4;
     let mut reached = false;
 
     if upper_nibble > 9 || cpu.registers.f.carry_flag() == 1 {
-        cpu.registers.a += 0x60;
+        cpu.registers.a = cpu.registers.a.wrapping_add( 0x06);
         reached = true;
     }
 
