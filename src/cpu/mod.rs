@@ -1569,7 +1569,7 @@ impl Cpu {
             0xC6 => {
                 let addr = self.pc + 1;
                 add_a_r(self, mmu.read_mem(addr));
-                self.pc += 1;
+                self.pc += 2;
             }
 
             //RST 0x00(CAll to n)
@@ -3418,7 +3418,7 @@ impl Cpu {
                 let d: i8 = mmu.read_mem(self.pc + 1) as i8;
                 self.sp = self.sp.wrapping_add(d as u16);
                 self.registers.set_hl(self.sp);
-                
+
                 self.pc += 2;
             }
 
@@ -3430,8 +3430,7 @@ impl Cpu {
 
             //LD A, (u16)
             0xFA => {
-                println!("REACHED", self.pc);
-                let addr = 0;
+                let addr = self.get_u16(&mmu);
                 let n = mmu.read_mem(addr);
                 ld_8bit(&mut self.registers.a, n);
                 self.pc += 3;
