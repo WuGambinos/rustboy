@@ -419,7 +419,7 @@ impl Cpu {
 
             //STOP
             0x10 => {
-                std::process::exit(0);
+                self.pc += 1;
             }
 
             // LD DE, u16
