@@ -571,7 +571,7 @@ impl Cpu {
                 self.pc += 2;
             }
 
-            //DAA MAY need to check
+            //DAA
             0x27 => {
                 daa(self);
                 self.pc += 1;
