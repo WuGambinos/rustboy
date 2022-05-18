@@ -12,7 +12,7 @@ use crate::cpu::instructions::{cp_r_r, inc_16bit, ld_8bit, ld_a_from_io, or_r_r}
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/06-ld r,r.gb";
+    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
