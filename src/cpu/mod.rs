@@ -581,6 +581,8 @@ impl Cpu {
                     self.registers.f.clear_carry_flag();
                 }
                 self.registers.f.clear_half_carry_flag();
+
+                self.pc += 1;
             }
 
             //JR Z, i8
@@ -3380,6 +3382,9 @@ impl Cpu {
                     &mut self.registers.f.data,
                     &mut self.sp,
                 );
+
+                //Clear Lower Nibble of F register
+                self.registers.f.data &= 0xF0;
                 self.pc += 1;
             }
 
@@ -3475,8 +3480,8 @@ impl Cpu {
 
         println!("MEM[SP+1]: {:#X}", mmu.read_mem(self.sp.wrapping_add(1)));
         println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
-        println!("MEM[SP-1]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(1)));
-        println!("MEM[SP-2]: {:#X}", mmu.read_mem(self.sp.wrapping_sub(2)));
+        println!("MEM[{:#X}]: {:#X}", self.sp.wrapping_sub(1), mmu.read_mem(self.sp.wrapping_sub(1)));
+        println!("MEM[{:#X}]: {:#X}",self.sp.wrapping_sub(2), mmu.read_mem(self.sp.wrapping_sub(2)));
 
 
         println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
