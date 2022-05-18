@@ -12,7 +12,7 @@ use crate::cpu::instructions::{cp_r_r, inc_16bit, ld_8bit, ld_a_from_io, or_r_r}
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/09-op_rr.gb";
+    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -102,36 +102,36 @@ fn main() {
 
     }*/
 
-    let mut cond = true;
-    while cond {
 
-        while cpu.pc != 0xC2EA {
+    loop  {
+        cpu.emulate_cycle(&mut mmu);
+        println!();
+        cpu.print_state(&mmu);
+    }
+
+    /*while cond {
+
+        while cpu.pc != 0xC24C{
             cpu.emulate_cycle(&mut mmu);
+            println!();
+            cpu.print_state(&mmu);
+            //println!("PC: {:#X}", cpu.pc);
+
             cond = false;
         }
-    }
-
-    cpu.print_state(&mmu);
-    mmu.write_mem(0xDFFD, 0xD0);
+    }*/
 
 
-    loop {
+    //mmu.write_mem(0xDFFD, 0xD0);
+
+    /*loop {
         cpu.emulate_cycle(&mut mmu);
-        println!();
-        cpu.print_state(&mmu);
-    }
 
-
-    /*for _ in 0..30{
-        while cpu.pc != 0xC00C {
-            cpu.emulate_cycle(&mut mmu);
+        if cpu.pc == 0xCA03 {
+            println!();
+            cpu.print_state(&mmu);
+            break;
         }
-
-        println!();
-        cpu.print_state(&mmu);
-
-        cpu.emulate_cycle(&mut mmu);
-
     }*/
 
 
