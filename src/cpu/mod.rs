@@ -311,13 +311,13 @@ impl Cpu {
                 self.pc += 1;
             }
 
-            //INC B: Flags:Z0H
+            //INC B
             0x04 => {
                 inc_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
             }
 
-            //DEC B: Flags Z1H
+            //DEC B
             0x05 => {
                 dec_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
@@ -343,19 +343,18 @@ impl Cpu {
             //LD (u16), SP
             0x08 => {
                 //memory[u16] = SP
-                let addr: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 1), mmu.read_mem(self.pc + 2)]);
+                let addr: u16 = self.get_u16(&mmu);
 
                 //Lower byte of stack pointer
                 let lower_sp: u8 = (self.sp & 0x00FF) as u8;
 
-                //Higher byte of stack pointer
+                //Upper byte of stack pointer
                 let upper_sp: u8 = ((self.sp & 0xFF00) >> 8) as u8;
 
                 //Write lower_sp to addr
                 mmu.write_mem(addr, lower_sp);
 
-                //Write lower_sp to addr+1
+                //Write upper_sp to addr+1
                 mmu.write_mem(addr + 1, upper_sp);
 
                 //Increase Program Counter
@@ -364,7 +363,8 @@ impl Cpu {
 
             //ADD HL, BC
             0x09 => {
-                add_rr_hl(self, "DE");
+                add_rr_hl(self, "BC");
+
                 //Increase Program Counter
                 self.pc += 1;
             }
