@@ -343,7 +343,7 @@ impl Cpu {
             //LD (u16), SP
             0x08 => {
                 //memory[u16] = SP
-                let addr: u16 = self.get_u16(&mmu);
+                let addr: u16 = self.get_u16(mmu);
 
                 //Lower byte of stack pointer
                 let lower_sp: u8 = (self.sp & 0x00FF) as u8;
@@ -402,8 +402,8 @@ impl Cpu {
             //LD C, u8
             0x0E => {
                 //C = u8
-                let value: u8 = mmu.read_mem(self.pc + 1);
-                self.registers.c = value;
+                let u8_value: u8 = mmu.read_mem(self.pc + 1);
+                self.registers.c = u8_value;
 
                 //Increase Program Counter
                 self.pc += 2;
@@ -456,15 +456,15 @@ impl Cpu {
             //DEC D
             0x15 => {
                 dec_8bit(&mut self.registers.f, &mut self.registers.d);
-                //Inrease Program Counter
+                //Increase Program Counter
                 self.pc += 1;
             }
 
             //LD D, u8
             0x16 => {
                 //D = u8
-                let value: u8 = mmu.read_mem(self.pc + 1);
-                self.registers.d = value;
+                let u8_value: u8 = mmu.read_mem(self.pc + 1);
+                self.registers.d = u8_value;
 
                 //Increase Program Counter
                 self.pc += 2;
@@ -481,8 +481,8 @@ impl Cpu {
 
             //JR i8
             0x18 => {
-                let value = mmu.read_mem(self.pc + 1);
-                jr(self, value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                jr(self, u8_value);
             }
 
             //ADD HL, DE
@@ -517,57 +517,68 @@ impl Cpu {
 
             //LD E, u8
             0x1E => {
-                self.registers.e = mmu.read_mem(self.pc + 1);
+                let u8_value = mmu.read_mem(self.pc  + 1);
+                self.registers.e = u8_value;
                 self.pc += 2;
             }
 
             //RRA
             0x1F => {
+                //Rotate
                 rra(self);
                 self.pc += 1;
             }
 
             //JR NZ, i8
             0x20 => {
-                let value = mmu.read_mem(self.pc + 1);
-                jr_nz(self, value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                jr_nz(self, u8_value);
             }
 
             //LD HL, u16
             0x21 => {
-                let value = self.get_u16(mmu);
-                self.registers.set_hl(value);
+                let u16_value = self.get_u16(mmu);
+                self.registers.set_hl(u16_value);
                 self.pc += 3;
             }
 
             //LD (HL+), A
             0x22 => {
+                //memory[HL] = A
                 mmu.write_mem(self.registers.hl(), self.registers.a);
+
+                //HL++
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
                 self.pc += 1;
             }
 
             //INC HL
             0x23 => {
+                //HL++
                 inc_16bit(self, "HL");
                 self.pc += 1;
             }
 
             //INC H
             0x24 => {
+                //H++
                 inc_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
             //DEC H
             0x25 => {
+                //L++
                 dec_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
             }
 
             //LD H, u8
             0x26 => {
-                self.registers.h = mmu.read_mem(self.pc + 1);
+                let u8_value = mmu.read_mem(self.pc + 1);
+
+                //H = u8
+                self.registers.h = u8_value;
                 self.pc += 2;
             }
 
@@ -579,72 +590,83 @@ impl Cpu {
 
             //JR Z, i8
             0x28 => {
-                let value = mmu.read_mem(self.pc + 1);
-                jr_z(self, value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                jr_z(self, u8_value);
             }
 
             //ADD HL, HL
             0x29 => {
+
+                //HL = HL + HL
                 add_rr_hl(self, "HL");
                 self.pc += 1;
             }
 
             //LD A, (HL+)
             0x2A => {
+                //A = memory[HL]
                 self.registers.a = mmu.read_mem(self.registers.hl());
+
+                //HL++
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
                 self.pc += 1;
             }
 
             //DEC HL
             0x2B => {
+                //HL--
                 dec_16bit(self, "HL");
                 self.pc += 1;
             }
 
             //INC L
             0x2C => {
+                //L++
                 inc_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
             //DEC L
             0x2D => {
+                //L--
                 dec_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
             }
 
             //LD L, u8
             0x2E => {
-                let value = mmu.read_mem(self.pc + 1);
-                self.registers.l = value;
+                let u8_value = mmu.read_mem(self.pc + 1);
+                //L = u8
+                self.registers.l = u8_value;
                 self.pc += 2;
             }
 
             //CPL
             0x2F => {
-                self.registers.f.set_sub_flag();
-                self.registers.f.set_half_carry_flag();
                 //A = A xor FF
                 self.registers.a ^= 0xFF;
+                self.registers.f.set_sub_flag();
+                self.registers.f.set_half_carry_flag();
                 self.pc += 1;
             }
 
             //JR NC, i8
             0x30 => {
-                let value = mmu.read_mem(self.pc + 1);
-                jr_nc(self, value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                jr_nc(self, u8_value);
             }
 
             //LD SP, u16
             0x31 => {
-                self.sp = self.get_u16(mmu);
+                let u16_value = self.get_u16(mmu);
+                //SP = u16
+                self.sp = u16_value;
                 self.pc += 3;
             }
 
             //LD (HL--), A
             0x32 => {
-                //mmu[HL] = A
+                //memory[HL] = A
                 mmu.write_mem(self.registers.hl(), self.registers.a);
 
                 //HL--
@@ -655,28 +677,30 @@ impl Cpu {
 
             //INC SP
             0x33 => {
+                //SP++
                 inc_16bit(self, "SP");
                 self.pc += 1;
             }
 
             //INC (HL)
             0x34 => {
+                //memory[HL]++
                 inc_mem(self, mmu);
                 self.pc += 1;
             }
 
             //DEC (HL)
             0x35 => {
+                //memory[HL]--
                 dec_mem(self, mmu);
                 self.pc += 1;
             }
 
             //LD (HL), u8
             0x36 => {
-                let value = mmu.read_mem(self.pc + 1);
-
-                //mmu[HL] = u8
-                mmu.write_mem(self.registers.hl(), value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                //memory[HL] = u8
+                mmu.write_mem(self.registers.hl(), u8_value);
 
                 self.pc += 2;
             }
@@ -689,23 +713,24 @@ impl Cpu {
 
             //JR C, i8
             0x38 => {
-                let value = mmu.read_mem(self.pc + 1);
-                jr_c(self, value);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                jr_c(self, u8_value);
             }
 
             //ADD HL, SP
             0x39 => {
+                //HL = HL + SP
                 add_rr_hl(self, "SP");
                 self.pc += 1;
             }
 
             //LD A, (HL--)
             0x3A => {
-                //value = mem[HL]
-                let value = mmu.read_mem(self.registers.hl());
+                //u8 = memory[HL]
+                let u8_value = mmu.read_mem(self.registers.hl());
 
-                //A = mem[HL]
-                self.registers.a = value;
+                //A = memory[HL]
+                self.registers.a = u8_value;
 
                 //HL--
                 self.registers.set_hl(self.registers.hl().wrapping_sub(1));
@@ -715,25 +740,30 @@ impl Cpu {
 
             //DEC SP
             0x3B => {
+                //SP--
                 dec_16bit(self, "SP");
                 self.pc += 1;
             }
 
             //INC A
             0x3C => {
+                //A++
                 inc_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
             //DEC A
             0x3D => {
+                //A--
                 dec_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
             }
 
             //LD A, u8
             0x3E => {
-                self.registers.a = mmu.read_mem(self.pc + 1);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                //A = u8
+                self.registers.a = u8_value;
                 self.pc += 2;
             }
 
