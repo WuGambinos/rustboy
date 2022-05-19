@@ -6,13 +6,12 @@ pub use mmu::*;
 
 use std::fs;
 use std::path::Path;
-use crate::cpu::instructions::{cp_r_r, inc_16bit, ld_8bit, ld_a_from_io, or_r_r};
 
 #[macro_use]
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/04-op r,imm.gb";
+    let test_rom = "roms/cpu_instrs/individual/03-op sp,hl.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
