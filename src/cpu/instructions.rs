@@ -983,7 +983,7 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
         "SP" => {
             cpu.sp = cpu.sp.wrapping_add(1);
         }
-        _ => println!("Not a register PAIR"),
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 
@@ -1002,7 +1002,7 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
         "SP" => {
             cpu.sp = cpu.sp.wrapping_sub(1);
         }
-        _ => println!("NOT A REGISTER PAIR"),
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 
@@ -1050,7 +1050,23 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             }
             cpu.registers.f.clear_sub_flag();
         }
-        _ => println!("NOT A REGISTER PAIR"),
+
+        "SP" => {
+            cpu.registers
+                .f
+                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+            cpu.registers
+                .set_hl(cpu.registers.hl().wrapping_add(cpu.sp));
+
+            if cpu.registers.hl() == 0 {
+                cpu.registers.f.set_zero_flag();
+            } else {
+                cpu.registers.f.clear_zero_flag();
+            }
+            cpu.registers.f.clear_sub_flag();
+
+        }
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 

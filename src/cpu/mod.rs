@@ -1144,7 +1144,7 @@ impl Cpu {
 
             //LD A, (HL)
             0x7E => {
-                let addr = self.registers.hl();
+                let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.a, mmu.read_mem(addr));
                 self.pc += 1;
             }
@@ -1180,7 +1180,7 @@ impl Cpu {
 
             //ADD A, H
             0x84 => {
-                add_a_r(self, self.registers.e);
+                add_a_r(self, self.registers.h);
                 self.pc += 1;
             }
 
@@ -1241,7 +1241,7 @@ impl Cpu {
 
             //ADC A, (HL)
             0x8E => {
-                let addr = self.registers.hl();
+                let addr: u16 = self.registers.hl();
                 adc_a_r(self, mmu.read_mem(addr));
                 self.pc += 1;
             }
@@ -1564,23 +1564,20 @@ impl Cpu {
 
             //JP NZ, u16
             0xC2 => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                jp_nz(self, nn);
+                let u16_value = self.get_u16(mmu);
+                jp_nz(self, u16_value);
             }
 
             //JP u16
             0xC3 => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                jp(self, nn)
+                let u16_value = self.get_u16(mmu);
+                jp(self, u16_value)
             }
 
             //CALL NZ, u16
             0xC4 => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call_nz(self, mmu, nn);
+                let u16_value: u16 = self.get_u16(mmu);
+                call_nz(self, mmu, u16_value);
             }
 
             //PUSH BC
@@ -1592,12 +1589,14 @@ impl Cpu {
             //ADD A, u8
             0xC6 => {
                 let addr = self.pc + 1;
-                add_a_r(self, mmu.read_mem(addr));
+                let u8_value = mmu.read_mem((addr));
+                add_a_r(self, u8_value);
                 self.pc += 2;
             }
 
             //RST 0x00(CAll to n)
             0xC7 => rst(self, mmu, 0x00),
+
             //RET Z
             0xC8 => {
                 ret_z(self, mmu);
@@ -1610,9 +1609,8 @@ impl Cpu {
 
             //JP Z, u16
             0xCA => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                jp_z(self, nn);
+                let u16_value = self.get_u16(mmu);
+                jp_z(self, u16_value);
             }
 
             //PREFIX CB
@@ -3194,16 +3192,14 @@ impl Cpu {
 
             //CALL Z, u16
             0xCC => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call_z(self, mmu, nn);
+                let u16_value = self.get_u16(mmu);
+                call_z(self, mmu, u16_value);
             }
 
             //CALL u16
             0xCD => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call(self, mmu, nn);
+                let u16_value = self.get_u16(mmu);
+                call(self, mmu, u16_value);
             }
 
             //ADC A, u8
@@ -3234,19 +3230,17 @@ impl Cpu {
 
             //JP NC, u16
             0xD2 => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                jp_nc(self, nn);
+                let u16_value = self.get_u16(mmu);
+                jp_nc(self, u16_value);
             }
 
             //Invalid Opcode
-            0xD3 => {}
+            0xD3 => {},
 
             //CALL NC, u16
             0xD4 => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call_nc(self, mmu, nn);
+                let u16_value = self.get_u16(mmu);
+                call_nc(self, mmu, u16_value);
             }
 
             //PUSH DE
@@ -3257,8 +3251,8 @@ impl Cpu {
 
             //SUB A, u8
             0xD6 => {
-                let operand = mmu.read_mem(self.pc + 1);
-                sub_r_r(self, operand);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                sub_r_r(self, u8_value);
                 self.pc += 2;
             }
 
@@ -3273,10 +3267,8 @@ impl Cpu {
 
             //JP C, u16
             0xDA => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-
-                jp_c(self, nn);
+                let u16_value = self.get_u16(mmu);
+                jp_c(self, u16_value);
             }
 
             //Invalid Opcode
@@ -3284,9 +3276,8 @@ impl Cpu {
 
             //CALL C, u16
             0xDC => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                call_c(self, mmu, nn);
+                let u16_value =  self.get_u16(mmu);
+                call_c(self, mmu, u16_value);
             }
 
             //Invalid Opcode
@@ -3294,8 +3285,8 @@ impl Cpu {
 
             //SBC A, u8
             0xDE => {
-                let operand = mmu.read_mem(self.pc + 1);
-                sbc_r_r(self, operand);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                sbc_r_r(self, u8_value);
                 self.pc += 2;
             }
 
@@ -3304,8 +3295,8 @@ impl Cpu {
 
             //LD (0xFF00 + u8), A
             0xE0 => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                ld_io_from_a(self, mmu, n);
+                let u8_value: u8 = mmu.read_mem(self.pc + 1);
+                ld_io_from_a(self, mmu, u8_value);
                 self.pc += 2;
             }
 
@@ -3340,8 +3331,8 @@ impl Cpu {
 
             //AND A, u8
             0xE6 => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                and_r_r(self, n);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                and_r_r(self, u8_value);
                 self.pc += 2;
             }
 
@@ -3350,8 +3341,8 @@ impl Cpu {
 
             //ADD SP, i8  MAY NEED TO CHECK
             0xE8 => {
-                let d: i8 = mmu.read_mem(self.pc + 1) as i8;
-                self.sp = self.sp.wrapping_add(d as u16);
+                let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.sp = self.sp.wrapping_add(i8_value as u16);
                 self.pc += 2;
             }
 
@@ -3362,9 +3353,8 @@ impl Cpu {
 
             //LD (u16), A
             0xEA => {
-                let nn: u16 =
-                    u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)]);
-                mmu.write_mem(nn, self.registers.a);
+                let u16_value = self.get_u16(mmu);
+                mmu.write_mem(u16_value, self.registers.a);
                 self.pc += 3;
             }
 
@@ -3379,8 +3369,8 @@ impl Cpu {
 
             //XOR A, u8
             0xEE => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                xor_r_r(self, n);
+                let u8_value  = mmu.read_mem(self.pc + 1);
+                xor_r_r(self, u8_value);
                 self.pc += 2;
             }
 
@@ -3391,8 +3381,8 @@ impl Cpu {
 
             //LD A, (FF00+u8)
             0xF0 => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                ld_a_from_io(self, mmu, n);
+                let u8_value: u8 = mmu.read_mem(self.pc + 1);
+                ld_a_from_io(self, mmu, u8_value);
                 self.pc += 2;
             }
 
@@ -3432,8 +3422,8 @@ impl Cpu {
 
             //OR A, u8
             0xF6 => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                or_r_r(self, n);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                or_r_r(self, u8_value);
                 self.pc += 2;
             }
 
@@ -3442,8 +3432,8 @@ impl Cpu {
 
             //LD HL, SP+i8
             0xF8 => {
-                let d: i8 = mmu.read_mem(self.pc + 1) as i8;
-                self.sp = self.sp.wrapping_add(d as u16);
+                let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
+                self.sp = self.sp.wrapping_add(i8_value as u16);
                 self.registers.set_hl(self.sp);
 
                 self.pc += 2;
@@ -3458,8 +3448,8 @@ impl Cpu {
             //LD A, (u16)
             0xFA => {
                 let addr = self.get_u16(&mmu);
-                let n = mmu.read_mem(addr);
-                ld_8bit(&mut self.registers.a, n);
+                let u8_value = mmu.read_mem(addr);
+                ld_8bit(&mut self.registers.a, u8_value);
                 self.pc += 3;
             }
 
@@ -3476,8 +3466,8 @@ impl Cpu {
 
             //CP A, u8
             0xFE => {
-                let n: u8 = mmu.read_mem(self.pc + 1);
-                cp_r_r(self, n);
+                let u8_value = mmu.read_mem(self.pc + 1);
+                cp_r_r(self, u8_value);
                 self.pc += 2;
             }
 
