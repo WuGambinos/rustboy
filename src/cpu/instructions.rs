@@ -1030,42 +1030,30 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers
                 .f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
+
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
             cpu.registers.f.clear_sub_flag();
         }
         "DE" => {
             cpu.registers
                 .f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
             cpu.registers.f.clear_sub_flag();
         }
         "HL" => {
             cpu.registers
                 .f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
             cpu.registers.f.clear_sub_flag();
         }
 
@@ -1073,14 +1061,10 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers
                 .f
                 .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+
             cpu.registers
                 .set_hl(cpu.registers.hl().wrapping_add(cpu.sp));
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
             cpu.registers.f.clear_sub_flag();
 
         }
