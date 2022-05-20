@@ -347,7 +347,7 @@ pub fn rlca(cpu: &mut Cpu) {
     }
 
     //Clear Zero Flag
-    cpu.registers.f.update_zero_flag(cpu.registers.a);
+    cpu.registers.f.clear_zero_flag();
 
     //Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
