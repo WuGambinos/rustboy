@@ -3359,10 +3359,26 @@ impl Cpu {
             //RST 0x20
             0xE7 => rst(self, mmu, 0x20),
 
-            //ADD SP, i8  MAY NEED TO CHECK
+            //ADD SP, i8
             0xE8 => {
                 let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
-                self.sp = self.sp.wrapping_add(i8_value as u16);
+
+                let a  = i8_value as u32;
+                let b = self.sp as u32;
+
+                let c = a.wrapping_add( b);
+
+                self.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+                self.registers.f.update_carry_flag_sum_16bit(a as u16, b as u16);
+
+                //Clear Sub Flag
+                self.registers.f.clear_sub_flag();
+
+                //Clear Zero Flag
+                self.registers.f.clear_zero_flag();
+
+                self.sp = c as u16;
                 self.pc += 2;
             }
 
@@ -3452,7 +3468,18 @@ impl Cpu {
 
             //LD HL, SP+i8
             0xF8 => {
+                self.registers.f.clear_sub_flag();
+                self.registers.f.clear_zero_flag();
+
                 let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
+
+                let a = self.sp as u32;
+                let b = i8_value as u32;
+                let c = a.wrapping_add( b);
+
+                self.registers.f.update_half_carry_flag_sum_8bit(a as u8, b as u8);
+                self.registers.f.update_half_carry_flag_sum_8bit(self.sp as u8, i8_value as u8);
+
                 self.sp = self.sp.wrapping_add(i8_value as u16);
                 self.registers.set_hl(self.sp);
 
