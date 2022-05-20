@@ -1355,16 +1355,16 @@ pub fn ld_io_from_a(cpu: &Cpu, mmu: &mut Mmu, n: u8) {
 }
 
 ///
-/// Load data from io-port C into A register
+/// Load data from ($FF00 + register C) into A register
 pub fn ld_a_from_io_c(cpu: &mut Cpu, mmu: &Mmu) {
-    let addr: u16 = 0xFF00 + 0x000C;
+    let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
     cpu.registers.a = mmu.read_mem(addr);
 }
 
 ///
-/// Load data from register A into io-port C
+/// Load data from register A into ($FF00 + register C)
 pub fn ld_io_c_from_a(cpu: &Cpu, mmu: &mut Mmu) {
-    let addr: u16 = 0xFF00 + 0x000C;
+    let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
     mmu.write_mem(addr, cpu.registers.a);
 }
 

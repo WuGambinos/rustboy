@@ -16,6 +16,6 @@ FAILED:
 
 02-interrupts.gb
 03-op sp, hl.gb
-07-jr,jp,call,ret,rst.gb
+07-jr,jp,call,ret,rst.gb (almost) 
 08-misc instrs.gb
 
