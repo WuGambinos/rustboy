@@ -11,7 +11,7 @@ use std::path::Path;
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/08-misc instrs.gb";
+    let test_rom = "roms/cpu_instrs/individual/10-bit ops.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom

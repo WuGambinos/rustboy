@@ -2984,7 +2984,7 @@ impl Cpu {
 
                     //SET 3, L
                     0xDD => {
-                        set_n_r(&mut self.registers.c, 3);
+                        set_n_r(&mut self.registers.l, 3);
                         self.pc += 2;
                     }
 
