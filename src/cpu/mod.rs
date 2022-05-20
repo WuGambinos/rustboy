@@ -3325,7 +3325,7 @@ impl Cpu {
             //LD (0xFF00 + C), A
             0xE2 => {
                 ld_io_c_from_a(self, mmu);
-                self.pc += 2;
+                self.pc += 1;
             }
 
             //Invalid Opcode
