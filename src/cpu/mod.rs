@@ -3263,7 +3263,9 @@ impl Cpu {
             0xD8 => ret_c(self, mmu),
 
             //RETI (NEED TO FIX)
-            0xD9 => {}
+            0xD9 => {
+                self.pc += 1;
+            }
 
             //JP C, u16
             0xDA => {
