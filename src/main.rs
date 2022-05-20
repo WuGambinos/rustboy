@@ -11,7 +11,7 @@ use std::path::Path;
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/04-op r,imm.gb";
+    let test_rom = "roms/cpu_instrs/individual/05-op rp.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -43,8 +43,6 @@ fn main() {
             print!("{}", c);
             mmu.write_mem(0xff02, 0x0);
         }
-       /*cpu.print_state(&mmu);
-       println!();*/
    }
 }
 
