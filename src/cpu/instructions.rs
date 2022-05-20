@@ -1027,46 +1027,79 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
 pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
-            cpu.registers
-                .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
 
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.bc() as u32;
 
+            //HL + BC
+            let c = a + b;
+
+            //Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
+            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
+
+            cpu.registers.set_hl(c as u16);
         }
         "DE" => {
-            cpu.registers
-                .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.de() as u32;
 
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
+            //HL + DE
+            let c = a + b;
 
+            //Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
+            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+
+            cpu.registers.set_hl(c as u16);
+
         }
         "HL" => {
-            cpu.registers
-                .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.hl() as u32;
 
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
+            //HL + HL
+            let c = a + b;
 
+            //Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry;
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
+            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+
+            cpu.registers.set_hl(c as u16);
         }
 
         "SP" => {
-            cpu.registers
-                .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.sp as u32;
 
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.sp));
+            //HL + HL
+            let c = a + b;
 
+            //Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
 
+            //Update Half Carry;
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
+            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+
+            cpu.registers.set_hl(c as u16);
         }
         _ => println!("{}, Not a register PAIR", register),
     }
