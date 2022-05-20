@@ -717,6 +717,8 @@ impl Cpu {
             //Set Carry Flag(SCF)
             0x37 => {
                 self.registers.f.set_carry_flag();
+                self.registers.f.clear_sub_flag();
+                self.registers.f.clear_half_carry_flag();
                 self.pc += 1;
             }
 
@@ -776,9 +778,16 @@ impl Cpu {
                 self.pc += 2;
             }
 
-            //Clear Carry Flag(CCF)
+            //Carry = Carry xor 1
             0x3F => {
-                self.registers.f.clear_carry_flag();
+                let c = self.registers.f.carry_flag() ^ 1;
+                if c == 1{
+                    self.registers.f.set_carry_flag();
+                } else {
+                    self.registers.f.clear_carry_flag();
+                }
+                self.registers.f.clear_half_carry_flag();
+                self.registers.f.clear_sub_flag();
                 self.pc += 1;
             }
 

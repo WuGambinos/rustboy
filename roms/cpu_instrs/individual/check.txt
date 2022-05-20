@@ -6,6 +6,7 @@ PASSED:
 04-op r,imm.gb
 05-op rp, gb
 10-bit ops.gb
+11-op a,(hl).gb
 
 
 
@@ -17,4 +18,3 @@ FAILED:
 07-jr,jp,call,ret,rst.gb
 08-misc instrs.gb
 09-op_rr.gb
-11-op a,(hl).gb
