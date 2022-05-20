@@ -1205,7 +1205,7 @@ pub fn jp_nc(cpu: &mut Cpu, nn: u16) {
 ///
 /// Call to nn
 pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
-    let mut stack_pointer = cpu.sp;
+    let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
     stack_pointer -= 2;
@@ -1268,6 +1268,9 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     //SP = SP - 2
     stack_pointer -= 2;
 
+    //Increment PC before push
+    cpu.pc += 1;
+
     //mem[SP] = lower byte of program counter
     mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
 
@@ -1275,7 +1278,9 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
     //PC = n
-    cpu.pc = u16::from_be_bytes([0, n]);
+    cpu.pc = n as u16;
+
+    cpu.sp = stack_pointer;
 }
 
 ///Return
