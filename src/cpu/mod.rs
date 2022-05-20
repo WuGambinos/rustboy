@@ -1668,7 +1668,7 @@ impl Cpu {
                     //RLC (HL)
                     0x06 => {
                         let addr = self.registers.hl();
-                        rlc(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        rlc_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -1717,7 +1717,7 @@ impl Cpu {
                     //RRC (HL)
                     0x0E => {
                         let addr = self.registers.hl();
-                        rrc(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        rrc_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -1766,7 +1766,7 @@ impl Cpu {
                     //RL (HL)
                     0x16 => {
                         let addr = self.registers.hl();
-                        rl(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        rl_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -1815,7 +1815,7 @@ impl Cpu {
                     //RR (HL)
                     0x1E => {
                         let addr = self.registers.hl();
-                        rr(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        rr_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -1864,7 +1864,7 @@ impl Cpu {
                     //SLA (HL)
                     0x26 => {
                         let addr = self.registers.hl();
-                        sla(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        sla_hl(&mut self.registers.f, mmu,addr);
                         self.pc += 2;
                     }
 
@@ -1913,7 +1913,7 @@ impl Cpu {
                     //SRA (HL)
                     0x2E => {
                         let addr = self.registers.hl();
-                        sra(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        sra_hl(&mut self.registers.f, mmu,addr);
                         self.pc += 2;
                     }
 
@@ -1962,7 +1962,7 @@ impl Cpu {
                     //SWAP (HL)
                     0x36 => {
                         let addr = self.registers.hl();
-                        swap(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        swap_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -2011,7 +2011,7 @@ impl Cpu {
                     //SRL (HL)
                     0x3E => {
                         let addr = self.registers.hl();
-                        srl(&mut self.registers.f, &mut mmu.read_mem(addr));
+                        srl_hl(&mut self.registers.f, mmu,addr);
                         self.pc += 2;
                     }
 

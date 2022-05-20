@@ -1447,9 +1447,6 @@ pub fn bit_n_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16, n: u8) {
 
     //Set Half Carry
     f.set_half_carry_flag();
-
-    //Write new value to memory
-    mmu.write_mem(addr, value);
 }
 
 ///
