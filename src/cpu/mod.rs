@@ -121,7 +121,18 @@ impl Flags {
         }
     }
 
-    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {}
+    fn update_half_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
+        let a: u32 = register as u32;
+        let b: u32 = operand as u32;
+
+        let half_carry: bool = ((a & 0x0FFF) + (b & 0x0FFF)) > 0xFFF;
+
+        if half_carry {
+            self.set_half_carry_flag();
+        } else {
+            self.clear_half_carry_flag();
+        }
+    }
 
     //Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
