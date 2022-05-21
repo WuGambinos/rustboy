@@ -268,6 +268,9 @@ pub struct Cpu {
     ///Program counter
     pub pc: u16,
 
+    ///Interrupt Master Enable
+    ime: bool,
+
     ///Current opcode
     pub(crate) opcode: u8,
 }
@@ -285,6 +288,7 @@ impl Cpu {
             registers: Registers::new(),
             sp: 0xFFFE,
             pc: 0,
+            ime: false,
             opcode: 0,
         }
     }
