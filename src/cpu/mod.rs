@@ -3361,16 +3361,18 @@ impl Cpu {
 
             //ADD SP, i8
             0xE8 => {
-                let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
 
-                let a  = i8_value as u32;
-                let b = self.sp as u32;
+                //i8
+                let i8_value  = mmu.read_mem(self.pc + 1) as i8;
 
-                let c = a.wrapping_add( b);
+                //SP + i8
+                let c = self.sp.wrapping_add(i8_value as u16);
 
-                self.registers.f.update_half_carry_flag_sum_16bit(a, b);
+                //Calculate Half Carry
+                let half_carry = (c & 0x0F) < (self.sp & 0x0F);
 
-                self.registers.f.update_carry_flag_sum_16bit(a as u16, b as u16);
+                //Calculate Carry
+                let carry = (c & 0xFF) < (self.sp & 0xFF);
 
                 //Clear Sub Flag
                 self.registers.f.clear_sub_flag();
@@ -3378,7 +3380,24 @@ impl Cpu {
                 //Clear Zero Flag
                 self.registers.f.clear_zero_flag();
 
-                self.sp = c as u16;
+
+                //Update Half Carry
+                if half_carry {
+                    self.registers.f.set_half_carry_flag();
+                } else {
+                    self.registers.f.clear_half_carry_flag();
+                }
+
+                //Update Carry
+                if carry {
+                    self.registers.f.set_carry_flag();
+                } else{
+                    self.registers.f.clear_carry_flag();
+                }
+
+                //SP = SP + i8
+                self.sp = c;
+
                 self.pc += 2;
             }
 
@@ -3468,20 +3487,41 @@ impl Cpu {
 
             //LD HL, SP+i8
             0xF8 => {
+
+                //i8
+                let i8_value = mmu.read_mem(self.pc + 1) as i8;
+
+                //SP + i8
+                let c: u16 = self.sp.wrapping_add(i8_value as u16);
+
+                //Calculate Half Carry
+                let half_carry = (c & 0x0F) < (self.sp & 0x0F);
+
+                //Calculate Carry
+                let carry = (c & 0xFF) < (self.sp & 0xFF);
+
+                //Clear Sub Flag
                 self.registers.f.clear_sub_flag();
+
+                //Clear Zero Flag
                 self.registers.f.clear_zero_flag();
 
-                let i8_value: i8 = mmu.read_mem(self.pc + 1) as i8;
+                //Update Half Carry
+                if half_carry {
+                    self.registers.f.set_half_carry_flag();
+                } else {
+                    self.registers.f.clear_half_carry_flag();
+                }
 
-                let a = self.sp as u32;
-                let b = i8_value as u32;
-                let c = a.wrapping_add( b);
+                //Update Carry
+                if carry {
+                    self.registers.f.set_carry_flag();
+                } else{
+                    self.registers.f.clear_carry_flag();
+                }
 
-                self.registers.f.update_half_carry_flag_sum_8bit(a as u8, b as u8);
-                self.registers.f.update_half_carry_flag_sum_8bit(self.sp as u8, i8_value as u8);
-
-                self.sp = self.sp.wrapping_add(i8_value as u16);
-                self.registers.set_hl(self.sp);
+                //HL = SP + i8
+                self.registers.set_hl(c);
 
                 self.pc += 2;
             }
