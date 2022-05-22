@@ -348,7 +348,7 @@ impl Cpu {
 
 
 
-    pub fn emulate_cycle(&mut self, mmu: &mut Mmu) {
+    pub fn execute_instruction(&mut self, mmu: &mut Mmu) {
         self.fetch(mmu);
 
         //Handle Interrupts
@@ -3670,3 +3670,4 @@ impl Cpu {
 
 #[cfg(test)]
 mod tests;
+mod timer;

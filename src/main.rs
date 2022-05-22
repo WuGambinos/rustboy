@@ -36,7 +36,7 @@ fn main() {
     let mut cond = true;
 
     while cond {
-        cpu.emulate_cycle(&mut mmu);
+        cpu.execute_instruction(&mut mmu);
         println!();
         cpu.print_state(&mmu);
 
