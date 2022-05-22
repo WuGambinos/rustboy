@@ -1266,7 +1266,7 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
-    stack_pointer -= 2;
+    stack_pointer = stack_pointer.wrapping_sub( 2);
 
     //Increment PC before push
     cpu.pc += 1;
@@ -1492,4 +1492,16 @@ pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
     value &= !(1 << n);
 
     mmu.write_mem(addr, value);
+}
+
+
+/************************************************************************
+ * Interrupt Instructions
+ * *********************************************************************/
+pub fn ei(cpu: &mut Cpu) {
+    cpu.ime = true;
+}
+
+pub fn di(cpu: &mut Cpu) {
+    cpu.ime = false;
 }

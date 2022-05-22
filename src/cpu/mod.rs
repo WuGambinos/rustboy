@@ -271,6 +271,9 @@ pub struct Cpu {
     ///Interrupt Master Enable
     ime: bool,
 
+    ///Halt
+    halted: bool,
+
     ///Current opcode
     pub(crate) opcode: u8,
 }
@@ -289,12 +292,67 @@ impl Cpu {
             sp: 0xFFFE,
             pc: 0,
             ime: false,
+            halted: false,
             opcode: 0,
         }
     }
 
+    ///Handle Interrupts
+    fn handle_interrupt(&mut self, mmu: &mut Mmu) {
+
+        //Check if interrupts are enabled
+        if self.ime == false && self.halted == false {
+            return;
+        }
+
+        //Check if some interrupt have been triggered
+        let triggered  = mmu.read_mem(0xFFFF) & mmu.read_mem(0xFF0F);
+
+        if triggered == 0 {
+            return;
+        }
+
+        self.halted = false;
+        if self.ime == false {
+            return;
+        }
+
+        self.ime = false;
+
+        //Valid Interrupt
+        let n = triggered.trailing_zeros();
+        if n >= 5 {
+            panic!("Invalid Interrupt Triggered");
+        }
+
+        //Clean up the interrupt
+        let mut interrupt_flags = mmu.read_mem(0xFFFF);
+        interrupt_flags &= !(1<<n);
+        mmu.write_mem(0xFFFF, interrupt_flags);
+
+        //Save current program pointer
+        let pc = self.pc;
+
+        let upper_sp = (pc >> 8) as u8 ;
+        let lower_sp = pc as u8;
+        push_rr(mmu, upper_sp, lower_sp, &mut self.sp);
+
+        //Change th PC value to the interrupt location
+        //handler
+        self.pc = 0x0040 | ((n as u16) << 3);
+
+
+
+
+    }
+
+
+
     pub fn emulate_cycle(&mut self, mmu: &mut Mmu) {
         self.fetch(mmu);
+
+        //Handle Interrupts
+        self.handle_interrupt(mmu);
 
         match self.opcode {
             //NOP
@@ -3286,6 +3344,8 @@ impl Cpu {
 
             //RETI (NEED TO FIX)
             0xD9 => {
+                ret(self, mmu);
+                ei(self);
                 self.pc += 1;
             }
 
@@ -3467,6 +3527,7 @@ impl Cpu {
 
             //DI
             0xF3 => {
+                di(self);
                 self.pc += 1;
             }
 
@@ -3546,6 +3607,7 @@ impl Cpu {
 
             //EI
             0xFB => {
+                ei(self);
                 self.pc += 1;
             }
 
