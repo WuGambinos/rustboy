@@ -333,9 +333,9 @@ impl Cpu {
         //Save current program pointer
         let pc = self.pc;
 
-        let upper_sp = (pc >> 8) as u8 ;
-        let lower_sp = pc as u8;
-        push_rr(mmu, upper_sp, lower_sp, &mut self.sp);
+        let upper_pc = (pc >> 8) as u8 ;
+        let lower_pc = pc as u8;
+        push_rr(mmu, upper_pc, lower_pc, &mut self.sp);
 
         //Change th PC value to the interrupt location
         //handler
@@ -349,10 +349,10 @@ impl Cpu {
 
 
     pub fn execute_instruction(&mut self, mmu: &mut Mmu) {
-        self.fetch(mmu);
-
         //Handle Interrupts
         self.handle_interrupt(mmu);
+
+        self.fetch(mmu);
 
         match self.opcode {
             //NOP

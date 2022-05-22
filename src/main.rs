@@ -35,28 +35,15 @@ fn main() {
 
     let mut cond = true;
 
-    while cond {
-        cpu.execute_instruction(&mut mmu);
-        println!();
-        cpu.print_state(&mmu);
 
-        if cpu.opcode == 0xF8 {
-            cpu.print_state(&mmu);
-            cond = false;
-        }
-    }
-
-
-
-
-  /* loop {
-       cpu.emulate_cycle(&mut mmu);
-       if mmu.read_mem(0xFF02) == 0x81 {
-            let c: char = mmu.read_mem(0xFF01) as char;
-            print!("{}", c);
-            mmu.write_mem(0xff02, 0x0);
-        }
-   }*/
+      loop {
+           cpu.execute_instruction(&mut mmu);
+           if mmu.read_mem(0xFF02) == 0x81 {
+                let c: char = mmu.read_mem(0xFF01) as char;
+                print!("{}", c);
+                mmu.write_mem(0xff02, 0x0);
+            }
+       }
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
