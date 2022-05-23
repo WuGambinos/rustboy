@@ -361,6 +361,8 @@ impl Cpu {
             self.ime = true;
         }
 
+        //Handle Interrupts
+        self.handle_interrupt(mmu);
 
         self.fetch(mmu);
 
@@ -3638,8 +3640,6 @@ impl Cpu {
             0xFF => rst(self, mmu, 0x38),
             //_ => println!("NOT AN OPCODE"),
         }
-        //Handle Interrupts
-        self.handle_interrupt(mmu);
 
     }
 
@@ -3674,6 +3674,10 @@ impl Cpu {
         );
 
         println!("{}", reg);
+
+        println!("IF: {:#X}", mmu.read_mem(0xFF0F));
+        println!("IE: {:#X}", mmu.read_mem(0xFFFF));
+        println!("mem[FF0F]: {:#X}", mmu.read_mem(0xFF0F));
 
         println!("FLAG: {:#X}", self.registers.f.data);
 
