@@ -271,6 +271,9 @@ pub struct Cpu {
     ///Interrupt Master Enable
     ime: bool,
 
+    ///Help with enabled IME
+    ime_to_be_enabled: bool,
+
     ///Halt
     halted: bool,
 
@@ -292,6 +295,7 @@ impl Cpu {
             sp: 0xFFFE,
             pc: 0,
             ime: false,
+            ime_to_be_enabled: false,
             halted: false,
             opcode: 0,
         }
@@ -331,7 +335,7 @@ impl Cpu {
         mmu.write_mem(0xFFFF, interrupt_flags);
 
         //Save current program pointer
-        let pc = self.pc;
+        /*let pc = self.pc;
 
         let upper_pc = (pc >> 8) as u8 ;
         let lower_pc = pc as u8;
@@ -339,7 +343,10 @@ impl Cpu {
 
         //Change th PC value to the interrupt location
         //handler
-        self.pc = 0x0040 | ((n as u16) << 3);
+        self.pc = 0x0040 | ((n as u16) << 3);*/
+        self.ime_to_be_enabled = false;
+
+        rst(self, mmu, 0x50);
 
 
 
@@ -349,8 +356,11 @@ impl Cpu {
 
 
     pub fn execute_instruction(&mut self, mmu: &mut Mmu) {
-        //Handle Interrupts
-        self.handle_interrupt(mmu);
+
+        if self.ime_to_be_enabled {
+            self.ime = true;
+        }
+
 
         self.fetch(mmu);
 
@@ -3628,6 +3638,9 @@ impl Cpu {
             0xFF => rst(self, mmu, 0x38),
             //_ => println!("NOT AN OPCODE"),
         }
+        //Handle Interrupts
+        self.handle_interrupt(mmu);
+
     }
 
     fn fetch(&mut self, mmu: &Mmu) {
@@ -3665,6 +3678,8 @@ impl Cpu {
         println!("FLAG: {:#X}", self.registers.f.data);
 
         println!("OPCODE: {:#X}", self.opcode);
+
+
     }
 }
 
