@@ -1499,7 +1499,8 @@ pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
  * Interrupt Instructions
  * *********************************************************************/
 pub fn ei(cpu: &mut Cpu) {
-    cpu.ime = true;
+    cpu.ime_to_be_enabled = true;
+    //cpu.ime = true;
 }
 
 pub fn di(cpu: &mut Cpu) {

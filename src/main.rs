@@ -43,6 +43,9 @@ fn main() {
                 print!("{}", c);
                 mmu.write_mem(0xff02, 0x0);
             }
+
+         /* println!();
+          cpu.print_state(&mmu);*/
        }
 }
 
