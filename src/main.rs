@@ -35,8 +35,40 @@ fn main() {
 
     let mut cond = true;
 
+   /* while cond {
+        cpu.execute_instruction(&mut mmu);
+        if cpu.pc == 0x0050 {
+            cond = false;
+        }
+    }*/
 
-      loop {
+    //cpu.print_state(&mmu);
+
+    let mut counter = 0;
+
+    for _ in 0..189691 {
+        cpu.execute_instruction(&mut mmu);
+    }
+    mmu.write_mem(0xDFFB, 0xC0);
+    mmu.write_mem(0xDFFC, 0xC2);
+    cpu.print_state(&mmu);
+
+    println!();
+    cpu.execute_instruction(&mut mmu);
+
+
+    println!();
+    cpu.print_state(&mmu);
+
+    for _ in 0..13 {
+        cpu.execute_instruction(&mut mmu);
+        println!();
+        cpu.print_state(&mmu);
+
+    }
+
+
+      /*loop {
            cpu.execute_instruction(&mut mmu);
            if mmu.read_mem(0xFF02) == 0x81 {
                 let c: char = mmu.read_mem(0xFF01) as char;
@@ -44,9 +76,12 @@ fn main() {
                 mmu.write_mem(0xff02, 0x0);
             }
 
-         /* println!();
-          cpu.print_state(&mmu);*/
+            println!();
+            cpu.print_state(&mmu);
+            counter += 1;
        }
+
+       */
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
