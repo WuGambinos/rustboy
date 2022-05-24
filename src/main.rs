@@ -67,7 +67,6 @@ fn main() {
 
     }
 
-
       /*loop {
            cpu.execute_instruction(&mut mmu);
            if mmu.read_mem(0xFF02) == 0x81 {
