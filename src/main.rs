@@ -4,8 +4,11 @@ pub use cpu::Cpu;
 pub mod mmu;
 pub use mmu::*;
 
+
+
 use std::fs;
 use std::path::Path;
+use crate::cpu::timer::Timer;
 
 #[macro_use]
 extern crate text_io;
@@ -22,6 +25,9 @@ fn main() {
 
     //Cpu
     let mut cpu = Cpu::new();
+
+    //Timer
+    let mut timer = Timer::new();
 
     //Mapped Memory Unit
     let mut mmu: Mmu = Mmu::new();
