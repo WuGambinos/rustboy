@@ -3689,4 +3689,4 @@ impl Cpu {
 
 #[cfg(test)]
 mod tests;
-mod timer;
+pub(crate) mod timer;
