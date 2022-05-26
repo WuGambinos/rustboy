@@ -1,5 +1,5 @@
 pub mod instructions;
-use crate::Mmu;
+use crate::{Mmu, Timer};
 
 use self::instructions::*;
 
@@ -279,6 +279,9 @@ pub struct Cpu {
 
     ///Current opcode
     pub(crate) opcode: u8,
+
+    ///Timer
+    timer: Timer,
 }
 
 impl Default for Cpu {
@@ -298,6 +301,7 @@ impl Cpu {
             ime_to_be_enabled: false,
             halted: false,
             opcode: 0,
+            timer: Timer::new(),
         }
     }
 
@@ -310,7 +314,8 @@ impl Cpu {
         }
 
         //Check if some interrupt have been triggered
-        let triggered  = mmu.read_mem(0xFFFF) & mmu.read_mem(0xFF0F);
+        let mut triggered  = mmu.read_mem(0xFFFF) & mmu.read_mem(0xFF0F);
+        triggered = 0x04;
 
         if triggered == 0 {
             return;
@@ -368,7 +373,10 @@ impl Cpu {
 
         match self.opcode {
             //NOP
-            0x00 => self.pc += 1,
+            0x00 => {
+                self.pc += 1;
+                self.timer.internal_ticks =self.timer.internal_ticks.wrapping_add(1);
+            },
 
             //LD BC, u16
             0x01 => {
@@ -380,30 +388,45 @@ impl Cpu {
 
                 //Increase program counter
                 self.pc += 3;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (BC), A
             0x02 => {
                 mmu.write_mem(self.registers.bc(), self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC BC
             0x03 => {
                 self.registers.set_bc(self.registers.bc().wrapping_add(1));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC B
             0x04 => {
                 inc_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC B
             0x05 => {
                 dec_8bit(&mut self.registers.f, &mut self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, u8
@@ -413,6 +436,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RLCA
@@ -421,6 +447,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (u16), SP
@@ -442,6 +471,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 3;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(5);
             }
 
             //ADD HL, BC
@@ -450,6 +482,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (BC)
@@ -457,6 +492,9 @@ impl Cpu {
                 let addr: u16 = self.registers.bc();
                 self.registers.a = mmu.read_mem(addr);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC BC
@@ -466,6 +504,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC C
@@ -473,6 +514,9 @@ impl Cpu {
                 inc_8bit(&mut self.registers.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC C
@@ -480,6 +524,9 @@ impl Cpu {
                 dec_8bit(&mut self.registers.f, &mut self.registers.c);
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, u8
@@ -490,6 +537,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RRCA
@@ -498,11 +548,17 @@ impl Cpu {
                 rrca(self);
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //STOP
             0x10 => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             // LD DE, u16
@@ -513,6 +569,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 3;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (DE) = A
@@ -521,12 +580,18 @@ impl Cpu {
                 let addr: u16 = self.registers.de();
                 mmu.write_mem(addr, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC DE
             0x13 => {
                 self.registers.set_de(self.registers.de().wrapping_add(1));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC D
@@ -534,6 +599,9 @@ impl Cpu {
                 inc_8bit(&mut self.registers.f, &mut self.registers.d);
                 //Increase Program counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC D
@@ -541,6 +609,9 @@ impl Cpu {
                 dec_8bit(&mut self.registers.f, &mut self.registers.d);
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, u8
@@ -551,6 +622,9 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RLA
@@ -560,42 +634,63 @@ impl Cpu {
 
                 //Increase Program Counter
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR i8
             0x18 => {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 jr(self, u8_value);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //ADD HL, DE
             0x19 => {
                 add_rr_hl(self, "DE");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (DE)
             0x1A => {
                 self.registers.a = mmu.read_mem(self.registers.de());
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC DE
             0x1B => {
                 dec_16bit(self, "DE");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC E
             0x1C => {
                 inc_8bit(&mut self.registers.f, &mut self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC E
             0x1D => {
                 dec_8bit(&mut self.registers.f, &mut self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, u8
@@ -603,6 +698,9 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc  + 1);
                 self.registers.e = u8_value;
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RRA
@@ -610,6 +708,9 @@ impl Cpu {
                 //Rotate
                 rra(self);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR NZ, i8
@@ -623,6 +724,9 @@ impl Cpu {
                 let u16_value = self.get_u16(mmu);
                 self.registers.set_hl(u16_value);
                 self.pc += 3;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL+), A
@@ -633,6 +737,9 @@ impl Cpu {
                 //HL++
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC HL
@@ -640,6 +747,9 @@ impl Cpu {
                 //HL++
                 inc_16bit(self, "HL");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC H
@@ -647,6 +757,9 @@ impl Cpu {
                 //H++
                 inc_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC H
@@ -654,6 +767,9 @@ impl Cpu {
                 //L++
                 dec_8bit(&mut self.registers.f, &mut self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, u8
@@ -663,12 +779,18 @@ impl Cpu {
                 //H = u8
                 self.registers.h = u8_value;
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DAA
             0x27 => {
                 daa(self);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR Z, i8
@@ -683,6 +805,9 @@ impl Cpu {
                 //HL = HL + HL
                 add_rr_hl(self, "HL");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (HL+)
@@ -693,6 +818,9 @@ impl Cpu {
                 //HL++
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC HL
@@ -700,6 +828,9 @@ impl Cpu {
                 //HL--
                 dec_16bit(self, "HL");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC L
@@ -707,6 +838,9 @@ impl Cpu {
                 //L++
                 inc_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC L
@@ -714,6 +848,9 @@ impl Cpu {
                 //L--
                 dec_8bit(&mut self.registers.f, &mut self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, u8
@@ -722,6 +859,9 @@ impl Cpu {
                 //L = u8
                 self.registers.l = u8_value;
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //CPL
@@ -731,6 +871,9 @@ impl Cpu {
                 self.registers.f.set_sub_flag();
                 self.registers.f.set_half_carry_flag();
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR NC, i8
@@ -745,6 +888,9 @@ impl Cpu {
                 //SP = u16
                 self.sp = u16_value;
                 self.pc += 3;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL--), A
@@ -756,6 +902,9 @@ impl Cpu {
                 self.registers.set_hl(self.registers.hl().wrapping_sub(1));
 
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC SP
@@ -763,6 +912,9 @@ impl Cpu {
                 //SP++
                 inc_16bit(self, "SP");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC (HL)
@@ -770,6 +922,9 @@ impl Cpu {
                 //memory[HL]++
                 inc_mem(self, mmu);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //DEC (HL)
@@ -777,6 +932,9 @@ impl Cpu {
                 //memory[HL]--
                 dec_mem(self, mmu);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL), u8
@@ -786,6 +944,9 @@ impl Cpu {
                 mmu.write_mem(self.registers.hl(), u8_value);
 
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //Set Carry Flag(SCF)
@@ -794,6 +955,9 @@ impl Cpu {
                 self.registers.f.clear_sub_flag();
                 self.registers.f.clear_half_carry_flag();
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR C, i8
@@ -807,6 +971,9 @@ impl Cpu {
                 //HL = HL + SP
                 add_rr_hl(self, "SP");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (HL--)
@@ -821,6 +988,9 @@ impl Cpu {
                 self.registers.set_hl(self.registers.hl().wrapping_sub(1));
 
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC SP
@@ -828,6 +998,9 @@ impl Cpu {
                 //SP--
                 dec_16bit(self, "SP");
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC A
@@ -835,6 +1008,9 @@ impl Cpu {
                 //A++
                 inc_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC A
@@ -842,6 +1018,9 @@ impl Cpu {
                 //A--
                 dec_8bit(&mut self.registers.f, &mut self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, u8
@@ -850,6 +1029,9 @@ impl Cpu {
                 //A = u8
                 self.registers.a = u8_value;
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //Carry = Carry xor 1
@@ -863,41 +1045,62 @@ impl Cpu {
                 self.registers.f.clear_half_carry_flag();
                 self.registers.f.clear_sub_flag();
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, B
             0x40 => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, C
             0x41 => {
                 ld_8bit(&mut self.registers.b, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, D
             0x42 => {
                 ld_8bit(&mut self.registers.b, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, E
             0x43 => {
                 ld_8bit(&mut self.registers.b, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, H
             0x44 => {
                 ld_8bit(&mut self.registers.b, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, L
             0x45 => {
                 ld_8bit(&mut self.registers.b, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, (HL)
@@ -905,47 +1108,71 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.b, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD B, A
             0x47 => {
                 ld_8bit(&mut self.registers.b, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, B
             0x48 => {
                 ld_8bit(&mut self.registers.c, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, C
             0x49 => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, D
             0x4A => {
                 ld_8bit(&mut self.registers.c, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, E
             0x4B => {
                 ld_8bit(&mut self.registers.c, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, H
             0x4C => {
                 ld_8bit(&mut self.registers.c, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, L
             0x4D => {
                 ld_8bit(&mut self.registers.c, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, (HL)
@@ -953,47 +1180,71 @@ impl Cpu {
             let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.c, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD C, A
             0x4F => {
                 ld_8bit(&mut self.registers.c, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, B
             0x50 => {
                 ld_8bit(&mut self.registers.d, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, C
             0x51 => {
                 ld_8bit(&mut self.registers.d, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, D
             0x52 => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, E
             0x53 => {
                 ld_8bit(&mut self.registers.d, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, H
             0x54 => {
                 ld_8bit(&mut self.registers.d, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, L
             0x55 => {
                 ld_8bit(&mut self.registers.d, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, (HL)
@@ -1001,47 +1252,71 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.d, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD D, A
             0x57 => {
                 ld_8bit(&mut self.registers.d, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, B
             0x58 => {
                 ld_8bit(&mut self.registers.e, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, C
             0x59 => {
                 ld_8bit(&mut self.registers.e, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, D
             0x5A => {
                 ld_8bit(&mut self.registers.e, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, E
             0x5B => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, H
             0x5C => {
                 ld_8bit(&mut self.registers.e, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, L
             0x5D => {
                 ld_8bit(&mut self.registers.e, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, (HL)
@@ -1049,47 +1324,71 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.e, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD E, A
             0x5F => {
                 ld_8bit(&mut self.registers.e, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, B
             0x60 => {
                 ld_8bit(&mut self.registers.h, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, C
             0x61 => {
                 ld_8bit(&mut self.registers.h, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, D
             0x62 => {
                 ld_8bit(&mut self.registers.h, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, E
             0x63 => {
                 ld_8bit(&mut self.registers.h, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, H
             0x64 => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, L
             0x65 => {
                 ld_8bit(&mut self.registers.h, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, (HL)
@@ -1097,47 +1396,71 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.h, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD H, A
             0x67 => {
                 ld_8bit(&mut self.registers.h, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, B
             0x68 => {
                 ld_8bit(&mut self.registers.l, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, C
             0x69 => {
                 ld_8bit(&mut self.registers.l, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, D
             0x6A => {
                 ld_8bit(&mut self.registers.l, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, E
             0x6B => {
                 ld_8bit(&mut self.registers.l, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, H
             0x6C => {
                 ld_8bit(&mut self.registers.l, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, L
             0x6D => {
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, (HL)
@@ -1145,93 +1468,142 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.l, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD L, A
             0x6F => {
                 ld_8bit(&mut self.registers.l, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (HL), B
             0x70 => {
                 mmu.write_mem(self.registers.hl(), self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), C
             0x71 => {
                 mmu.write_mem(self.registers.hl(), self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), D
             0x72 => {
                 mmu.write_mem(self.registers.hl(), self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), E
             0x73 => {
                 mmu.write_mem(self.registers.hl(), self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), H
             0x74 => {
                 mmu.write_mem(self.registers.hl(), self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), L
             0x75 => {
                 mmu.write_mem(self.registers.hl(), self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //HALT (NEED TO FINISH)
-            0x76 => {}
+            0x76 => {
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+            }
 
             //LD (HL), A
             0x77 => {
                 mmu.write_mem(self.registers.hl(), self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, B
             0x78 => {
                 ld_8bit(&mut self.registers.a, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, C
             0x79 => {
                 ld_8bit(&mut self.registers.a, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+
             }
 
             //LD A, D
             0x7A => {
                 ld_8bit(&mut self.registers.a, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, E
             0x7B => {
                 ld_8bit(&mut self.registers.a, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, H
             0x7C => {
                 ld_8bit(&mut self.registers.a, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, L
             0x7D => {
                 ld_8bit(&mut self.registers.a, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, (HL)
@@ -1239,47 +1611,71 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.a, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, A
             0x7F => {
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, B
             0x80 => {
                 add_a_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, C
             0x81 => {
                 add_a_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, D
             0x82 => {
                 add_a_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, E
             0x83 => {
                 add_a_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, H
             0x84 => {
                 add_a_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, L
             0x85 => {
                 add_a_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, (HL)
@@ -1287,48 +1683,72 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 add_a_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //ADD A, A
             0x87 => {
                 add_a_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, B
             0x88 => {
                 adc_a_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, C
             0x89 => {
                 adc_a_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, D
             0x8A => {
                 adc_a_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, E
             0x8B => {
                 adc_a_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, H
             0x8C => {
                 adc_a_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, L
             0x8D => {
                 adc_a_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, (HL)
@@ -1336,48 +1756,72 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 adc_a_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //ADC A, A
             0x8F => {
                 adc_a_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, B
             0x90 => {
                 sub_r_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, C
             0x91 => {
                 sub_r_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, D
             0x92 => {
                 sub_r_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, E
             0x93 => {
                 sub_r_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, H
             0x94 => {
                 sub_r_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, L
             0x95 => {
                 sub_r_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, (HL)
@@ -1385,48 +1829,72 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 sub_r_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //SUB  A, A
             0x97 => {
                 sub_r_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, B
             0x98 => {
                 sbc_r_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, C
             0x99 => {
                 sbc_r_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, D
             0x9A => {
                 sbc_r_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, E
             0x9B => {
                 sbc_r_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, H
             0x9C => {
                 sbc_r_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, L
             0x9D => {
                 sbc_r_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, (HL)
@@ -1434,48 +1902,72 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 sbc_r_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //SBC A, A
             0x9F => {
                 sbc_r_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, B
             0xA0 => {
                 and_r_r(self, self.registers.b);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, C
             0xA1 => {
                 and_r_r(self, self.registers.c);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, D
             0xA2 => {
                 and_r_r(self, self.registers.d);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, E
             0xA3 => {
                 and_r_r(self, self.registers.e);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, H
             0xA4 => {
                 and_r_r(self, self.registers.h);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
-            //AND A. L
+            //AND A, L
             0xA5 => {
                 and_r_r(self, self.registers.l);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, (HL)
@@ -1483,97 +1975,145 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 and_r_r(self, mmu.read_mem(addr));
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //AND A, A
             0xA7 => {
                 and_r_r(self, self.registers.a);
                 self.pc = self.pc.wrapping_add(1);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, B
             0xA8 => {
                 xor_r_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, C
             0xA9 => {
                 xor_r_r(self, self.registers.c);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, D
             0xAA => {
                 xor_r_r(self, self.registers.d);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, E
             0xAB => {
                 xor_r_r(self, self.registers.e);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, H
             0xAC => {
                 xor_r_r(self, self.registers.h);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, L
             0xAD => {
                 xor_r_r(self, self.registers.l);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, (HL)
             0xAE => {
                 let addr: u16 = self.registers.hl();
                 xor_r_r(self, mmu.read_mem(addr));
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //XOR A, A
             0xAF => {
                 xor_r_r(self, self.registers.a);
-                self.pc += 1
+                self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, B
             0xB0 => {
                 or_r_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, C
             0xB1 => {
                 or_r_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, D
             0xB2 => {
                 or_r_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, E
             0xB3 => {
                 or_r_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, H
             0xB4 => {
                 or_r_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, L
             0xB5 => {
                 or_r_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, (HL)
@@ -1581,48 +2121,72 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 or_r_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //OR A, A
             0xB7 => {
                 or_r_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, B
             0xB8 => {
                 cp_r_r(self, self.registers.b);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, C
             0xB9 => {
                 cp_r_r(self, self.registers.c);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, D
             0xBA => {
                 cp_r_r(self, self.registers.d);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, E
             0xBB => {
                 cp_r_r(self, self.registers.e);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, H
             0xBC => {
                 cp_r_r(self, self.registers.h);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, L
             0xBD => {
                 cp_r_r(self, self.registers.l);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, (HL)
@@ -1630,12 +2194,18 @@ impl Cpu {
                 let addr: u16 = self.registers.hl();
                 cp_r_r(self, mmu.read_mem(addr));
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //CP A, A
             0xBF => {
                 cp_r_r(self, self.registers.a);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //RET NZ
@@ -1652,6 +2222,9 @@ impl Cpu {
                     &mut self.sp,
                 );
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //JP NZ, u16
@@ -1676,6 +2249,9 @@ impl Cpu {
             0xC5 => {
                 push_rr(mmu, self.registers.b, self.registers.c, &mut self.sp);
                 self.pc += 1;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //ADD A, u8
@@ -1684,10 +2260,18 @@ impl Cpu {
                 let u8_value = mmu.read_mem(addr);
                 add_a_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x00(CAll to n)
-            0xC7 => rst(self, mmu, 0x00),
+            0xC7 => {
+                rst(self, mmu, 0x00);
+
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
+            }
 
             //RET Z
             0xC8 => {
@@ -1697,6 +2281,8 @@ impl Cpu {
             //RET
             0xC9 => {
                 ret(self, mmu);
+                //Increase Timer
+               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //JP Z, u16

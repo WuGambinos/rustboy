@@ -1122,8 +1122,10 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 pub fn jr_z(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.zero_flag() == 1 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1132,8 +1134,10 @@ pub fn jr_z(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.zero_flag() == 0 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1142,8 +1146,10 @@ pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
 pub fn jr_c(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.carry_flag() == 1 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1152,8 +1158,10 @@ pub fn jr_c(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.carry_flag() == 0 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1168,8 +1176,10 @@ pub fn jp(cpu: &mut Cpu, nn: u16) {
 pub fn jp_z(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 ///
@@ -1177,8 +1187,10 @@ pub fn jp_z(cpu: &mut Cpu, nn: u16) {
 pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1228,8 +1240,10 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1237,8 +1251,10 @@ pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1300,16 +1316,20 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
 
 pub fn ret_z(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.zero_flag() == 1 {
-        ret(cpu, mmu)
+        ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.zero_flag() == 0 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::Mmu;
 
-
+#[derive(Debug)]
 pub struct Timer {
     /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
     /// resets it to 0x00
@@ -18,7 +18,7 @@ pub struct Timer {
     pub(crate) tac: u8,
 
     ///Internal Ticks
-    internal_ticks: u32,
+    pub(crate) internal_ticks: u32,
 }
 
 
@@ -33,16 +33,26 @@ impl Timer {
         }
     }
 
-    fn timer_tick(&mut self) {
+    fn do_cycle(&mut self, ticks: u32) {
 
+        //Use internal_ticks to check if we need to increment the divider register
+        self.internal_ticks += ticks;
+
+       /*
         let prev_div:  u16 = self.div;
 
         self.div += 1;
+        */
+
+        while self.internal_ticks >= 256 {
+            self.div = self.div.wrapping_add(1);
+            self.internal_ticks -= 256;
+        }
 
         let mut timer_update: bool = false;
 
         //Get Timer Clock
-        match self.tac & 0b11 {
+        /*match self.tac & 0b11 {
             0b00 => timer_update = ((prev_div & (1 << 9)) == 1) && ((!(self.div & (1 << 9))) == 1),
 
             0b01 => timer_update = ((prev_div & (1 << 3)) == 1) && ((!(self.div & (1 << 3))) == 1),
@@ -52,18 +62,20 @@ impl Timer {
             0b11 => timer_update = ((prev_div & (1 << 7)) == 1) && ((!(self.div & (1 << 7))) == 1) ,
 
             _ => (),
-        }
+        }*/
 
         let cond: u8 = self.tac & (1 << 2);
 
+        //If Clock is enabled
         if timer_update && cond == 1 {
-            self.tima += 1;
+
+            //Increment Counter by 1
+            self.tima  = self.tima.wrapping_add (1);
 
 
-            //If Overflow request interrupt
-            if self.tima == 0xFF {
-                self.tima = self.tima
-
+            //If Counter Overflows, request interrupt
+            if self.tima == 0 {
+                self.tima = self.tma;
                 //Request Timer interrupt
 
 
