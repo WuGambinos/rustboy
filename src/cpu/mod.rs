@@ -122,7 +122,6 @@ impl Flags {
     }
 
     fn update_half_carry_flag_sum_16bit(&mut self, register: u32, operand: u32) {
-
         let half_carry: bool = ((register & 0x0FFF) + (operand & 0x0FFF)) > 0x0FFF;
 
         if half_carry {
@@ -307,14 +306,13 @@ impl Cpu {
 
     ///Handle Interrupts
     fn handle_interrupt(&mut self, mmu: &mut Mmu) {
-
         //Check if interrupts are enabled
         if !self.ime && !self.halted {
             return;
         }
 
         //Check if some interrupt have been triggered
-        let mut triggered  = mmu.read_mem(0xFFFF) & mmu.read_mem(0xFF0F);
+        let mut triggered = mmu.read_mem(0xFFFF) & mmu.read_mem(0xFF0F);
         triggered = 0x04;
 
         if triggered == 0 {
@@ -336,7 +334,7 @@ impl Cpu {
 
         //Clean up the interrupt
         let mut interrupt_flags = mmu.read_mem(0xFFFF);
-        interrupt_flags &= !(1<<n);
+        interrupt_flags &= !(1 << n);
         mmu.write_mem(0xFFFF, interrupt_flags);
 
         //Save current program pointer
@@ -352,16 +350,9 @@ impl Cpu {
         self.ime_to_be_enabled = false;
 
         rst(self, mmu, 0x50);
-
-
-
-
     }
 
-
-
     pub fn execute_instruction(&mut self, mmu: &mut Mmu) {
-
         if self.ime_to_be_enabled {
             self.ime = true;
         }
@@ -375,8 +366,8 @@ impl Cpu {
             //NOP
             0x00 => {
                 self.pc += 1;
-                self.timer.internal_ticks =self.timer.internal_ticks.wrapping_add(1);
-            },
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
+            }
 
             //LD BC, u16
             0x01 => {
@@ -390,7 +381,7 @@ impl Cpu {
                 self.pc += 3;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (BC), A
@@ -408,7 +399,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC B
@@ -417,7 +408,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC B
@@ -426,7 +417,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, u8
@@ -438,7 +429,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RLCA
@@ -449,7 +440,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (u16), SP
@@ -473,7 +464,7 @@ impl Cpu {
                 self.pc += 3;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(5);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(5);
             }
 
             //ADD HL, BC
@@ -484,7 +475,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (BC)
@@ -494,7 +485,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC BC
@@ -506,7 +497,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC C
@@ -516,7 +507,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC C
@@ -526,7 +517,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, u8
@@ -539,7 +530,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RRCA
@@ -550,7 +541,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //STOP
@@ -558,7 +549,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             // LD DE, u16
@@ -571,7 +562,7 @@ impl Cpu {
                 self.pc += 3;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (DE) = A
@@ -582,7 +573,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC DE
@@ -591,7 +582,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC D
@@ -601,7 +592,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC D
@@ -611,7 +602,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, u8
@@ -624,7 +615,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RLA
@@ -636,7 +627,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR i8
@@ -645,7 +636,7 @@ impl Cpu {
                 jr(self, u8_value);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //ADD HL, DE
@@ -654,7 +645,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (DE)
@@ -663,7 +654,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC DE
@@ -672,7 +663,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC E
@@ -681,7 +672,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC E
@@ -690,17 +681,17 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, u8
             0x1E => {
-                let u8_value = mmu.read_mem(self.pc  + 1);
+                let u8_value = mmu.read_mem(self.pc + 1);
                 self.registers.e = u8_value;
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RRA
@@ -710,7 +701,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR NZ, i8
@@ -726,7 +717,7 @@ impl Cpu {
                 self.pc += 3;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL+), A
@@ -739,7 +730,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC HL
@@ -749,7 +740,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC H
@@ -759,7 +750,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC H
@@ -769,7 +760,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, u8
@@ -781,7 +772,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DAA
@@ -790,7 +781,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR Z, i8
@@ -801,13 +792,12 @@ impl Cpu {
 
             //ADD HL, HL
             0x29 => {
-
                 //HL = HL + HL
                 add_rr_hl(self, "HL");
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (HL+)
@@ -820,7 +810,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC HL
@@ -830,7 +820,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC L
@@ -840,7 +830,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC L
@@ -850,7 +840,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, u8
@@ -861,7 +851,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //CPL
@@ -873,7 +863,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR NC, i8
@@ -890,7 +880,7 @@ impl Cpu {
                 self.pc += 3;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL--), A
@@ -904,7 +894,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC SP
@@ -914,7 +904,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC (HL)
@@ -924,7 +914,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //DEC (HL)
@@ -934,7 +924,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (HL), u8
@@ -946,7 +936,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //Set Carry Flag(SCF)
@@ -957,7 +947,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //JR C, i8
@@ -973,7 +963,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (HL--)
@@ -990,7 +980,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DEC SP
@@ -1000,7 +990,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //INC A
@@ -1010,7 +1000,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //DEC A
@@ -1020,7 +1010,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, u8
@@ -1031,13 +1021,13 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //Carry = Carry xor 1
             0x3F => {
                 let c = self.registers.f.carry_flag() ^ 1;
-                if c == 1{
+                if c == 1 {
                     self.registers.f.set_carry_flag();
                 } else {
                     self.registers.f.clear_carry_flag();
@@ -1047,7 +1037,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, B
@@ -1055,7 +1045,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, C
@@ -1064,7 +1054,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, D
@@ -1073,7 +1063,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, E
@@ -1082,7 +1072,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, H
@@ -1091,7 +1081,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, L
@@ -1100,7 +1090,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD B, (HL)
@@ -1110,7 +1100,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD B, A
@@ -1119,7 +1109,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, B
@@ -1128,7 +1118,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, C
@@ -1136,7 +1126,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, D
@@ -1145,7 +1135,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, E
@@ -1154,7 +1144,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, H
@@ -1163,7 +1153,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, L
@@ -1172,17 +1162,17 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD C, (HL)
             0x4E => {
-            let addr: u16 = self.registers.hl();
+                let addr: u16 = self.registers.hl();
                 ld_8bit(&mut self.registers.c, mmu.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD C, A
@@ -1191,7 +1181,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, B
@@ -1200,7 +1190,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, C
@@ -1209,7 +1199,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, D
@@ -1217,7 +1207,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, E
@@ -1226,7 +1216,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, H
@@ -1235,7 +1225,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, L
@@ -1244,7 +1234,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD D, (HL)
@@ -1254,7 +1244,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD D, A
@@ -1263,7 +1253,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, B
@@ -1272,7 +1262,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, C
@@ -1281,7 +1271,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, D
@@ -1290,7 +1280,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, E
@@ -1298,7 +1288,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, H
@@ -1307,7 +1297,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, L
@@ -1316,7 +1306,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD E, (HL)
@@ -1326,7 +1316,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD E, A
@@ -1335,7 +1325,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, B
@@ -1344,7 +1334,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, C
@@ -1353,7 +1343,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, D
@@ -1362,7 +1352,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, E
@@ -1371,7 +1361,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, H
@@ -1379,7 +1369,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, L
@@ -1388,7 +1378,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD H, (HL)
@@ -1398,7 +1388,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD H, A
@@ -1407,7 +1397,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, B
@@ -1416,7 +1406,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, C
@@ -1425,7 +1415,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, D
@@ -1434,7 +1424,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, E
@@ -1443,7 +1433,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, H
@@ -1452,7 +1442,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, L
@@ -1460,7 +1450,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD L, (HL)
@@ -1470,7 +1460,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD L, A
@@ -1479,7 +1469,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (HL), B
@@ -1488,7 +1478,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), C
@@ -1497,7 +1487,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), D
@@ -1506,7 +1496,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), E
@@ -1515,7 +1505,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), H
@@ -1524,7 +1514,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD (HL), L
@@ -1533,13 +1523,13 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //HALT (NEED TO FINISH)
             0x76 => {
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (HL), A
@@ -1548,7 +1538,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, B
@@ -1557,7 +1547,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, C
@@ -1566,8 +1556,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
-
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, D
@@ -1576,7 +1565,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, E
@@ -1585,7 +1574,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, H
@@ -1594,7 +1583,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, L
@@ -1603,7 +1592,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD A, (HL)
@@ -1613,7 +1602,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, A
@@ -1621,7 +1610,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, B
@@ -1630,7 +1619,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, C
@@ -1639,7 +1628,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, D
@@ -1648,7 +1637,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, E
@@ -1657,7 +1646,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, H
@@ -1666,7 +1655,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, L
@@ -1675,7 +1664,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADD A, (HL)
@@ -1685,7 +1674,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //ADD A, A
@@ -1694,7 +1683,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, B
@@ -1703,7 +1692,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, C
@@ -1712,7 +1701,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, D
@@ -1721,7 +1710,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, E
@@ -1730,7 +1719,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, H
@@ -1739,7 +1728,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, L
@@ -1748,7 +1737,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //ADC A, (HL)
@@ -1758,7 +1747,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //ADC A, A
@@ -1767,7 +1756,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, B
@@ -1776,7 +1765,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, C
@@ -1785,7 +1774,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, D
@@ -1794,7 +1783,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, E
@@ -1803,7 +1792,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-                self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, H
@@ -1812,7 +1801,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, L
@@ -1821,7 +1810,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SUB A, (HL)
@@ -1831,7 +1820,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //SUB  A, A
@@ -1840,7 +1829,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, B
@@ -1849,7 +1838,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, C
@@ -1858,7 +1847,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, D
@@ -1867,7 +1856,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, E
@@ -1876,7 +1865,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, H
@@ -1885,7 +1874,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, L
@@ -1894,7 +1883,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //SBC A, (HL)
@@ -1904,7 +1893,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //SBC A, A
@@ -1913,7 +1902,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, B
@@ -1922,7 +1911,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, C
@@ -1931,7 +1920,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, D
@@ -1940,7 +1929,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, E
@@ -1949,7 +1938,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, H
@@ -1958,7 +1947,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, L
@@ -1967,7 +1956,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //AND A, (HL)
@@ -1977,7 +1966,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //AND A, A
@@ -1986,7 +1975,7 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, B
@@ -1995,7 +1984,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, C
@@ -2004,7 +1993,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, D
@@ -2013,7 +2002,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, E
@@ -2022,7 +2011,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, H
@@ -2031,7 +2020,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, L
@@ -2040,7 +2029,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //XOR A, (HL)
@@ -2050,7 +2039,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //XOR A, A
@@ -2059,7 +2048,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, B
@@ -2068,7 +2057,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, C
@@ -2077,7 +2066,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, D
@@ -2086,7 +2075,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, E
@@ -2095,7 +2084,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, H
@@ -2104,7 +2093,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, L
@@ -2113,7 +2102,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //OR A, (HL)
@@ -2123,7 +2112,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //OR A, A
@@ -2132,7 +2121,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, B
@@ -2141,7 +2130,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, C
@@ -2150,7 +2139,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, D
@@ -2159,7 +2148,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, E
@@ -2168,7 +2157,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, H
@@ -2177,7 +2166,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, L
@@ -2186,7 +2175,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //CP A, (HL)
@@ -2196,7 +2185,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //CP A, A
@@ -2205,7 +2194,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(1);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //RET NZ
@@ -2224,7 +2213,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(3);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //JP NZ, u16
@@ -2251,7 +2240,7 @@ impl Cpu {
                 self.pc += 1;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //ADD A, u8
@@ -2262,7 +2251,7 @@ impl Cpu {
                 self.pc += 2;
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(2);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x00(CAll to n)
@@ -2270,7 +2259,7 @@ impl Cpu {
                 rst(self, mmu, 0x00);
 
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //RET Z
@@ -2282,7 +2271,7 @@ impl Cpu {
             0xC9 => {
                 ret(self, mmu);
                 //Increase Timer
-               self.timer.internal_ticks  = self.timer.internal_ticks.wrapping_add(4);
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //JP Z, u16
@@ -2533,7 +2522,7 @@ impl Cpu {
                     //SLA (HL)
                     0x26 => {
                         let addr = self.registers.hl();
-                        sla_hl(&mut self.registers.f, mmu,addr);
+                        sla_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -2582,7 +2571,7 @@ impl Cpu {
                     //SRA (HL)
                     0x2E => {
                         let addr = self.registers.hl();
-                        sra_hl(&mut self.registers.f, mmu,addr);
+                        sra_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -2680,7 +2669,7 @@ impl Cpu {
                     //SRL (HL)
                     0x3E => {
                         let addr = self.registers.hl();
-                        srl_hl(&mut self.registers.f, mmu,addr);
+                        srl_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
                     }
 
@@ -3878,6 +3867,9 @@ impl Cpu {
             0xCD => {
                 let u16_value = self.get_u16(mmu);
                 call(self, mmu, u16_value);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(6);
             }
 
             //ADC A, u8
@@ -3885,10 +3877,18 @@ impl Cpu {
                 let operand = mmu.read_mem(self.pc + 1);
                 adc_a_r(self, operand);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x08
-            0xCF => rst(self, mmu, 0x08),
+            0xCF => {
+                rst(self, mmu, 0x08);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
+            }
 
             //RET NC
             0xD0 => {
@@ -3904,6 +3904,9 @@ impl Cpu {
                     &mut self.sp,
                 );
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //JP NC, u16
@@ -3913,7 +3916,7 @@ impl Cpu {
             }
 
             //Invalid Opcode
-            0xD3 => {},
+            0xD3 => {}
 
             //CALL NC, u16
             0xD4 => {
@@ -3925,6 +3928,9 @@ impl Cpu {
             0xD5 => {
                 push_rr(mmu, self.registers.d, self.registers.e, &mut self.sp);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //SUB A, u8
@@ -3932,10 +3938,18 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 sub_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x10
-            0xD7 => rst(self, mmu, 0x10),
+            0xD7 => {
+                rst(self, mmu, 0x10);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
+            }
 
             //RET C
             0xD8 => ret_c(self, mmu),
@@ -3945,6 +3959,9 @@ impl Cpu {
                 ret(self, mmu);
                 ei(self);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //JP C, u16
@@ -3958,7 +3975,7 @@ impl Cpu {
 
             //CALL C, u16
             0xDC => {
-                let u16_value =  self.get_u16(mmu);
+                let u16_value = self.get_u16(mmu);
                 call_c(self, mmu, u16_value);
             }
 
@@ -3970,16 +3987,27 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 sbc_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x18
-            0xDF => rst(self, mmu, 0x18),
+            0xDF => {
+                rst(self, mmu, 0x18);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
+            }
 
             //LD (0xFF00 + u8), A
             0xE0 => {
                 let u8_value: u8 = mmu.read_mem(self.pc + 1);
                 ld_io_from_a(self, mmu, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //POP HL
@@ -3991,12 +4019,18 @@ impl Cpu {
                     &mut self.sp,
                 );
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD (0xFF00 + C), A
             0xE2 => {
                 ld_io_c_from_a(self, mmu);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //Invalid Opcode
@@ -4009,6 +4043,9 @@ impl Cpu {
             0xE5 => {
                 push_rr(mmu, self.registers.h, self.registers.l, &mut self.sp);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //AND A, u8
@@ -4016,16 +4053,23 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 and_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x20
-            0xE7 => rst(self, mmu, 0x20),
+            0xE7 => {
+                rst(self, mmu, 0x20);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
+            }
 
             //ADD SP, i8
             0xE8 => {
-
                 //i8
-                let i8_value  = mmu.read_mem(self.pc + 1) as i8;
+                let i8_value = mmu.read_mem(self.pc + 1) as i8;
 
                 //SP + i8
                 let c = self.sp.wrapping_add(i8_value as u16);
@@ -4042,7 +4086,6 @@ impl Cpu {
                 //Clear Zero Flag
                 self.registers.f.clear_zero_flag();
 
-
                 //Update Half Carry
                 if half_carry {
                     self.registers.f.set_half_carry_flag();
@@ -4053,7 +4096,7 @@ impl Cpu {
                 //Update Carry
                 if carry {
                     self.registers.f.set_carry_flag();
-                } else{
+                } else {
                     self.registers.f.clear_carry_flag();
                 }
 
@@ -4061,11 +4104,17 @@ impl Cpu {
                 self.sp = c;
 
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //JP HL
             0xE9 => {
                 jp(self, self.registers.hl());
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //LD (u16), A
@@ -4073,6 +4122,9 @@ impl Cpu {
                 let u16_value = self.get_u16(mmu);
                 mmu.write_mem(u16_value, self.registers.a);
                 self.pc += 3;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //Invalid Opcode
@@ -4086,14 +4138,19 @@ impl Cpu {
 
             //XOR A, u8
             0xEE => {
-                let u8_value  = mmu.read_mem(self.pc + 1);
+                let u8_value = mmu.read_mem(self.pc + 1);
                 xor_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x28
             0xEF => {
                 rst(self, mmu, 0x28);
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //LD A, (FF00+u8)
@@ -4101,6 +4158,9 @@ impl Cpu {
                 let u8_value: u8 = mmu.read_mem(self.pc + 1);
                 ld_a_from_io(self, mmu, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //POP AF
@@ -4115,18 +4175,27 @@ impl Cpu {
                 //Clear Lower Nibble of F register
                 self.registers.f.data &= 0xF0;
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD A, (FF00 + C)
             0xF2 => {
                 ld_a_from_io_c(self, mmu);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //DI
             0xF3 => {
                 di(self);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //Invalid Opcode
@@ -4136,6 +4205,9 @@ impl Cpu {
             0xF5 => {
                 push_rr(mmu, self.registers.a, self.registers.f.data, &mut self.sp);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //OR A, u8
@@ -4143,14 +4215,21 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 or_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x30
-            0xF7 => rst(self, mmu, 0x30),
+            0xF7 => {
+                rst(self, mmu, 0x30);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
+            }
 
             //LD HL, SP+i8
             0xF8 => {
-
                 //i8
                 let i8_value = mmu.read_mem(self.pc + 1) as i8;
 
@@ -4179,7 +4258,7 @@ impl Cpu {
                 //Update Carry
                 if carry {
                     self.registers.f.set_carry_flag();
-                } else{
+                } else {
                     self.registers.f.clear_carry_flag();
                 }
 
@@ -4187,12 +4266,18 @@ impl Cpu {
                 self.registers.set_hl(c);
 
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
             }
 
             //LD SP, HL
             0xF9 => {
                 self.sp = self.registers.hl();
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //LD A, (u16)
@@ -4201,12 +4286,18 @@ impl Cpu {
                 let u8_value = mmu.read_mem(addr);
                 ld_8bit(&mut self.registers.a, u8_value);
                 self.pc += 3;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //EI
             0xFB => {
                 ei(self);
                 self.pc += 1;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             }
 
             //Invalid Opcode
@@ -4220,13 +4311,19 @@ impl Cpu {
                 let u8_value = mmu.read_mem(self.pc + 1);
                 cp_r_r(self, u8_value);
                 self.pc += 2;
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
             }
 
             //RST 0x38
-            0xFF => rst(self, mmu, 0x38),
+            0xFF => {
+                rst(self, mmu, 0x38);
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
+            }
             //_ => println!("NOT AN OPCODE"),
         }
-
     }
 
     fn fetch(&mut self, mmu: &Mmu) {
@@ -4244,9 +4341,16 @@ impl Cpu {
 
         println!("MEM[SP+1]: {:#X}", mmu.read_mem(self.sp.wrapping_add(1)));
         println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
-        println!("MEM[{:#X}]: {:#X}", self.sp.wrapping_sub(1), mmu.read_mem(self.sp.wrapping_sub(1)));
-        println!("MEM[{:#X}]: {:#X}",self.sp.wrapping_sub(2), mmu.read_mem(self.sp.wrapping_sub(2)));
-
+        println!(
+            "MEM[{:#X}]: {:#X}",
+            self.sp.wrapping_sub(1),
+            mmu.read_mem(self.sp.wrapping_sub(1))
+        );
+        println!(
+            "MEM[{:#X}]: {:#X}",
+            self.sp.wrapping_sub(2),
+            mmu.read_mem(self.sp.wrapping_sub(2))
+        );
 
         println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
         println!("MEM[0xDFE9]: {:#X}", mmu.read_mem(0xDFE9));
@@ -4268,8 +4372,6 @@ impl Cpu {
         println!("FLAG: {:#X}", self.registers.f.data);
 
         println!("OPCODE: {:#X}", self.opcode);
-
-
     }
 }
 

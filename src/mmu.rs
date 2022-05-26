@@ -46,11 +46,9 @@ impl Mmu {
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if addr >= 0xFF04 && addr <= 0xFF07 {
-
         } else {
             self.memory[addr as usize] = value;
         }
-
     }
 
     pub fn read_mem(&self, addr: u16) -> u8 {
@@ -62,6 +60,4 @@ impl Mmu {
             self.write_mem(i as u16, rom[i]);
         }
     }
-
-
 }

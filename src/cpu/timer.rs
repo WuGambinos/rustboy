@@ -21,7 +21,6 @@ pub struct Timer {
     pub(crate) internal_ticks: u32,
 }
 
-
 impl Timer {
     pub fn new() -> Self {
         Self {
@@ -34,11 +33,10 @@ impl Timer {
     }
 
     fn do_cycle(&mut self, ticks: u32) {
-
         //Use internal_ticks to check if we need to increment the divider register
         self.internal_ticks += ticks;
 
-       /*
+        /*
         let prev_div:  u16 = self.div;
 
         self.div += 1;
@@ -68,21 +66,15 @@ impl Timer {
 
         //If Clock is enabled
         if timer_update && cond == 1 {
-
             //Increment Counter by 1
-            self.tima  = self.tima.wrapping_add (1);
-
+            self.tima = self.tima.wrapping_add(1);
 
             //If Counter Overflows, request interrupt
             if self.tima == 0 {
                 self.tima = self.tma;
                 //Request Timer interrupt
-
-
             }
         }
-
-
     }
 
     /// Read u8 valeu from Timer/Divider register at addr
@@ -98,13 +90,11 @@ impl Timer {
 
             _ => 123,
         }
-
     }
 
     /// Write u8 value to Timer/Divider register at addr
-    fn timer_write(&mut self, addr: u16, value: u8){
-        match addr{
-
+    fn timer_write(&mut self, addr: u16, value: u8) {
+        match addr {
             //DIV
             0xFF04 => self.div = 0,
 
@@ -117,12 +107,7 @@ impl Timer {
             //TAC
             0xFF07 => self.tac = value,
 
-            _ => ()
+            _ => (),
         }
-
     }
-
-
-
 }
-
