@@ -5,14 +5,18 @@ pub struct Timer {
     /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
     /// resets it to 0x00
     pub(crate) div: u16,
+
     /// Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
     /// When the value overflows then it will be reset to value specified in TMA and interrupt
     /// will be request
     pub(crate) tima: u8,
+
     /// Timer Modulo (R/W)
     pub(crate) tma: u8,
+
     ///Timer Control (R/W)
     pub(crate) tac: u8,
+
     ///Internal Ticks
     internal_ticks: u32,
 }
@@ -37,6 +41,7 @@ impl Timer {
 
         let mut timer_update: bool = false;
 
+        //Get Timer Clock
         match self.tac & 0b11 {
             0b00 => timer_update = ((prev_div & (1 << 9)) == 1) && ((!(self.div & (1 << 9))) == 1),
 
@@ -65,6 +70,43 @@ impl Timer {
             }
         }
 
+
+    }
+
+    /// Read u8 valeu from Timer/Divider register at addr
+    fn timer_read(&self, addr: u16) -> u8 {
+        match addr {
+            0xFF04 => return ((self.div as u16) >> 8) as u8,
+
+            0xFF05 => return self.tima,
+
+            0xFF06 => return self.tma,
+
+            0xFF07 => return self.tac,
+
+            _ => 123,
+        }
+
+    }
+
+    /// Write u8 value to Timer/Divider register at addr
+    fn timer_write(&mut self, addr: u16, value: u8){
+        match addr{
+
+            //DIV
+            0xFF04 => self.div = 0,
+
+            //TIMA
+            0xFF05 => self.tima = value,
+
+            //TMA
+            0xFF06 => self.tma = value,
+
+            //TAC
+            0xFF07 => self.tac = value,
+
+            _ => ()
+        }
 
     }
 

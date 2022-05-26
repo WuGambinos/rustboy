@@ -63,40 +63,5 @@ impl Mmu {
         }
     }
 
-    /// Read u8 valeu from Timer/Divider register at addr
-    fn timer_read(&self, timer: Timer, addr: u16) -> u8 {
-        match addr {
-            0xFF04 => return ((timer.div as u16) >> 8) as u8,
 
-            0xFF05 => return timer.tima,
-
-            0xFF06 => return timer.tma,
-
-            0xFF07 => return timer.tac,
-
-            _ => 123,
-        }
-
-    }
-
-    /// Write u8 value to Timer/Divider register at addr
-    fn timer_write(self, timer: &mut Timer, addr: u16, value: u8){
-        match addr{
-
-            //DIV
-            0xFF04 => timer.div = 0,
-
-            //TIMA
-            0xFF05 => timer.tima = value,
-
-            //TMA
-            0xFF06 => timer.tma = value,
-
-            //TAC
-            0xFF07 => timer.tac = value,
-
-            _ => ()
-        }
-
-    }
 }
