@@ -48,7 +48,7 @@ fn main() {
 
     //cpu.print_state(&mmu);
 
-    let mut counter = 0;
+   /* let mut counter = 0;
 
     for _ in 0..189691 {
         cpu.execute_instruction(&mut mmu);
@@ -67,9 +67,9 @@ fn main() {
         cpu.execute_instruction(&mut mmu);
         println!();
         cpu.print_state(&mmu);
-    }
+    }*/
 
-    /*loop {
+    loop {
         cpu.execute_instruction(&mut mmu);
         if mmu.read_mem(0xFF02) == 0x81 {
              let c: char = mmu.read_mem(0xFF01) as char;
@@ -77,12 +77,11 @@ fn main() {
              mmu.write_mem(0xff02, 0x0);
          }
 
-         println!();
-         cpu.print_state(&mmu);
-         counter += 1;
-    }
+        let cycles_passed = cpu.timer.internal_ticks - cpu.last_cycle;
+        println!("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
+        println!();
 
-    */
+    }
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {

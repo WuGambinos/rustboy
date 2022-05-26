@@ -280,7 +280,9 @@ pub struct Cpu {
     pub(crate) opcode: u8,
 
     ///Timer
-    timer: Timer,
+    pub(crate) timer: Timer,
+
+    pub(crate) last_cycle: u32,
 }
 
 impl Default for Cpu {
@@ -301,6 +303,7 @@ impl Cpu {
             halted: false,
             opcode: 0,
             timer: Timer::new(),
+            last_cycle: 0,
         }
     }
 
@@ -359,6 +362,8 @@ impl Cpu {
 
         //Handle Interrupts
         self.handle_interrupt(mmu);
+
+        self.last_cycle = self.timer.internal_ticks;
 
         self.fetch(mmu);
 
@@ -2225,7 +2230,10 @@ impl Cpu {
             //JP u16
             0xC3 => {
                 let u16_value = self.get_u16(mmu);
-                jp(self, u16_value)
+                jp(self, u16_value);
+
+                //Increase Timer
+                self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
             }
 
             //CALL NZ, u16
