@@ -128,10 +128,9 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     //Update Half Carry Flag
     if half_carry {
         cpu.registers.f.set_half_carry_flag();
+    } else {
+        cpu.registers.f.clear_half_carry_flag();
     }
-     else {
-         cpu.registers.f.clear_half_carry_flag();
-     }
 
     //Update Carry Flag
     if c > 0xFF {
@@ -172,7 +171,6 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
 }
 
 pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
-
     //Accumulator
     let a = cpu.registers.a as i16;
 
@@ -180,7 +178,9 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     let b = operand as i16;
 
     //Result
-    let c = a.wrapping_sub(b).wrapping_sub(cpu.registers.f.carry_flag() as i16);
+    let c = a
+        .wrapping_sub(b)
+        .wrapping_sub(cpu.registers.f.carry_flag() as i16);
 
     //Calculate Half Carry
     let half_carry = ((a & 0x0F) - (b & 0x0F) - (cpu.registers.f.carry_flag() as i16)) < 0;
@@ -206,7 +206,6 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.f.update_zero_flag(c as u8);
 
     cpu.registers.a = c as u8;
-
 }
 
 pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
@@ -303,7 +302,6 @@ pub fn daa(cpu: &mut Cpu) {
         if cpu.registers.f.half_carry_flag() == 1 || (cpu.registers.a & 0x0F) > 0x09 {
             cpu.registers.a = cpu.registers.a.wrapping_add(0x6);
         }
-
     } else {
         if cpu.registers.f.carry_flag() == 1 {
             cpu.registers.a = cpu.registers.a.wrapping_sub(0x60);
@@ -319,8 +317,6 @@ pub fn daa(cpu: &mut Cpu) {
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(cpu.registers.a);
-
-
 }
 
 /************************************************************************
@@ -1027,7 +1023,6 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
 pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
-
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.bc() as u32;
 
@@ -1041,7 +1036,9 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
 
             //Calculate Carry
-            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
+            cpu.registers
+                .f
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
 
             cpu.registers.set_hl(c as u16);
         }
@@ -1059,10 +1056,11 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
 
             //Calculate Carry
-            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
+            cpu.registers
+                .f
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
 
             cpu.registers.set_hl(c as u16);
-
         }
         "HL" => {
             let a = cpu.registers.hl() as u32;
@@ -1078,7 +1076,9 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
 
             //Calculate Carry
-            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
+            cpu.registers
+                .f
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
 
             cpu.registers.set_hl(c as u16);
         }
@@ -1097,7 +1097,9 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
 
             //Calculate Carry
-            cpu.registers.f.update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+            cpu.registers
+                .f
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
 
             cpu.registers.set_hl(c as u16);
         }
@@ -1199,8 +1201,10 @@ pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
 pub fn jp_c(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1209,8 +1213,10 @@ pub fn jp_c(cpu: &mut Cpu, nn: u16) {
 pub fn jp_nc(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1262,8 +1268,10 @@ pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1271,8 +1279,10 @@ pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_nc(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1282,7 +1292,7 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
-    stack_pointer = stack_pointer.wrapping_sub( 2);
+    stack_pointer = stack_pointer.wrapping_sub(2);
 
     //Increment PC before push
     cpu.pc += 1;
@@ -1309,7 +1319,7 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     cpu.pc = pc;
 
     //SP = SP + 2
-    sp =sp.wrapping_add( 2);
+    sp = sp.wrapping_add(2);
 
     cpu.sp = sp;
 }
@@ -1336,16 +1346,21 @@ pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
 pub fn ret_c(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.carry_flag() == 1 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
 pub fn ret_nc(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.carry_flag() == 0 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1513,7 +1528,6 @@ pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
 
     mmu.write_mem(addr, value);
 }
-
 
 /************************************************************************
  * Interrupt Instructions

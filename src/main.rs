@@ -4,11 +4,9 @@ pub use cpu::Cpu;
 pub mod mmu;
 pub use mmu::*;
 
-
-
+use crate::cpu::timer::Timer;
 use std::fs;
 use std::path::Path;
-use crate::cpu::timer::Timer;
 
 #[macro_use]
 extern crate text_io;
@@ -41,7 +39,7 @@ fn main() {
 
     let mut cond = true;
 
-   /* while cond {
+    /* while cond {
         cpu.execute_instruction(&mut mmu);
         if cpu.pc == 0x0050 {
             cond = false;
@@ -62,7 +60,6 @@ fn main() {
     println!();
     cpu.execute_instruction(&mut mmu);
 
-
     println!();
     cpu.print_state(&mmu);
 
@@ -70,29 +67,25 @@ fn main() {
         cpu.execute_instruction(&mut mmu);
         println!();
         cpu.print_state(&mmu);
-
     }
 
-      /*loop {
-           cpu.execute_instruction(&mut mmu);
-           if mmu.read_mem(0xFF02) == 0x81 {
-                let c: char = mmu.read_mem(0xFF01) as char;
-                print!("{}", c);
-                mmu.write_mem(0xff02, 0x0);
-            }
+    /*loop {
+        cpu.execute_instruction(&mut mmu);
+        if mmu.read_mem(0xFF02) == 0x81 {
+             let c: char = mmu.read_mem(0xFF01) as char;
+             print!("{}", c);
+             mmu.write_mem(0xff02, 0x0);
+         }
 
-            println!();
-            cpu.print_state(&mmu);
-            counter += 1;
-       }
+         println!();
+         cpu.print_state(&mmu);
+         counter += 1;
+    }
 
-       */
+    */
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector
     fs::read(path)
 }
-
-
-
