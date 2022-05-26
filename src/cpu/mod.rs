@@ -5097,8 +5097,7 @@ impl Cpu {
                 rst(self, mmu, 0x38);
                 //Increase Timer
                 self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
-            }
-            //_ => println!("NOT AN OPCODE"),
+            } //_ => println!("NOT AN OPCODE"),
         }
     }
 
