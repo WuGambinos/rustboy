@@ -305,7 +305,7 @@ impl Cpu {
     fn handle_interrupt(&mut self, mmu: &mut Mmu) {
 
         //Check if interrupts are enabled
-        if self.ime == false && self.halted == false {
+        if !self.ime && !self.halted {
             return;
         }
 
@@ -317,7 +317,7 @@ impl Cpu {
         }
 
         self.halted = false;
-        if self.ime == false {
+        if !self.ime {
             return;
         }
 
@@ -1681,7 +1681,7 @@ impl Cpu {
             //ADD A, u8
             0xC6 => {
                 let addr = self.pc + 1;
-                let u8_value = mmu.read_mem((addr));
+                let u8_value = mmu.read_mem(addr);
                 add_a_r(self, u8_value);
                 self.pc += 2;
             }
