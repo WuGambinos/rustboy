@@ -2,14 +2,19 @@ use crate::Mmu;
 
 
 pub struct Timer {
-    /// Divider Register
-    div: u16,
-    /// Timer Counter(R/W)
-    tima: u8,
+    /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
+    /// resets it to 0x00
+    pub(crate) div: u16,
+    /// Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
+    /// When the value overflows then it will be reset to value specified in TMA and interrupt
+    /// will be request
+    pub(crate) tima: u8,
     /// Timer Modulo (R/W)
-    tma: u8,
+    pub(crate) tma: u8,
     ///Timer Control (R/W)
-    tac: u8,
+    pub(crate) tac: u8,
+    ///Internal Ticks
+    internal_ticks: u32,
 }
 
 
@@ -20,6 +25,7 @@ impl Timer {
             tima: 0,
             tma: 0,
             tac: 0,
+            internal_ticks: 0,
         }
     }
 
@@ -62,42 +68,7 @@ impl Timer {
 
     }
 
-    /// Read u8 valeu from Timer/Divider register at addr
-    fn timer_read(&self, mmu: &Mmu, addr: u16) -> u8 {
-        match addr {
-            0xFF04 => return ((self.div as u16) >> 8) as u8,
 
-            0xFF05 => return self.tima,
-
-            0xFF06 => return self.tma,
-
-            0xFF07 => return self.tac,
-
-            _ => 123,
-        }
-
-    }
-
-    /// Write u8 value to Timer/Divider register at addr
-    fn timer_write(&mut self, mmu: &Mmu, addr: u16, value: u8){
-        match addr{
-
-            //DIV
-            0xFF04 => self.div = 0,
-
-            //TIMA
-            0xFF05 => self.tima = value,
-
-            //TMA
-            0xFF06 => self.tma = value,
-
-            //TAC
-            0xFF07 => self.tac = value,
-
-            _ => ()
-        }
-
-    }
 
 }
 
