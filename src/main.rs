@@ -1,9 +1,10 @@
 pub mod cpu;
 pub use cpu::Cpu;
 
-pub mod mmu;
 mod gameboy;
+pub mod mmu;
 
+use gameboy::GameBoy;
 pub use mmu::*;
 
 use crate::cpu::timer::Timer;
@@ -32,6 +33,8 @@ fn main() {
     //Mapped Memory Unit
     let mut mmu: Mmu = Mmu::new();
 
+    let mut game_boy: GameBoy = GameBoy::new(&mut cpu, &mut mmu, &mut timer);
+
     //Read Rom into memory
     mmu.read_rom(&rom);
 
@@ -50,7 +53,7 @@ fn main() {
 
     //cpu.print_state(&mmu);
 
-   /* let mut counter = 0;
+    /* let mut counter = 0;
 
     for _ in 0..189691 {
         cpu.execute_instruction(&mut mmu);
@@ -77,11 +80,10 @@ fn main() {
         timer.do_cycle(cycles_passed);
 
         if mmu.read_mem(0xFF02) == 0x81 {
-             let c: char = mmu.read_mem(0xFF01) as char;
-             print!("{}", c);
-             mmu.write_mem(0xff02, 0x0);
-         }
-
+            let c: char = mmu.read_mem(0xFF01) as char;
+            print!("{}", c);
+            mmu.write_mem(0xff02, 0x0);
+        }
 
         /*("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
         println!();*/
