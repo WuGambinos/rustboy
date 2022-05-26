@@ -2291,36 +2291,54 @@ impl Cpu {
                     0x00 => {
                         rlc(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC C
                     0x01 => {
                         rlc(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC D
                     0x02 => {
                         rlc(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC E
                     0x03 => {
                         rlc(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC H
                     0x04 => {
                         rlc(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC L
                     0x05 => {
                         rlc(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RLC (HL)
@@ -2328,48 +2346,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         rlc_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RLC A
                     0x07 => {
                         rlc(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC B
                     0x08 => {
                         rrc(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC C
                     0x09 => {
                         rrc(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC D
                     0x0A => {
                         rrc(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC E
                     0x0B => {
                         rrc(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC H
                     0x0C => {
                         rrc(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC L
                     0x0D => {
                         rrc(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RRC (HL)
@@ -2377,48 +2419,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         rrc_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RRC A
                     0x0F => {
                         rrc(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL B
                     0x10 => {
                         rl(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL C
                     0x11 => {
                         rl(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL D
                     0x12 => {
                         rl(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL E
                     0x13 => {
                         rl(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL H
                     0x14 => {
                         rl(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL L
                     0x15 => {
                         rl(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RL (HL)
@@ -2426,48 +2492,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         rl_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RL A
                     0x17 => {
                         rl(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR B
                     0x18 => {
                         rr(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR C
                     0x19 => {
                         rr(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR D
                     0x1A => {
                         rr(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR E
                     0x1B => {
                         rr(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR H
                     0x1C => {
                         rr(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR L
                     0x1D => {
                         rr(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RR (HL)
@@ -2475,48 +2565,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         rr_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RR A
                     0x1F => {
                         rr(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA B
                     0x20 => {
                         sla(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA C
                     0x21 => {
                         sla(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA D
                     0x22 => {
                         sla(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA E
                     0x23 => {
                         sla(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA H
                     0x24 => {
                         sla(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA L
                     0x25 => {
                         sla(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SLA (HL)
@@ -2524,48 +2638,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         sla_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SLA A
                     0x27 => {
                         sla(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA B
                     0x28 => {
                         sra(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA C
                     0x29 => {
                         sra(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA D
                     0x2A => {
                         sra(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA E
                     0x2B => {
                         sra(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA H
                     0x2C => {
                         sra(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA L
                     0x2D => {
                         sra(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRA (HL)
@@ -2573,48 +2711,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         sra_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SRA A
                     0x2F => {
                         sra(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP B
                     0x30 => {
                         swap(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP C
                     0x31 => {
                         swap(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP D
                     0x32 => {
                         swap(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP E
                     0x33 => {
                         swap(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP H
                     0x34 => {
                         swap(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP L
                     0x35 => {
                         swap(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SWAP (HL)
@@ -2622,48 +2784,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         swap_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SWAP A
                     0x37 => {
                         swap(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL B
                     0x38 => {
                         srl(&mut self.registers.f, &mut self.registers.b);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL C
                     0x39 => {
                         srl(&mut self.registers.f, &mut self.registers.c);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL D
                     0x3A => {
                         srl(&mut self.registers.f, &mut self.registers.d);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL E
                     0x3B => {
                         srl(&mut self.registers.f, &mut self.registers.e);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL H
                     0x3C => {
                         srl(&mut self.registers.f, &mut self.registers.h);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL L
                     0x3D => {
                         srl(&mut self.registers.f, &mut self.registers.l);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SRL (HL)
@@ -2671,48 +2857,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         srl_hl(&mut self.registers.f, mmu, addr);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SRL A
                     0x3F => {
                         srl(&mut self.registers.f, &mut self.registers.a);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, B
                     0x40 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, C
                     0x41 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, D
                     0x42 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, E
                     0x43 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, H
                     0x44 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, L
                     0x45 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 0, (HL)
@@ -2720,48 +2930,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 0, A
                     0x47 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, B
                     0x48 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, C
                     0x49 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, D
                     0x4A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, E
                     0x4B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, H
                     0x4C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, L
                     0x4D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 1, (HL)
@@ -2769,48 +3003,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 1, A
                     0x4F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, B
                     0x50 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, C
                     0x51 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, D
                     0x52 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, E
                     0x53 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, H
                     0x54 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, L
                     0x55 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 2, (HL)
@@ -2818,48 +3076,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 2, A
                     0x57 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, B
                     0x58 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, C
                     0x59 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, D
                     0x5A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, E
                     0x5B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, H
                     0x5C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, L
                     0x5D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 3, (HL)
@@ -2867,48 +3149,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 3, A
                     0x5F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, B
                     0x60 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, C
                     0x61 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, D
                     0x62 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, E
                     0x63 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, H
                     0x64 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, L
                     0x65 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 4, (HL)
@@ -2916,48 +3222,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 4, A
                     0x67 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, B
                     0x68 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, C
                     0x69 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, D
                     0x6A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, E
                     0x6B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, H
                     0x6C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, L
                     0x6D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 5, (HL)
@@ -2965,48 +3295,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 5, A
                     0x6F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, B
                     0x70 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, C
                     0x71 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, D
                     0x72 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, E
                     0x73 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, H
                     0x74 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, L
                     0x75 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 6, (HL)
@@ -3014,48 +3368,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 6, A
                     0x77 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, B
                     0x78 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, C
                     0x79 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, D
                     0x7A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, E
                     0x7B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, H
                     0x7C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, L
                     0x7D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //BIT 7, (HL)
@@ -3063,48 +3441,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, mmu, addr, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(3);
                     }
 
                     //BIT 7, A
                     0x7F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, B
                     0x80 => {
                         res_n_r(&mut self.registers.b, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, C
                     0x81 => {
                         res_n_r(&mut self.registers.c, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, D
                     0x82 => {
                         res_n_r(&mut self.registers.d, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, E
                     0x83 => {
                         res_n_r(&mut self.registers.e, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, H
                     0x84 => {
                         res_n_r(&mut self.registers.h, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, L
                     0x85 => {
                         res_n_r(&mut self.registers.l, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 0, (HL)
@@ -3112,48 +3514,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 0, A
                     0x87 => {
                         res_n_r(&mut self.registers.a, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, B
                     0x88 => {
                         res_n_r(&mut self.registers.b, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, C
                     0x89 => {
                         res_n_r(&mut self.registers.c, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, D
                     0x8A => {
                         res_n_r(&mut self.registers.d, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, E
                     0x8B => {
                         res_n_r(&mut self.registers.e, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, H
                     0x8C => {
                         res_n_r(&mut self.registers.h, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, L
                     0x8D => {
                         res_n_r(&mut self.registers.l, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 1, (HL)
@@ -3161,48 +3587,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 1, A
                     0x8F => {
                         res_n_r(&mut self.registers.a, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, B
                     0x90 => {
                         res_n_r(&mut self.registers.b, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, C
                     0x91 => {
                         res_n_r(&mut self.registers.c, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, D
                     0x92 => {
                         res_n_r(&mut self.registers.d, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, E
                     0x93 => {
                         res_n_r(&mut self.registers.e, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, H
                     0x94 => {
                         res_n_r(&mut self.registers.h, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, L
                     0x95 => {
                         res_n_r(&mut self.registers.l, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 2, (HL)
@@ -3210,48 +3660,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 2, A
                     0x97 => {
                         res_n_r(&mut self.registers.a, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, B
                     0x98 => {
                         res_n_r(&mut self.registers.b, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, C
                     0x99 => {
                         res_n_r(&mut self.registers.c, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, D
                     0x9A => {
                         res_n_r(&mut self.registers.d, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, E
                     0x9B => {
                         res_n_r(&mut self.registers.e, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, H
                     0x9C => {
                         res_n_r(&mut self.registers.h, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, L
                     0x9D => {
                         res_n_r(&mut self.registers.l, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 3, (HL)
@@ -3259,48 +3733,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 3, A
                     0x9F => {
                         res_n_r(&mut self.registers.a, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, B
                     0xA0 => {
                         res_n_r(&mut self.registers.b, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, C
                     0xA1 => {
                         res_n_r(&mut self.registers.c, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, D
                     0xA2 => {
                         res_n_r(&mut self.registers.d, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, E
                     0xA3 => {
                         res_n_r(&mut self.registers.e, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, H
                     0xA4 => {
                         res_n_r(&mut self.registers.h, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, L
                     0xA5 => {
                         res_n_r(&mut self.registers.l, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 4, (HL)
@@ -3308,48 +3806,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 4, A
                     0xA7 => {
                         res_n_r(&mut self.registers.a, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, B
                     0xA8 => {
                         res_n_r(&mut self.registers.b, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, C
                     0xA9 => {
                         res_n_r(&mut self.registers.c, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, D
                     0xAA => {
                         res_n_r(&mut self.registers.d, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, E
                     0xAB => {
                         res_n_r(&mut self.registers.e, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, H
                     0xAC => {
                         res_n_r(&mut self.registers.h, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, L
                     0xAD => {
                         res_n_r(&mut self.registers.l, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 5, (HL)
@@ -3357,48 +3879,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 5, A
                     0xAF => {
                         res_n_r(&mut self.registers.a, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, B
                     0xB0 => {
                         res_n_r(&mut self.registers.b, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, C
                     0xB1 => {
                         res_n_r(&mut self.registers.c, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, D
                     0xB2 => {
                         res_n_r(&mut self.registers.d, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, E
                     0xB3 => {
                         res_n_r(&mut self.registers.e, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, H
                     0xB4 => {
                         res_n_r(&mut self.registers.h, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, L
                     0xB5 => {
                         res_n_r(&mut self.registers.l, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 6, (HL)
@@ -3406,48 +3952,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 6, A
                     0xB7 => {
                         res_n_r(&mut self.registers.a, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, B
                     0xB8 => {
                         res_n_r(&mut self.registers.b, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, C
                     0xB9 => {
                         res_n_r(&mut self.registers.c, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, D
                     0xBA => {
                         res_n_r(&mut self.registers.d, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, E
                     0xBB => {
                         res_n_r(&mut self.registers.e, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, H
                     0xBC => {
                         res_n_r(&mut self.registers.h, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, L
                     0xBD => {
                         res_n_r(&mut self.registers.l, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //RES 7, (HL)
@@ -3455,48 +4025,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         res_n_hl(mmu, addr, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //RES 7, A
                     0xBF => {
                         res_n_r(&mut self.registers.a, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, B
                     0xC0 => {
                         set_n_r(&mut self.registers.b, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, C
                     0xC1 => {
                         set_n_r(&mut self.registers.c, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, D
                     0xC2 => {
                         set_n_r(&mut self.registers.d, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, E
                     0xC3 => {
                         set_n_r(&mut self.registers.e, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, H
                     0xC4 => {
                         set_n_r(&mut self.registers.h, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, L
                     0xC5 => {
                         set_n_r(&mut self.registers.l, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 0, (HL)
@@ -3504,48 +4098,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 0, A
                     0xC7 => {
                         set_n_r(&mut self.registers.a, 0);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, B
                     0xC8 => {
                         set_n_r(&mut self.registers.b, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, C
                     0xC9 => {
                         set_n_r(&mut self.registers.c, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, D
                     0xCA => {
                         set_n_r(&mut self.registers.d, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, E
                     0xCB => {
                         set_n_r(&mut self.registers.e, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, H
                     0xCC => {
                         set_n_r(&mut self.registers.h, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, L
                     0xCD => {
                         set_n_r(&mut self.registers.l, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 1, (HL)
@@ -3553,48 +4171,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 1, A
                     0xCF => {
                         set_n_r(&mut self.registers.a, 1);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, B
                     0xD0 => {
                         set_n_r(&mut self.registers.b, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, C
                     0xD1 => {
                         set_n_r(&mut self.registers.c, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, D
                     0xD2 => {
                         set_n_r(&mut self.registers.d, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, E
                     0xD3 => {
                         set_n_r(&mut self.registers.e, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, H
                     0xD4 => {
                         set_n_r(&mut self.registers.h, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, L
                     0xD5 => {
                         set_n_r(&mut self.registers.l, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 2, (HL)
@@ -3602,48 +4244,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 2, A
                     0xD7 => {
                         set_n_r(&mut self.registers.a, 2);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, B
                     0xD8 => {
                         set_n_r(&mut self.registers.b, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, C
                     0xD9 => {
                         set_n_r(&mut self.registers.c, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, D
                     0xDA => {
                         set_n_r(&mut self.registers.d, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, E
                     0xDB => {
                         set_n_r(&mut self.registers.e, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, H
                     0xDC => {
                         set_n_r(&mut self.registers.h, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, L
                     0xDD => {
                         set_n_r(&mut self.registers.l, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 3, (HL)
@@ -3651,48 +4317,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 3, A
                     0xDF => {
                         set_n_r(&mut self.registers.a, 3);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, B
                     0xE0 => {
                         set_n_r(&mut self.registers.b, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, C
                     0xE1 => {
                         set_n_r(&mut self.registers.c, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, D
                     0xE2 => {
                         set_n_r(&mut self.registers.d, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, E
                     0xE3 => {
                         set_n_r(&mut self.registers.e, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, H
                     0xE4 => {
                         set_n_r(&mut self.registers.h, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, L
                     0xE5 => {
                         set_n_r(&mut self.registers.l, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 4, (HL)
@@ -3700,48 +4390,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 4, A
                     0xE7 => {
                         set_n_r(&mut self.registers.a, 4);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, B
                     0xE8 => {
                         set_n_r(&mut self.registers.b, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, C
                     0xE9 => {
                         set_n_r(&mut self.registers.c, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, D
                     0xEA => {
                         set_n_r(&mut self.registers.d, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, E
                     0xEB => {
                         set_n_r(&mut self.registers.e, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, H
                     0xEC => {
                         set_n_r(&mut self.registers.h, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, L
                     0xED => {
                         set_n_r(&mut self.registers.l, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 5, (HL)
@@ -3749,48 +4463,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 5, A
                     0xEF => {
                         set_n_r(&mut self.registers.a, 5);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, B
                     0xF0 => {
                         set_n_r(&mut self.registers.b, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, C
                     0xF1 => {
                         set_n_r(&mut self.registers.c, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, D
                     0xF2 => {
                         set_n_r(&mut self.registers.d, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, E
                     0xF3 => {
                         set_n_r(&mut self.registers.e, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, H
                     0xF4 => {
                         set_n_r(&mut self.registers.h, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, L
                     0xF5 => {
                         set_n_r(&mut self.registers.l, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 6, (HL)
@@ -3798,48 +4536,72 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 6, A
                     0xF7 => {
                         set_n_r(&mut self.registers.a, 6);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, B
                     0xF8 => {
                         set_n_r(&mut self.registers.b, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, C
                     0xF9 => {
                         set_n_r(&mut self.registers.c, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, D
                     0xFA => {
                         set_n_r(&mut self.registers.d, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, E
                     0xFB => {
                         set_n_r(&mut self.registers.e, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, H
                     0xFC => {
                         set_n_r(&mut self.registers.h, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, L
                     0xFD => {
                         set_n_r(&mut self.registers.l, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
 
                     //SET 7, (HL)
@@ -3847,12 +4609,18 @@ impl Cpu {
                         let addr = self.registers.hl();
                         set_n_hl(mmu, addr, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(4);
                     }
 
                     //SET 7, A
                     0xFF => {
                         set_n_r(&mut self.registers.a, 7);
                         self.pc += 2;
+
+                        //Increase Timer
+                        self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
                     }
                 }
             }
