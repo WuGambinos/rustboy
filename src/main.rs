@@ -71,16 +71,18 @@ fn main() {
 
     loop {
         cpu.execute_instruction(&mut mmu);
+        let cycles_passed = (cpu.timer.internal_ticks - cpu.last_cycle) * 4;
+        timer.do_cycle(cycles_passed);
+
         if mmu.read_mem(0xFF02) == 0x81 {
              let c: char = mmu.read_mem(0xFF01) as char;
              print!("{}", c);
              mmu.write_mem(0xff02, 0x0);
          }
 
-        let cycles_passed = cpu.timer.internal_ticks - cpu.last_cycle;
-        println!("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
-        println!();
 
+        /*("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
+        println!();*/
     }
 }
 

@@ -32,7 +32,7 @@ impl Timer {
         }
     }
 
-    fn do_cycle(&mut self, ticks: u32) {
+    pub(crate) fn do_cycle(&mut self, ticks: u32) {
         //Use internal_ticks to check if we need to increment the divider register
         self.internal_ticks += ticks;
 
