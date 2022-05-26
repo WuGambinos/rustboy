@@ -1,4 +1,9 @@
+use crate::{Cpu, Timer};
+
+use crate::Mmu;
+
 struct Gameboy {
     cpu: Cpu,
-    mmu: MMU,
+    mmu: Mmu,
+    timer: Timer,
 }

@@ -2,6 +2,8 @@ pub mod cpu;
 pub use cpu::Cpu;
 
 pub mod mmu;
+mod gameboy;
+
 pub use mmu::*;
 
 use crate::cpu::timer::Timer;
