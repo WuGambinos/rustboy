@@ -20,7 +20,7 @@ fn ld_bc_u16() {
 
     //FADC
 
-    cpu.emulate_cycle(&mut mmu);
+    cpu.execute_instruction(&mut mmu);
 
     assert_eq!(cpu.registers.bc(), 0xDCFA);
 }

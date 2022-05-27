@@ -1,9 +1,13 @@
 pub mod cpu;
 pub use cpu::Cpu;
 
+mod gameboy;
 pub mod mmu;
+
+use gameboy::GameBoy;
 pub use mmu::*;
 
+use crate::cpu::timer::Timer;
 use std::fs;
 use std::path::Path;
 
@@ -11,7 +15,7 @@ use std::path::Path;
 extern crate text_io;
 
 fn main() {
-    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
+    let test_rom = "roms/cpu_instrs/individual/02-interrupts.gb";
     let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -23,8 +27,13 @@ fn main() {
     //Cpu
     let mut cpu = Cpu::new();
 
+    //Timer
+    let mut timer = Timer::new();
+
     //Mapped Memory Unit
     let mut mmu: Mmu = Mmu::new();
+
+    let mut game_boy: GameBoy = GameBoy::new(&mut cpu, &mut mmu, &mut timer);
 
     //Read Rom into memory
     mmu.read_rom(&rom);
@@ -33,113 +42,52 @@ fn main() {
 
     let mut counter = 0;
 
+    let mut cond = true;
 
-    loop {
-        cpu.emulate_cycle(&mut mmu);
-
-        if mmu.read_mem(0xFF02) == 0x81 {
-            let c: char = mmu.read_mem(0xFF01) as char;
-            print!("{}", c);
-
-            mmu.write_mem(0xff02, 0x0);
+    /* while cond {
+        cpu.execute_instruction(&mut mmu);
+        if cpu.pc == 0x0050 {
+            cond = false;
         }
-
-    }
-
-    //Emulate a cpu cycle
-    //loop {
-    //cpu.emulate_cycle(&mut mmu);
-
-
-    /*if cpu.pc == 0xC7B8 {
-            println!();
-            cpu.print_status(&mmu);
-            println!("Counter: {}", counter);
-        }*/
-
-    /*for _ in 0..10 {
-        while cpu.pc != 0xC7B8 {
-            cpu.emulate_cycle(&mut mmu);
-            counter += 1;
-        };
-
-        cpu.print_status(&mmu);
-        println!();
-
-        if mmu.read_mem(0xFF02) == 0x81 {
-            let c: char = mmu.read_mem(0xFF01) as char;
-            print!("{}", c);
-            if c == 'F' {
-                break;
-            }
-
-            mmu.write_mem(0xff02, 0x0);
-        }
-
-        cpu.emulate_cycle(&mut mmu);
-    }
-
-    cpu.print_status(&mmu);
-
-    for i in 0..2 {
-        while cpu.pc != 0xC0AA {
-            cpu.emulate_cycle(&mut mmu);
-        }
-
-        println!();
-        cpu.print_status(&mut mmu);
-
-        if i != 1 {
-            cpu.emulate_cycle(&mut mmu);
-        }
-
-    }
-    /*for i in 0..1100 {
-        cpu.emulate_cycle(&mut mmu);
-        println!();
-        cpu.print_status(&mmu);
     }*/
+
+    //cpu.print_state(&mmu);
+
+    /* let mut counter = 0;
+
+    for _ in 0..189691 {
+        cpu.execute_instruction(&mut mmu);
+    }
+    mmu.write_mem(0xDFFB, 0xC0);
+    mmu.write_mem(0xDFFC, 0xC2);
+    cpu.print_state(&mmu);
 
     println!();
-cpu.print_status(&mmu);
+    cpu.execute_instruction(&mut mmu);
 
-    loop {
-        cpu.emulate_cycle(&mut mmu);
+    println!();
+    cpu.print_state(&mmu);
+
+    for _ in 0..13 {
+        cpu.execute_instruction(&mut mmu);
         println!();
-        cpu.print_status(&mmu);
+        cpu.print_state(&mmu);
     }*/
 
-    //}
+    loop {
+        cpu.execute_instruction(&mut mmu);
+        let cycles_passed = (cpu.timer.internal_ticks - cpu.last_cycle) * 4;
+        timer.do_cycle(cycles_passed);
 
-        /*for _ in 0..16 {
-        while cpu.pc != 0x20D {
-            cpu.emulate_cycle(&mut mmu);
-        }
-
-        //cpu.print_status(&mmu);
-        cpu.emulate_cycle(&mut mmu);
-        //println!();
-    }
-    cpu.emulate_cycle(&mut mmu);*/
-
-
-        //8814
-        /*let mut count = 0;
-
-    let end = 180630;
-    let old_end = 364250;
-
-    for _ in 0..61 {
-        cpu.emulate_cycle(&mut mmu);
-        /*cpu.print_status(&mmu);
-        println!();*/
         if mmu.read_mem(0xFF02) == 0x81 {
             let c: char = mmu.read_mem(0xFF01) as char;
             print!("{}", c);
             mmu.write_mem(0xff02, 0x0);
         }
-    }*/
 
+        /*("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
+        println!();*/
+    }
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {

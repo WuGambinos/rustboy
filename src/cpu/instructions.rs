@@ -113,30 +113,36 @@ pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
 ///
 /// a = a + r + c
 pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
+    //Accumulator
     let mut a: u8 = cpu.registers.a;
 
-    //Need to sum operand and carry for the half carry to be calculated correctly
-    let new_operand: u8 = operand.wrapping_add(cpu.registers.f.carry_flag());
+    //Result
+    let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
 
-    //Update Half Carry
-    cpu.registers
-        .f
-        .update_half_carry_flag_sum_8bit(a, new_operand);
-
-    //Update Carry Flag
-    cpu.registers.f.update_carry_flag_sum_8bit(a, new_operand);
-
-    //a = r + a + c
-    a = a.wrapping_add(new_operand);
+    //Calculate Half Carry
+    let half_carry: bool = (((a & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F);
 
     //Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 
-    //Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
+    //Update Half Carry Flag
+    if half_carry {
+        cpu.registers.f.set_half_carry_flag();
+    } else {
+        cpu.registers.f.clear_half_carry_flag();
+    }
 
-    //Set actual accumulator equal to resulting value
-    cpu.registers.a = a;
+    //Update Carry Flag
+    if c > 0xFF {
+        cpu.registers.f.set_carry_flag();
+    } else {
+        cpu.registers.f.clear_carry_flag();
+    }
+
+    //Update Zero Flag
+    cpu.registers.f.update_zero_flag(c as u8);
+
+    cpu.registers.a = c as u8;
 }
 
 ///Subtracts another register from the accumulator, storing the result in the accumulator
@@ -165,30 +171,41 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
 }
 
 pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
-    let mut a: u8 = cpu.registers.a;
+    //Accumulator
+    let a = cpu.registers.a as i16;
 
-    //Need to subtract operand and carry for the half carry to be calculated correctly
-    a = a.wrapping_sub(operand);
+    //Operand
+    let b = operand as i16;
 
-    //Update Half Carry
-    cpu.registers.f.update_half_carry_flag_sub_8bit(a, 1);
+    //Result
+    let c = a
+        .wrapping_sub(b)
+        .wrapping_sub(cpu.registers.f.carry_flag() as i16);
 
-    //Update Carry(Borrow) Flag
-    cpu.registers
-        .f
-        .update_carry_flag_sub_8bit(cpu.registers.a, 1);
-
-    //a = a - r - c
-    a = a.wrapping_sub(1);
+    //Calculate Half Carry
+    let half_carry = ((a & 0x0F) - (b & 0x0F) - (cpu.registers.f.carry_flag() as i16)) < 0;
 
     //Set Sub Flag
     cpu.registers.f.set_sub_flag();
 
-    //Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
+    //Update Half Carry Flag
+    if half_carry {
+        cpu.registers.f.set_half_carry_flag();
+    } else {
+        cpu.registers.f.clear_half_carry_flag();
+    }
 
-    //Set actual accumulator equal to resulting value
-    cpu.registers.a = a;
+    //Update Carry(Borrow) Flag
+    if c < 0 {
+        cpu.registers.f.set_carry_flag();
+    } else {
+        cpu.registers.f.clear_carry_flag();
+    }
+
+    //Update Zero Flag
+    cpu.registers.f.update_zero_flag(c as u8);
+
+    cpu.registers.a = c as u8;
 }
 
 pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
@@ -276,24 +293,30 @@ pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
 }
 
 pub fn daa(cpu: &mut Cpu) {
-    if (cpu.registers.a & 0x0F) > 0x09 || cpu.registers.f.half_carry_flag() == 1 {
-        cpu.registers.a += 0x06;
-    }
+    if cpu.registers.f.sub_flag() == 0 {
+        if cpu.registers.f.carry_flag() == 1 || cpu.registers.a > 0x99 {
+            cpu.registers.a = cpu.registers.a.wrapping_add(0x60);
+            cpu.registers.f.set_carry_flag();
+        }
 
-    let upper_nibble = cpu.registers.a & 0xF0 >> 4;
-    let mut reached = false;
-
-    if upper_nibble > 9 || cpu.registers.f.carry_flag() == 1 {
-        cpu.registers.a += 0x60;
-        reached = true;
-    }
-
-    //Set carry if second addition was needed, otherwise reset carry
-    if reached {
-        cpu.registers.f.set_carry_flag();
+        if cpu.registers.f.half_carry_flag() == 1 || (cpu.registers.a & 0x0F) > 0x09 {
+            cpu.registers.a = cpu.registers.a.wrapping_add(0x6);
+        }
     } else {
-        cpu.registers.f.clear_carry_flag();
+        if cpu.registers.f.carry_flag() == 1 {
+            cpu.registers.a = cpu.registers.a.wrapping_sub(0x60);
+        }
+
+        if cpu.registers.f.half_carry_flag() == 1 {
+            cpu.registers.a = cpu.registers.a.wrapping_sub(0x6);
+        }
     }
+
+    //Clear Half Carry
+    cpu.registers.f.clear_half_carry_flag();
+
+    //Update Zero Flag
+    cpu.registers.f.update_zero_flag(cpu.registers.a);
 }
 
 /************************************************************************
@@ -320,7 +343,7 @@ pub fn rlca(cpu: &mut Cpu) {
     }
 
     //Clear Zero Flag
-    cpu.registers.f.update_zero_flag(cpu.registers.a);
+    cpu.registers.f.clear_zero_flag();
 
     //Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
@@ -974,7 +997,7 @@ pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
         "SP" => {
             cpu.sp = cpu.sp.wrapping_add(1);
         }
-        _ => println!("Not a register PAIR"),
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 
@@ -993,55 +1016,94 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
         "SP" => {
             cpu.sp = cpu.sp.wrapping_sub(1);
         }
-        _ => println!("NOT A REGISTER PAIR"),
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 
 pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
     match register {
         "BC" => {
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.bc() as u32;
+
+            //HL + BC
+            let c = a + b;
+
+            //Clear Sub Flag
+            cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
             cpu.registers
                 .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.bc()));
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
-            cpu.registers.f.clear_sub_flag();
+            cpu.registers.set_hl(c as u16);
         }
         "DE" => {
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.de() as u32;
+
+            //HL + DE
+            let c = a + b;
+
+            //Clear Sub Flag
+            cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
             cpu.registers
                 .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.de()));
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
-            cpu.registers.f.clear_sub_flag();
+            cpu.registers.set_hl(c as u16);
         }
         "HL" => {
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.registers.hl() as u32;
+
+            //HL + HL
+            let c = a + b;
+
+            //Clear Sub Flag
+            cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry;
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
             cpu.registers
                 .f
-                .update_half_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
-            cpu.registers
-                .set_hl(cpu.registers.hl().wrapping_add(cpu.registers.hl()));
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
 
-            if cpu.registers.hl() == 0 {
-                cpu.registers.f.set_zero_flag();
-            } else {
-                cpu.registers.f.clear_zero_flag();
-            }
-            cpu.registers.f.clear_sub_flag();
+            cpu.registers.set_hl(c as u16);
         }
-        _ => println!("NOT A REGISTER PAIR"),
+
+        "SP" => {
+            let a = cpu.registers.hl() as u32;
+            let b = cpu.sp as u32;
+
+            //HL + HL
+            let c = a + b;
+
+            //Clear Sub Flag
+            cpu.registers.f.clear_sub_flag();
+
+            //Update Half Carry;
+            cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
+
+            //Calculate Carry
+            cpu.registers
+                .f
+                .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
+
+            cpu.registers.set_hl(c as u16);
+        }
+        _ => println!("{}, Not a register PAIR", register),
     }
 }
 
@@ -1062,8 +1124,10 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 pub fn jr_z(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.zero_flag() == 1 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1072,8 +1136,10 @@ pub fn jr_z(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.zero_flag() == 0 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1082,8 +1148,10 @@ pub fn jr_nz(cpu: &mut Cpu, dd: u8) {
 pub fn jr_c(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.carry_flag() == 1 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1092,8 +1160,10 @@ pub fn jr_c(cpu: &mut Cpu, dd: u8) {
 pub fn jr_nc(cpu: &mut Cpu, dd: u8) {
     if cpu.registers.f.carry_flag() == 0 {
         jr(cpu, dd);
+        cpu.timer.internal_ticks += 3;
     } else {
         cpu.pc += 2;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1108,8 +1178,10 @@ pub fn jp(cpu: &mut Cpu, nn: u16) {
 pub fn jp_z(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 ///
@@ -1117,8 +1189,10 @@ pub fn jp_z(cpu: &mut Cpu, nn: u16) {
 pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1127,8 +1201,10 @@ pub fn jp_nz(cpu: &mut Cpu, nn: u16) {
 pub fn jp_c(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1137,15 +1213,17 @@ pub fn jp_c(cpu: &mut Cpu, nn: u16) {
 pub fn jp_nc(cpu: &mut Cpu, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         jp(cpu, nn);
+        cpu.timer.internal_ticks += 4;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
 ///
 /// Call to nn
 pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
-    let mut stack_pointer = cpu.sp;
+    let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
     stack_pointer -= 2;
@@ -1168,8 +1246,10 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1177,8 +1257,10 @@ pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1186,8 +1268,10 @@ pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1195,8 +1279,10 @@ pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 pub fn call_nc(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         call(cpu, mmu, nn);
+        cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
+        cpu.timer.internal_ticks += 3;
     }
 }
 
@@ -1206,7 +1292,10 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
-    stack_pointer -= 2;
+    stack_pointer = stack_pointer.wrapping_sub(2);
+
+    //Increment PC before push
+    cpu.pc += 1;
 
     //mem[SP] = lower byte of program counter
     mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
@@ -1215,7 +1304,9 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
     //PC = n
-    cpu.pc = u16::from_be_bytes([0, n]);
+    cpu.pc = n as u16;
+
+    cpu.sp = stack_pointer;
 }
 
 ///Return
@@ -1228,39 +1319,48 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     cpu.pc = pc;
 
     //SP = SP + 2
-    sp =sp.wrapping_add( 2);
+    sp = sp.wrapping_add(2);
 
     cpu.sp = sp;
 }
 
 pub fn ret_z(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.zero_flag() == 1 {
-        ret(cpu, mmu)
+        ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.zero_flag() == 0 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
 pub fn ret_c(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.carry_flag() == 1 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+        cpu.timer.internal_ticks += 2;
     }
 }
 
 pub fn ret_nc(cpu: &mut Cpu, mmu: &Mmu) {
     if cpu.registers.f.carry_flag() == 0 {
         ret(cpu, mmu);
+        cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
+
+        cpu.timer.internal_ticks += 2;
     }
 }
 
@@ -1290,16 +1390,16 @@ pub fn ld_io_from_a(cpu: &Cpu, mmu: &mut Mmu, n: u8) {
 }
 
 ///
-/// Load data from io-port C into A register
+/// Load data from ($FF00 + register C) into A register
 pub fn ld_a_from_io_c(cpu: &mut Cpu, mmu: &Mmu) {
-    let addr: u16 = 0xFF00 + 0x000C;
+    let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
     cpu.registers.a = mmu.read_mem(addr);
 }
 
 ///
-/// Load data from register A into io-port C
+/// Load data from register A into ($FF00 + register C)
 pub fn ld_io_c_from_a(cpu: &Cpu, mmu: &mut Mmu) {
-    let addr: u16 = 0xFF00 + 0x000C;
+    let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
     mmu.write_mem(addr, cpu.registers.a);
 }
 
@@ -1333,7 +1433,7 @@ pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
     let mut stack_pointer = *sp;
 
     //SP = SP - 2
-    stack_pointer -= 2;
+    stack_pointer = stack_pointer.wrapping_sub(2);
 
     //mem[sp] = rr
     mmu.write_mem(stack_pointer, lower);
@@ -1387,9 +1487,6 @@ pub fn bit_n_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16, n: u8) {
 
     //Set Half Carry
     f.set_half_carry_flag();
-
-    //Write new value to memory
-    mmu.write_mem(addr, value);
 }
 
 ///
@@ -1430,4 +1527,16 @@ pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
     value &= !(1 << n);
 
     mmu.write_mem(addr, value);
+}
+
+/************************************************************************
+ * Interrupt Instructions
+ * *********************************************************************/
+pub fn ei(cpu: &mut Cpu) {
+    cpu.ime_to_be_enabled = true;
+    //cpu.ime = true;
+}
+
+pub fn di(cpu: &mut Cpu) {
+    cpu.ime = false;
 }
