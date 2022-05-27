@@ -857,6 +857,7 @@ impl Cpu {
 
                 //Increase Timer
                 self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
+
             }
 
             //CPL
@@ -869,6 +870,7 @@ impl Cpu {
 
                 //Increase Timer
                 self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
+
             }
 
             //JR NC, i8
@@ -5116,6 +5118,7 @@ impl Cpu {
 
         println!("MEM[SP+1]: {:#X}", mmu.read_mem(self.sp.wrapping_add(1)));
         println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
+      
         println!(
             "MEM[{:#X}]: {:#X}",
             self.sp.wrapping_sub(1),
@@ -5126,6 +5129,7 @@ impl Cpu {
             self.sp.wrapping_sub(2),
             mmu.read_mem(self.sp.wrapping_sub(2))
         );
+
 
         println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
         println!("MEM[0xDFE9]: {:#X}", mmu.read_mem(0xDFE9));
