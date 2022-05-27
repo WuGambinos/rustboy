@@ -1,8 +1,8 @@
-use raylib::models::RaylibMesh;
+use crate::Timer;
 
 #[derive(Debug)]
-pub struct MMU {
-    memory: [u8; 0xFFFF],
+pub struct Mmu {
+    memory: [u8; 0x10000],
     //Interrupt Enable Register
     interrupt_en: u8,
     /*rom_bank: [u8; 16384],
@@ -30,25 +30,34 @@ pub struct MMU {
     high_ram: [u8; 127],*/
 }
 
-impl Default for MMU {
+impl Default for Mmu {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl MMU {
+impl Mmu {
     pub fn new() -> Self {
-        MMU {
-            memory: [0; 0xFFFF],
+        Mmu {
+            memory: [0; 0x10000],
             interrupt_en: 0,
         }
     }
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
-        self.memory[addr as usize] = value;
+        if addr >= 0xFF04 && addr <= 0xFF07 {
+        } else {
+            self.memory[addr as usize] = value;
+        }
     }
 
     pub fn read_mem(&self, addr: u16) -> u8 {
         self.memory[addr as usize]
+    }
+
+    pub fn read_rom(&mut self, rom: &Vec<u8>) {
+        for i in 0..rom.len() {
+            self.write_mem(i as u16, rom[i]);
+        }
     }
 }
