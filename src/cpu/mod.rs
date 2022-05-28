@@ -7,7 +7,7 @@ use self::instructions::*;
 
 #[derive(Debug)]
 pub struct Flags {
-    data: u8,
+    pub data: u8,
 }
 
 impl Flags {
@@ -19,62 +19,62 @@ impl Flags {
         (self.data >> 7) & 1
     }
 
-    fn sub_flag(&self) -> u8 {
+    pub fn sub_flag(&self) -> u8 {
         (self.data >> 6) & 1
     }
 
-    fn half_carry_flag(&self) -> u8 {
+    pub fn half_carry_flag(&self) -> u8 {
         (self.data >> 5) & 1
     }
 
-    fn carry_flag(&self) -> u8 {
+    pub fn carry_flag(&self) -> u8 {
         (self.data >> 4) & 1
     }
 
     ///Set Zero Flag
-    fn set_zero_flag(&mut self) {
+    pub fn set_zero_flag(&mut self) {
         self.data |= 1 << 7;
     }
 
     ///Clear Zero Flag
-    fn clear_zero_flag(&mut self) {
+    pub fn clear_zero_flag(&mut self) {
         self.data &= !(1 << 7);
     }
 
     ///Set Sub Flag
-    fn set_sub_flag(&mut self) {
+    pub fn set_sub_flag(&mut self) {
         self.data |= 1 << 6;
     }
 
     ///Clear Sub Flag
-    fn clear_sub_flag(&mut self) {
+    pub fn clear_sub_flag(&mut self) {
         self.data &= !(1 << 6);
     }
 
     ///Set Half Carry Flag
-    fn set_half_carry_flag(&mut self) {
+    pub fn set_half_carry_flag(&mut self) {
         self.data |= 1 << 5;
     }
 
     /// Clear Half Carry Flag
-    fn clear_half_carry_flag(&mut self) {
+    pub fn clear_half_carry_flag(&mut self) {
         self.data &= !(1 << 5)
     }
 
     ///Set Carry Flag
-    fn set_carry_flag(&mut self) {
+    pub fn set_carry_flag(&mut self) {
         self.data |= 1 << 4;
     }
 
     ///Clear Carry Flag
-    fn clear_carry_flag(&mut self) {
+    pub fn clear_carry_flag(&mut self) {
         self.data &= !(1 << 4);
     }
 
     ///Updates Carry flag
     ///
     /// Carry flag is set when operation results in overflow
-    fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
+    pub fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         let mut res: u16 = (register as u16) + (operand as u16);
 
         if res > 0xFF {
@@ -84,7 +84,7 @@ impl Flags {
         }
     }
 
-    fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
+    pub fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
         let res: u32 = (register as u32) + (operand as u32);
 
         if res > 0xFFFF {
@@ -94,7 +94,7 @@ impl Flags {
         }
     }
 
-    fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
+    pub fn update_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
         if register < operand {
             self.set_carry_flag();
         } else {
@@ -102,7 +102,7 @@ impl Flags {
         }
     }
 
-    fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
+    pub fn update_carry_flag_sub_16bit(&mut self, register: u16, operand: u16) {
         if register < operand {
             self.set_carry_flag();
         } else {
@@ -174,23 +174,23 @@ pub struct Registers {
     pub(crate) c: u8,
 
     //D Register
-    d: u8,
+    pub d: u8,
 
     //E Register
-    e: u8,
+    pub e: u8,
 
     //H Registe
-    h: u8,
+    pub h: u8,
 
     //L Register
-    l: u8,
+    pub l: u8,
 
     //F Register (FLAGS)
     pub(crate) f: Flags,
 }
 
 impl Registers {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Registers {
             a: 0x11,
             b: 0x00,
@@ -204,51 +204,51 @@ impl Registers {
     }
 
     ///Get register pair BC
-    fn bc(&self) -> u16 {
+    pub fn bc(&self) -> u16 {
         //(self.b as u16) << 8 | self.c as u16
         u16::from_be_bytes([self.b, self.c])
     }
 
     ///Store value in register pair BC
-    fn set_bc(&mut self, data: u16) {
+    pub fn set_bc(&mut self, data: u16) {
         let [b, c] = data.to_be_bytes();
         self.b = b;
         self.c = c;
     }
 
     ///Get register pair DE
-    fn de(&self) -> u16 {
+    pub fn de(&self) -> u16 {
         //(self.d as u16) << 8 | self.e as u16
         u16::from_be_bytes([self.d, self.e])
     }
 
     ///Store value in register pair DE
-    fn set_de(&mut self, data: u16) {
+    pub fn set_de(&mut self, data: u16) {
         let [d, e] = data.to_be_bytes();
         self.d = d;
         self.e = e;
     }
 
     ///Get register pair HL
-    fn hl(&self) -> u16 {
+    pub fn hl(&self) -> u16 {
         // (self.h as u16) << 8 | self.l as u16
         u16::from_be_bytes([self.h, self.l])
     }
 
     ///Store value in register pair HL
-    fn set_hl(&mut self, data: u16) {
+    pub fn set_hl(&mut self, data: u16) {
         let [h, l] = data.to_be_bytes();
         self.h = h;
         self.l = l;
     }
 
     ///Get Register Pair AF
-    fn af(&self) -> u16 {
+    pub fn af(&self) -> u16 {
         u16::from_be_bytes([self.a, self.f.data])
     }
 
     ///Store value in register pair AF
-    fn set_af(&mut self, data: u16) {
+    pub fn set_af(&mut self, data: u16) {
         let [a, f] = data.to_be_bytes();
         self.a = a;
         self.f.data = f;
@@ -268,13 +268,13 @@ pub struct Cpu {
     pub pc: u16,
 
     ///Interrupt Master Enable
-    ime: bool,
+    pub ime: bool,
 
     ///Help with enabled IME
-    ime_to_be_enabled: bool,
+    pub ime_to_be_enabled: bool,
 
     ///Halt
-    halted: bool,
+    pub halted: bool,
 
     ///Current opcode
     pub(crate) opcode: u8,
@@ -308,7 +308,7 @@ impl Cpu {
     }
 
     ///Handle Interrupts
-    fn handle_interrupt(&mut self, mmu: &mut Mmu) {
+    pub fn handle_interrupt(&mut self, mmu: &mut Mmu) {
         //Check if interrupts are enabled
         if !self.ime && !self.halted {
             return;
@@ -857,7 +857,6 @@ impl Cpu {
 
                 //Increase Timer
                 self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(2);
-
             }
 
             //CPL
@@ -870,7 +869,6 @@ impl Cpu {
 
                 //Increase Timer
                 self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
-
             }
 
             //JR NC, i8
@@ -5103,11 +5101,11 @@ impl Cpu {
         }
     }
 
-    fn fetch(&mut self, mmu: &Mmu) {
+    pub fn fetch(&mut self, mmu: &Mmu) {
         self.opcode = mmu.read_mem(self.pc);
     }
 
-    fn get_u16(&mut self, mmu: &Mmu) -> u16 {
+    pub fn get_u16(&mut self, mmu: &Mmu) -> u16 {
         // (mmu.read_mem(self.pc + 2) as u16) << 8 | mmu.read_mem(self.pc + 1) as u16
         u16::from_be_bytes([mmu.read_mem(self.pc + 2), mmu.read_mem(self.pc + 1)])
     }
@@ -5118,7 +5116,7 @@ impl Cpu {
 
         println!("MEM[SP+1]: {:#X}", mmu.read_mem(self.sp.wrapping_add(1)));
         println!("MEM[SP]: {:#X}", mmu.read_mem(self.sp));
-      
+
         println!(
             "MEM[{:#X}]: {:#X}",
             self.sp.wrapping_sub(1),
@@ -5129,7 +5127,6 @@ impl Cpu {
             self.sp.wrapping_sub(2),
             mmu.read_mem(self.sp.wrapping_sub(2))
         );
-
 
         println!("MEM[0xDFEA]: {:#X}", mmu.read_mem(0xDFEA));
         println!("MEM[0xDFE9]: {:#X}", mmu.read_mem(0xDFE9));
