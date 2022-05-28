@@ -95,7 +95,7 @@ impl GameBoy {
             //LD B, u8
             0x06 => {
                 //B = u8
-                self.cpu.registers.b = self.mmu.read_mem(self.cpu.pc + 1);
+                self.cpu.registers.b = self.read_mem(self.cpu.pc + 1);
 
                 //Increase Program Counter
                 self.cpu.pc += 2;
@@ -127,10 +127,10 @@ impl GameBoy {
                 let upper_sp: u8 = ((self.cpu.sp & 0xFF00) >> 8) as u8;
 
                 //Write lower_sp to addr
-                self.mmu.write_mem(addr, lower_sp);
+                self.write_mem(addr, lower_sp);
 
                 //Write upper_sp to addr+1
-                self.mmu.write_mem(addr + 1, upper_sp);
+                self.write_mem(addr + 1, upper_sp);
 
                 //Increase Program Counter
                 self.cpu.pc += 3;
@@ -153,7 +153,7 @@ impl GameBoy {
             //LD A, (BC)
             0x0A => {
                 let addr: u16 = self.cpu.registers.bc();
-                self.cpu.registers.a = self.mmu.read_mem(addr);
+                self.cpu.registers.a = self.read_mem(addr);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -197,7 +197,7 @@ impl GameBoy {
             //LD C, u8
             0x0E => {
                 //C = u8
-                let u8_value: u8 = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value: u8 = self.read_mem(self.cpu.pc + 1);
                 self.cpu.registers.c = u8_value;
 
                 //Increase Program Counter
@@ -243,7 +243,7 @@ impl GameBoy {
             0x12 => {
                 //memory[DE] = A
                 let addr: u16 = self.cpu.registers.de();
-                self.mmu.write_mem(addr, self.cpu.registers.a);
+                self.write_mem(addr, self.cpu.registers.a);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -284,7 +284,7 @@ impl GameBoy {
             //LD D, u8
             0x16 => {
                 //D = u8
-                let u8_value: u8 = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value: u8 = self.read_mem(self.cpu.pc + 1);
                 self.cpu.registers.d = u8_value;
 
                 //Increase Program Counter
@@ -308,7 +308,7 @@ impl GameBoy {
 
             //JR i8
             0x18 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 jr(&mut self.cpu, u8_value);
 
                 //Increase Timer
@@ -326,7 +326,7 @@ impl GameBoy {
 
             //LD A, (DE)
             0x1A => {
-                self.cpu.registers.a = self.mmu.read_mem(self.cpu.registers.de());
+                self.cpu.registers.a = self.read_mem(self.cpu.registers.de());
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -362,7 +362,7 @@ impl GameBoy {
 
             //LD E, u8
             0x1E => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 self.cpu.registers.e = u8_value;
                 self.cpu.pc += 2;
 
@@ -382,7 +382,7 @@ impl GameBoy {
 
             //JR NZ, i8
             0x20 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 jr_nz(&mut self.cpu, u8_value);
             }
 
@@ -444,7 +444,7 @@ impl GameBoy {
 
             //LD H, u8
             0x26 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
 
                 //H = u8
                 self.cpu.registers.h = u8_value;
@@ -465,7 +465,7 @@ impl GameBoy {
 
             //JR Z, i8
             0x28 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 jr_z(&mut self.cpu, u8_value);
             }
 
@@ -482,7 +482,7 @@ impl GameBoy {
             //LD A, (HL+)
             0x2A => {
                 //A = memory[HL]
-                self.cpu.registers.a = self.mmu.read_mem(self.cpu.registers.hl());
+                self.cpu.registers.a = self.read_mem(self.cpu.registers.hl());
 
                 //HL++
                 self.cpu
@@ -526,7 +526,7 @@ impl GameBoy {
 
             //LD L, u8
             0x2E => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 //L = u8
                 self.cpu.registers.l = u8_value;
                 self.cpu.pc += 2;
@@ -549,7 +549,7 @@ impl GameBoy {
 
             //JR NC, i8
             0x30 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 jr_nc(&mut self.cpu, u8_value);
             }
 
@@ -613,9 +613,9 @@ impl GameBoy {
 
             //LD (HL), u8
             0x36 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 //memory[HL] = u8
-                self.mmu.write_mem(self.cpu.registers.hl(), u8_value);
+                self.write_mem(self.cpu.registers.hl(), u8_value);
 
                 self.cpu.pc += 2;
 
@@ -636,7 +636,7 @@ impl GameBoy {
 
             //JR C, i8
             0x38 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 jr_c(&mut self.cpu, u8_value);
             }
 
@@ -653,7 +653,7 @@ impl GameBoy {
             //LD A, (HL--)
             0x3A => {
                 //u8 = memory[HL]
-                let u8_value = self.mmu.read_mem(self.cpu.registers.hl());
+                let u8_value = self.read_mem(self.cpu.registers.hl());
 
                 //A = memory[HL]
                 self.cpu.registers.a = u8_value;
@@ -701,7 +701,7 @@ impl GameBoy {
 
             //LD A, u8
             0x3E => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 //A = u8
                 self.cpu.registers.a = u8_value;
                 self.cpu.pc += 2;
@@ -782,7 +782,8 @@ impl GameBoy {
             //LD B, (HL)
             0x46 => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.b, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.b, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -854,7 +855,8 @@ impl GameBoy {
             //LD C, (HL)
             0x4E => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.c, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.c, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -926,7 +928,8 @@ impl GameBoy {
             //LD D, (HL)
             0x56 => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.d, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.d, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -998,7 +1001,8 @@ impl GameBoy {
             //LD E, (HL)
             0x5E => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.e, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.e, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1070,7 +1074,8 @@ impl GameBoy {
             //LD H, (HL)
             0x66 => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.h, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.h, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1142,7 +1147,8 @@ impl GameBoy {
             //LD L, (HL)
             0x6E => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.l, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.l, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1291,7 +1297,8 @@ impl GameBoy {
             //LD A, (HL)
             0x7E => {
                 let addr: u16 = self.cpu.registers.hl();
-                ld_8bit(&mut self.cpu.registers.a, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                ld_8bit(&mut self.cpu.registers.a, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1369,7 +1376,8 @@ impl GameBoy {
             //ADD A, (HL)
             0x86 => {
                 let addr: u16 = self.cpu.registers.hl();
-                add_a_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                add_a_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1449,7 +1457,8 @@ impl GameBoy {
             //ADC A, (HL)
             0x8E => {
                 let addr: u16 = self.cpu.registers.hl();
-                adc_a_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                adc_a_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1529,7 +1538,8 @@ impl GameBoy {
             //SUB A, (HL)
             0x96 => {
                 let addr: u16 = self.cpu.registers.hl();
-                sub_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                sub_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1609,7 +1619,8 @@ impl GameBoy {
             //SBC A, (HL)
             0x9E => {
                 let addr: u16 = self.cpu.registers.hl();
-                sbc_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                sbc_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1689,7 +1700,8 @@ impl GameBoy {
             //AND A, (HL)
             0xA6 => {
                 let addr: u16 = self.cpu.registers.hl();
-                and_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                and_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc = self.cpu.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1769,7 +1781,8 @@ impl GameBoy {
             //XOR A, (HL)
             0xAE => {
                 let addr: u16 = self.cpu.registers.hl();
-                xor_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                xor_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1849,7 +1862,8 @@ impl GameBoy {
             //OR A, (HL)
             0xB6 => {
                 let addr: u16 = self.cpu.registers.hl();
-                or_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                or_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -1929,7 +1943,8 @@ impl GameBoy {
             //CP A, (HL)
             0xBE => {
                 let addr: u16 = self.cpu.registers.hl();
-                cp_r_r(&mut self.cpu, self.mmu.read_mem(addr));
+                let u8_value = self.read_mem(addr);
+                cp_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 1;
 
                 //Increase Timer
@@ -2003,7 +2018,7 @@ impl GameBoy {
             //ADD A, u8
             0xC6 => {
                 let addr = self.cpu.pc + 1;
-                let u8_value = self.mmu.read_mem(addr);
+                let u8_value = self.read_mem(addr);
                 add_a_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -2042,7 +2057,7 @@ impl GameBoy {
                 let addr: u16 = self.cpu.pc + 1;
 
                 //Opcode
-                let op = &self.mmu.read_mem(addr);
+                let op = &self.read_mem(addr);
                 match op {
                     //RLC B
                     0x00 => {
@@ -4655,7 +4670,7 @@ impl GameBoy {
 
             //ADC A, u8
             0xCE => {
-                let operand = self.mmu.read_mem(self.cpu.pc + 1);
+                let operand = self.read_mem(self.cpu.pc + 1);
                 adc_a_r(&mut self.cpu, operand);
                 self.cpu.pc += 2;
 
@@ -4721,7 +4736,7 @@ impl GameBoy {
 
             //SUB A, u8
             0xD6 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 sub_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -4770,7 +4785,7 @@ impl GameBoy {
 
             //SBC A, u8
             0xDE => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 sbc_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -4788,7 +4803,7 @@ impl GameBoy {
 
             //LD (0xFF00 + u8), A
             0xE0 => {
-                let u8_value: u8 = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value: u8 = self.read_mem(self.cpu.pc + 1);
                 ld_io_from_a(&mut self.cpu, &mut self.mmu, u8_value);
                 self.cpu.pc += 2;
 
@@ -4841,7 +4856,7 @@ impl GameBoy {
 
             //AND A, u8
             0xE6 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 and_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -4860,7 +4875,7 @@ impl GameBoy {
             //ADD SP, i8
             0xE8 => {
                 //i8
-                let i8_value = self.mmu.read_mem(self.cpu.pc + 1) as i8;
+                let i8_value = self.read_mem(self.cpu.pc + 1) as i8;
 
                 //SP + i8
                 let c = self.cpu.sp.wrapping_add(i8_value as u16);
@@ -4912,7 +4927,7 @@ impl GameBoy {
             //LD (u16), A
             0xEA => {
                 let u16_value = self.cpu.get_u16(&self.mmu);
-                self.mmu.write_mem(u16_value, self.cpu.registers.a);
+                self.write_mem(u16_value, self.cpu.registers.a);
                 self.cpu.pc += 3;
 
                 //Increase Timer
@@ -4930,7 +4945,7 @@ impl GameBoy {
 
             //XOR A, u8
             0xEE => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 xor_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -4947,7 +4962,7 @@ impl GameBoy {
 
             //LD A, (FF00+u8)
             0xF0 => {
-                let u8_value: u8 = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value: u8 = self.read_mem(self.cpu.pc + 1);
                 ld_a_from_io(&mut self.cpu, &self.mmu, u8_value);
                 self.cpu.pc += 2;
 
@@ -5009,7 +5024,7 @@ impl GameBoy {
 
             //OR A, u8
             0xF6 => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 or_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -5028,7 +5043,7 @@ impl GameBoy {
             //LD HL, SP+i8
             0xF8 => {
                 //i8
-                let i8_value = self.mmu.read_mem(self.cpu.pc + 1) as i8;
+                let i8_value = self.read_mem(self.cpu.pc + 1) as i8;
 
                 //SP + i8
                 let c: u16 = self.cpu.sp.wrapping_add(i8_value as u16);
@@ -5080,7 +5095,7 @@ impl GameBoy {
             //LD A, (u16)
             0xFA => {
                 let addr = self.cpu.get_u16(&&self.mmu);
-                let u8_value = self.mmu.read_mem(addr);
+                let u8_value = self.read_mem(addr);
                 ld_8bit(&mut self.cpu.registers.a, u8_value);
                 self.cpu.pc += 3;
 
@@ -5105,7 +5120,7 @@ impl GameBoy {
 
             //CP A, u8
             0xFE => {
-                let u8_value = self.mmu.read_mem(self.cpu.pc + 1);
+                let u8_value = self.read_mem(self.cpu.pc + 1);
                 cp_r_r(&mut self.cpu, u8_value);
                 self.cpu.pc += 2;
 
@@ -5119,6 +5134,49 @@ impl GameBoy {
                 //Increase Timer
                 self.cpu.timer.internal_ticks = self.cpu.timer.internal_ticks.wrapping_add(2);
             } //_ => println!("NOT AN OPCODE"),
+        }
+    }
+
+    pub fn write_mem(&mut self, addr: u16, value: u8) {
+        if addr >= 0xFF04 && addr <= 0xFF07 {
+            match addr {
+                0xFF04 => self.timer.div = 0,
+
+                0xFF05 => self.timer.tima = value,
+
+                0xFF06 => self.timer.tma = value,
+
+                0xFF07 => self.timer.tac = value,
+
+                _ => (),
+            }
+        } else {
+            self.mmu.memory[addr as usize] = value;
+        }
+    }
+
+    pub fn read_mem(&self, addr: u16) -> u8 {
+        if addr >= 0xFF04 && addr <= 0xFF07 {
+            match addr {
+                0xFF04 => return self.timer.div as u8,
+
+                0xFF05 => return self.timer.tima,
+
+                0xFF06 => return self.timer.tma,
+
+                0xFF07 => return self.timer.tac,
+
+                _ => return 0,
+            }
+        } else {
+            self.mmu.memory[addr as usize]
+        }
+    }
+
+    pub fn emu_cycles(&mut self, n: u32) {
+        for _ in 0..n {
+            self.cpu.timer.internal_ticks += 1;
+            self.cpu.timer.do_cycle(n);
         }
     }
 }
