@@ -2,9 +2,13 @@ use crate::Timer;
 
 #[derive(Debug)]
 pub struct Mmu {
-    memory: [u8; 0x10000],
+    pub memory: [u8; 0x10000],
+
     //Interrupt Enable Register
     interrupt_en: u8,
+
+    //Interrupt Flag Register,
+    interrupt_flag: u8,
     /*rom_bank: [u8; 16384],
     extra_rom_bank: [u8; 16384],
 
@@ -41,6 +45,7 @@ impl Mmu {
         Mmu {
             memory: [0; 0x10000],
             interrupt_en: 0,
+            interrupt_flag: 0,
         }
     }
 
