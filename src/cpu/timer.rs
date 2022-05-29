@@ -32,35 +32,26 @@ impl Timer {
         }
     }
 
-    pub(crate) fn do_cycle(&mut self, ticks: u32) {
-        //Use internal_ticks to check if we need to increment the divider register
-        self.internal_ticks += ticks;
+    pub(crate) fn timer_tick(&mut self) {
+        let prev_div: u16 = self.div;
 
-        /*
-        let prev_div:  u16 = self.div;
-
-        self.div += 1;
-        */
-
-        while self.internal_ticks >= 256 {
-            self.div = self.div.wrapping_add(1);
-            self.internal_ticks -= 256;
-        }
+        //Increment Div Register
+        self.div = self.div.wrapping_add(1);
 
         let mut timer_update: bool = false;
 
         //Get Timer Clock
-        /*match self.tac & 0b11 {
+        match self.tac & 0b11 {
             0b00 => timer_update = ((prev_div & (1 << 9)) == 1) && ((!(self.div & (1 << 9))) == 1),
 
             0b01 => timer_update = ((prev_div & (1 << 3)) == 1) && ((!(self.div & (1 << 3))) == 1),
 
             0b10 => timer_update = ((prev_div & (1 << 5)) == 1) && ((!(self.div & (1 << 5))) == 1),
 
-            0b11 => timer_update = ((prev_div & (1 << 7)) == 1) && ((!(self.div & (1 << 7))) == 1) ,
+            0b11 => timer_update = ((prev_div & (1 << 7)) == 1) && ((!(self.div & (1 << 7))) == 1),
 
             _ => (),
-        }*/
+        }
 
         let cond: u8 = self.tac & (1 << 2);
 
@@ -72,7 +63,7 @@ impl Timer {
             //If Counter Overflows, request interrupt
             if self.tima == 0 {
                 self.tima = self.tma;
-                //Request Timer interrupt
+                //Request Timer interrupt TODO
             }
         }
     }

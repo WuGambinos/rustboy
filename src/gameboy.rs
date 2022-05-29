@@ -57,11 +57,4 @@ impl GameBoy {
             self.mmu.memory[addr as usize]
         }
     }
-
-    pub fn emu_cycles(&mut self, n: u32) {
-        for _ in 0..n {
-            self.cpu.timer.internal_ticks += 1;
-            self.cpu.timer.do_cycle(n);
-        }
-    }
 }
