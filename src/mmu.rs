@@ -1,5 +1,3 @@
-use crate::Timer;
-
 #[derive(Debug)]
 pub struct Mmu {
     pub memory: [u8; 0x10000],

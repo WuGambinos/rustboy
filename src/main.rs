@@ -4,6 +4,8 @@ pub use cpu::Cpu;
 mod gameboy;
 pub mod mmu;
 
+mod interconnect;
+
 use gameboy::GameBoy;
 pub use mmu::*;
 
