@@ -42,9 +42,9 @@ pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
 }
 
 ///Increment vlaue in memory using HL pointer
-pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
+pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     //Grab value in memory
-    let mut value = mmu.read_mem(cpu.registers.hl());
+    let mut value = interconnect.read_mem(cpu.registers.hl());
 
     //Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(value, 1);
@@ -53,7 +53,7 @@ pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     value = value.wrapping_add(1);
 
     //Write new incremented value back into memory
-    mmu.write_mem(cpu.registers.hl(), value);
+    interconnect.write_mem(cpu.registers.hl(), value);
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
@@ -63,9 +63,9 @@ pub fn inc_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
 }
 
 ///Decrement value in memory using HL pointer
-pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
+pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     //Grab value in memory
-    let mut value: u8 = mmu.read_mem(cpu.registers.hl());
+    let mut value: u8 = interconnect.read_mem(cpu.registers.hl());
 
     //Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(value, 1);
@@ -74,7 +74,7 @@ pub fn dec_mem(cpu: &mut Cpu, mmu: &mut Mmu) {
     value = value.wrapping_sub(1);
 
     //Write new decremented value back into memory
-    mmu.write_mem(cpu.registers.hl(), value);
+    interconnect.write_mem(cpu.registers.hl(), value);
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
@@ -120,7 +120,7 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
 
     //Calculate Half Carry
-    let half_carry: bool = (((a & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F);
+    let half_carry: bool = ((a & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F;
 
     //Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
@@ -482,9 +482,9 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
 /// Contents of mem[HL] are rotated to left 1 bit position.
 ///
 /// Contents of 7th bit are into carry and also to 0th bit
-pub fn rlc_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
+pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     //Value in memory at addr
-    let mut value = mmu.read_mem(addr);
+    let mut value = interconnect.read_mem(addr);
 
     //Conent of 7th bit
     let lmb: u8 = (value & 0x80) >> 7;
@@ -512,7 +512,7 @@ pub fn rlc_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value into memroy
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /// Rotate Register Right
@@ -556,8 +556,8 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
 /// mem[HL] is rotated to the right 1 bit position.
 ///
 /// Contents of Bit 0 are copied to Carry Flag and also to bit 7.
-pub fn rrc_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //Content of 0th bit
     let rmb: u8 = value & 0x01;
@@ -583,7 +583,7 @@ pub fn rrc_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value into memory
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /// Rotate Left
@@ -627,8 +627,8 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
 /// Contents of mem[HL] are roateted left 1 bit position
 ///
 /// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
-pub fn rl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     let lmb: u8 = (value & 0x80) >> 7;
 
@@ -654,7 +654,7 @@ pub fn rl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value into memory
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /// Rotate Right
@@ -692,8 +692,8 @@ pub fn rr(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-pub fn rr_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     let rmb: u8 = value & 0x01;
 
@@ -719,7 +719,7 @@ pub fn rr_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value to memory
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /// Shift Left Arithmetic
@@ -759,8 +759,8 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
 /// An arithmetic shift left 1 bit position is performed on contents of mem[HL]
 ///
 /// Contents of bit 7 are copied ot carry flag
-pub fn sla_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //7th bit
     let lmb: u8 = (value & 0x80) >> 7;
@@ -784,7 +784,7 @@ pub fn sla_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value into memory
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 ///Shift Right Arithmetic
@@ -822,8 +822,8 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
 }
 
 //Shift Right Arithmetic
-pub fn sra_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //7th bit
     let lmb: u8 = value & 0x80;
@@ -852,7 +852,7 @@ pub fn sra_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     //Clear Half Carry
     f.clear_half_carry_flag();
 
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 ///Swap r
@@ -883,8 +883,8 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
 ///Swap mem[HL]
 ///
 /// Exchange lower and higher nibbles
-pub fn swap_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value = mmu.read_mem(addr);
+pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value = interconnect.read_mem(addr);
 
     //Lower Nibble
     let low: u8 = value & 0x0F;
@@ -903,7 +903,7 @@ pub fn swap_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
 
     f.clear_half_carry_flag();
 
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /// Shift Right Logical
@@ -945,8 +945,8 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
 /// Performs right shift on operand. 0th bit is copied to carry
 ///
 /// 7th bit is cleared
-pub fn srl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //0th bit
     let rmb: u8 = value & 0x01;
@@ -971,7 +971,7 @@ pub fn srl_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16) {
     f.clear_half_carry_flag();
 
     //Write new value to memory
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 /************************************************************************
  * 16-bit Arithmetic instructions
@@ -1222,7 +1222,7 @@ pub fn jp_nc(cpu: &mut Cpu, nn: u16) {
 
 ///
 /// Call to nn
-pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
@@ -1232,8 +1232,8 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
     cpu.pc += 3;
 
     //mem[sp] = pc
-    mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
-    mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
+    interconnect.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
+    interconnect.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
     //PC = nn
     cpu.pc = nn;
@@ -1243,9 +1243,9 @@ pub fn call(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 
 ///
 /// Call to nn if zero flag is set
-pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
-        call(cpu, mmu, nn);
+        call(cpu, interconnect, nn);
         cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
@@ -1254,9 +1254,9 @@ pub fn call_z(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 }
 
 /// Call to nn if zero flag is clear
-pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
-        call(cpu, mmu, nn);
+        call(cpu, interconnect, nn);
         cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
@@ -1265,9 +1265,9 @@ pub fn call_nz(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 }
 
 /// Call to nn if carry flag is set
-pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
-        call(cpu, mmu, nn);
+        call(cpu, interconnect, nn);
         cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
@@ -1276,9 +1276,9 @@ pub fn call_c(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 }
 
 /// Call to nn if carry flag is clear
-pub fn call_nc(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
+pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
-        call(cpu, mmu, nn);
+        call(cpu, interconnect, nn);
         cpu.timer.internal_ticks += 6;
     } else {
         cpu.pc += 3;
@@ -1288,7 +1288,7 @@ pub fn call_nc(cpu: &mut Cpu, mmu: &mut Mmu, nn: u16) {
 
 ///
 /// Call to 00, 08, 10, 18, 20, 28, 30, 38(hex)
-pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
+pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
     let mut stack_pointer: u16 = cpu.sp;
 
     //SP = SP - 2
@@ -1298,10 +1298,10 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
     cpu.pc += 1;
 
     //mem[SP] = lower byte of program counter
-    mmu.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
+    interconnect.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
 
     //mem[SP+1] = upper byte of program counter (its + 1 below because we already moved the stack pointer)
-    mmu.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
+    interconnect.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
     //PC = n
     cpu.pc = n as u16;
@@ -1310,11 +1310,14 @@ pub fn rst(cpu: &mut Cpu, mmu: &mut Mmu, n: u8) {
 }
 
 ///Return
-pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
     let mut sp = cpu.sp;
 
     //PC = (SP)
-    let pc = u16::from_be_bytes([mmu.read_mem(sp.wrapping_add(1)), mmu.read_mem(sp)]);
+    let pc = u16::from_be_bytes([
+        interconnect.read_mem(sp.wrapping_add(1)),
+        interconnect.read_mem(sp),
+    ]);
 
     cpu.pc = pc;
 
@@ -1324,18 +1327,18 @@ pub fn ret(cpu: &mut Cpu, mmu: &Mmu) {
     cpu.sp = sp;
 }
 
-pub fn ret_z(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ret_z(cpu: &mut Cpu, interconnect: &Interconnect) {
     if cpu.registers.f.zero_flag() == 1 {
-        ret(cpu, mmu);
+        ret(cpu, interconnect);
         cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
         cpu.timer.internal_ticks += 2;
     }
 }
-pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ret_nz(cpu: &mut Cpu, interconnect: &Interconnect) {
     if cpu.registers.f.zero_flag() == 0 {
-        ret(cpu, mmu);
+        ret(cpu, interconnect);
         cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
@@ -1343,9 +1346,9 @@ pub fn ret_nz(cpu: &mut Cpu, mmu: &Mmu) {
     }
 }
 
-pub fn ret_c(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ret_c(cpu: &mut Cpu, interconnect: &Interconnect) {
     if cpu.registers.f.carry_flag() == 1 {
-        ret(cpu, mmu);
+        ret(cpu, interconnect);
         cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
@@ -1353,9 +1356,9 @@ pub fn ret_c(cpu: &mut Cpu, mmu: &Mmu) {
     }
 }
 
-pub fn ret_nc(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ret_nc(cpu: &mut Cpu, interconnect: &Interconnect) {
     if cpu.registers.f.carry_flag() == 0 {
-        ret(cpu, mmu);
+        ret(cpu, interconnect);
         cpu.timer.internal_ticks += 5;
     } else {
         cpu.pc += 1;
@@ -1377,30 +1380,30 @@ pub fn ld_8bit(r: &mut u8, data: u8) {
 
 ///
 /// Load data from io-port 'n' into A register
-pub fn ld_a_from_io(cpu: &mut Cpu, mmu: &Mmu, n: u8) {
+pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
     let addr: u16 = 0xFF00 + (n as u16);
-    cpu.registers.a = mmu.read_mem(addr);
+    cpu.registers.a = interconnect.read_mem(addr);
 }
 
 ///
 /// Load data from A register into io-port 'n'
-pub fn ld_io_from_a(cpu: &Cpu, mmu: &mut Mmu, n: u8) {
+pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
     let addr: u16 = 0xFF00 + (n as u16);
-    mmu.write_mem(addr, cpu.registers.a);
+    interconnect.write_mem(addr, cpu.registers.a);
 }
 
 ///
 /// Load data from ($FF00 + register C) into A register
-pub fn ld_a_from_io_c(cpu: &mut Cpu, mmu: &Mmu) {
+pub fn ld_a_from_io_c(cpu: &mut Cpu, interconnect: &Interconnect) {
     let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
-    cpu.registers.a = mmu.read_mem(addr);
+    cpu.registers.a = interconnect.read_mem(addr);
 }
 
 ///
 /// Load data from register A into ($FF00 + register C)
-pub fn ld_io_c_from_a(cpu: &Cpu, mmu: &mut Mmu) {
+pub fn ld_io_c_from_a(cpu: &Cpu, interconnect: &mut Interconnect) {
     let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
-    mmu.write_mem(addr, cpu.registers.a);
+    interconnect.write_mem(addr, cpu.registers.a);
 }
 
 /************************************************************************
@@ -1408,13 +1411,13 @@ pub fn ld_io_c_from_a(cpu: &Cpu, mmu: &mut Mmu) {
  * *********************************************************************/
 ///
 /// Contents of Register Pair are popped off stack
-pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
+pub fn pop_rr(interconnect: &Interconnect, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
     //Stack Pointer
     let mut stack_pointer = *sp;
 
     //Value in memory (mem[sp])
-    let low: u8 = mmu.read_mem(stack_pointer);
-    let up: u8 = mmu.read_mem(stack_pointer.wrapping_add(1));
+    let low: u8 = interconnect.read_mem(stack_pointer);
+    let up: u8 = interconnect.read_mem(stack_pointer.wrapping_add(1));
 
     //rr = mem[sp]
     *lower = low;
@@ -1428,7 +1431,7 @@ pub fn pop_rr(mmu: &Mmu, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
 
 ///
 /// Contents of Register Pair are pushed onto stack
-pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
+pub fn push_rr(interconnect: &mut Interconnect, upper: u8, lower: u8, sp: &mut u16) {
     //Stack Pointer
     let mut stack_pointer = *sp;
 
@@ -1436,8 +1439,8 @@ pub fn push_rr(mmu: &mut Mmu, upper: u8, lower: u8, sp: &mut u16) {
     stack_pointer = stack_pointer.wrapping_sub(2);
 
     //mem[sp] = rr
-    mmu.write_mem(stack_pointer, lower);
-    mmu.write_mem(stack_pointer + 1, upper);
+    interconnect.write_mem(stack_pointer, lower);
+    interconnect.write_mem(stack_pointer + 1, upper);
 
     *sp = stack_pointer;
 }
@@ -1470,8 +1473,8 @@ pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
 ///
 ///
 /// Checks the nth bit of mem[hl] and stores the inverse in the zero flag.
-pub fn bit_n_hl(f: &mut Flags, mmu: &mut Mmu, addr: u16, n: u8) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn bit_n_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16, n: u8) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     value = (value >> n) & 0x01;
 
@@ -1500,13 +1503,13 @@ pub fn set_n_r(r: &mut u8, n: u8) {
     *r = reg;
 }
 
-pub fn set_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn set_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //Set the nth bit
     value |= 1 << n;
 
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 ///
@@ -1520,13 +1523,13 @@ pub fn res_n_r(r: &mut u8, n: u8) {
     *r = reg;
 }
 
-pub fn res_n_hl(mmu: &mut Mmu, addr: u16, n: u8) {
-    let mut value: u8 = mmu.read_mem(addr);
+pub fn res_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
+    let mut value: u8 = interconnect.read_mem(addr);
 
     //Clear the nth bit
     value &= !(1 << n);
 
-    mmu.write_mem(addr, value);
+    interconnect.write_mem(addr, value);
 }
 
 /************************************************************************

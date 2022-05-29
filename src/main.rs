@@ -4,7 +4,7 @@ pub use cpu::Cpu;
 mod gameboy;
 pub mod mmu;
 
-mod interconnect;
+pub mod interconnect;
 
 use gameboy::GameBoy;
 pub use mmu::*;
@@ -32,15 +32,13 @@ fn main() {
     //GameBoy
     let mut game_boy: GameBoy = GameBoy::new();
 
-    game_boy.cpu.pc = 0x100;
-
     //Read Rom into memory
     game_boy.mmu.read_rom(&rom);
 
     game_boy.cpu.pc = 0x100;
 
     loop {
-        game_boy.execute_instruction();
+        game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
         let cycles_passed = (game_boy.cpu.timer.internal_ticks - game_boy.cpu.last_cycle) * 4;
         game_boy.timer.do_cycle(cycles_passed);
 
