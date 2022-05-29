@@ -19,8 +19,9 @@ extern crate text_io;
 
 fn main() {
     //Command Line Arguments
-    let args: Vec<String> = env::args().collect();
-    let test_rom = args[1].as_str();
+    //let args: Vec<String> = env::args().collect();
+    //let test_rom = args[1].as_str();
+    let test_rom = "roms/cpu_instrs/individual/01-special.gb";
     //let file_name = "roms/tetris.gb";
 
     //Path to rom
@@ -33,20 +34,25 @@ fn main() {
     let mut game_boy: GameBoy = GameBoy::new();
 
     //Read Rom into memory
-    game_boy.mmu.read_rom(&rom);
+    game_boy.interconnect.read_rom(&rom);
 
     game_boy.cpu.pc = 0x100;
 
     loop {
+
+
+
         game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
         let cycles_passed = (game_boy.cpu.timer.internal_ticks - game_boy.cpu.last_cycle) * 4;
         game_boy.timer.do_cycle(cycles_passed);
 
-        if game_boy.mmu.read_mem(0xFF02) == 0x81 {
-            let c: char = game_boy.mmu.read_mem(0xFF01) as char;
+        if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
+            let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
             print!("{}", c);
-            game_boy.mmu.write_mem(0xff02, 0x0);
+            game_boy.interconnect.write_mem(0xff02, 0x0);
         }
+
+
 
         //("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
     }
