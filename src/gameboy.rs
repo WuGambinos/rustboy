@@ -1,3 +1,4 @@
+use crate::interconnect::Interconnect;
 use crate::{Cpu, Timer};
 
 use crate::Mmu;
@@ -8,6 +9,7 @@ pub struct GameBoy {
     pub cpu: Cpu,
     pub mmu: Mmu,
     pub timer: Timer,
+    pub interconnect: Interconnect,
 }
 
 impl GameBoy {
@@ -16,6 +18,7 @@ impl GameBoy {
             cpu: Cpu::new(),
             mmu: Mmu::new(),
             timer: Timer::new(),
+            interconnect: Interconnect::new(),
         }
     }
 
