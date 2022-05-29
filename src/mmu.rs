@@ -58,9 +58,5 @@ impl Mmu {
         self.memory[addr as usize]
     }
 
-    pub fn read_rom(&mut self, rom: &Vec<u8>) {
-        for i in 0..rom.len() {
-            self.write_mem(i as u16, rom[i]);
-        }
-    }
+
 }
