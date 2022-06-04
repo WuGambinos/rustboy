@@ -55,4 +55,22 @@ impl Interconnect {
             self.write_mem(i as u16, rom[i]);
         }
     }
+
+    pub fn step(&mut self, ticks: u32) {
+        self.timer.div = self.timer.div.wrapping_add(1);
+
+        if self.timer.tac & 0b100 != 0 {
+            if ((self.timer.tima as u16) + 1) & 0xFF == 0 {
+                self.timer.tima = self.timer.tma;
+
+                // Fire Timer interrupt
+                let mut flag = self.read_mem(0xFF0F);
+                flag |= 0x2;
+                self.write_mem(0xFF0F, flag);
+            } else {
+                //Increment TIMA
+                self.timer.tima += 1;
+            }
+        }
+    }
 }
