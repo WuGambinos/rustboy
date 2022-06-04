@@ -5199,7 +5199,6 @@ impl Cpu {
             0xD9 => {
                 ret(self, interconnect);
                 ei(self);
-                self.pc += 1;
 
                 //Increase Timer
                 interconnect.timer.internal_ticks =
