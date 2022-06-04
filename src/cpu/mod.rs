@@ -1,6 +1,5 @@
 pub mod instructions;
-use crate::interconnect::{self, Interconnect};
-use crate::{Mmu, Timer};
+use crate::interconnect::Interconnect;
 
 use self::instructions::*;
 
@@ -358,12 +357,12 @@ impl Cpu {
         }
 
         //Handle Interrupts
-        //self.handle_interrupt(interconnect);
+        self.handle_interrupt(interconnect);
 
         self.last_cycle = interconnect.timer.internal_ticks;
 
         self.fetch(interconnect);
-        self.emu_cycles(interconnect, 1);
+        //self.emu_cycles(interconnect, 1);
 
         match self.opcode {
             //NOP
