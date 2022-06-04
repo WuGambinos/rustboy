@@ -7,8 +7,6 @@ use crate::cpu::instructions::*;
 
 pub struct GameBoy {
     pub cpu: Cpu,
-    pub mmu: Mmu,
-    pub timer: Timer,
     pub interconnect: Interconnect,
 }
 
@@ -16,13 +14,11 @@ impl GameBoy {
     pub fn new() -> Self {
         Self {
             cpu: Cpu::new(),
-            mmu: Mmu::new(),
-            timer: Timer::new(),
             interconnect: Interconnect::new(),
         }
     }
 
-    pub fn write_mem(&mut self, addr: u16, value: u8) {
+    /*pub fn write_mem(&mut self, addr: u16, value: u8) {
         if addr >= 0xFF04 && addr <= 0xFF07 {
             match addr {
                 0xFF04 => self.timer.div = 0,
@@ -56,5 +52,5 @@ impl GameBoy {
         } else {
             self.mmu.memory[addr as usize]
         }
-    }
+    }*/
 }
