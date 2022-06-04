@@ -19,6 +19,8 @@ pub struct Timer {
 
     ///Internal Ticks
     pub(crate) internal_ticks: u32,
+
+    tima_speed: u32,
 }
 
 impl Timer {
@@ -29,6 +31,18 @@ impl Timer {
             tma: 0,
             tac: 0,
             internal_ticks: 0,
+            tima_speed: 256,
+        }
+    }
+
+    pub fn update(&mut self) {
+        match self.tac & 0x3 {
+            0x0 => self.tima_speed = 256,
+            0x1 => self.tima_speed = 4,
+            0x2 => self.tima_speed = 16,
+            0x3 => self.tima_speed = 64,
+
+            _ => (),
         }
     }
 
