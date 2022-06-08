@@ -56,20 +56,24 @@ impl Interconnect {
         }
     }
 
-    pub fn step(&mut self, ticks: u32) {
-        self.timer.div = self.timer.div.wrapping_add(1);
+    // Execute the timer cycle
+    pub fn do_cycle(&mut self, ticks: u32, interconnect: &mut Interconnect) {
+        self.timer.internal_ticks += ticks;
 
-        if self.timer.tac & 0b100 != 0 {
-            if ((self.timer.tima as u16) + 1) & 0xFF == 0 {
+        while self.timer.internal_ticks >= 256 {
+            self.timer.div = self.timer.div.wrapping_add(1);
+            self.timer.internal_ticks -= 256;
+        }
+
+        //Is Clock Enabled
+        if self.timer.is_clock_enabled() {
+            // Increment counter
+            self.timer.tima.wrapping_add(1);
+
+            if self.timer.tima == 0 {
                 self.timer.tima = self.timer.tma;
 
-                // Fire Timer interrupt
-                let mut flag = self.read_mem(0xFF0F);
-                flag |= 0x2;
-                self.write_mem(0xFF0F, flag);
-            } else {
-                //Increment TIMA
-                self.timer.tima += 1;
+                //REQUEST INTERRUPT
             }
         }
     }

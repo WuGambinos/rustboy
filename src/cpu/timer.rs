@@ -19,8 +19,6 @@ pub struct Timer {
 
     ///Internal Ticks
     pub(crate) internal_ticks: u32,
-
-    tima_speed: u32,
 }
 
 impl Timer {
@@ -31,54 +29,6 @@ impl Timer {
             tma: 0,
             tac: 0,
             internal_ticks: 0,
-            tima_speed: 256,
-        }
-    }
-
-    pub fn update(&mut self) {
-        match self.tac & 0x3 {
-            0x0 => self.tima_speed = 256,
-            0x1 => self.tima_speed = 4,
-            0x2 => self.tima_speed = 16,
-            0x3 => self.tima_speed = 64,
-
-            _ => (),
-        }
-    }
-
-    pub(crate) fn timer_tick(&mut self) {
-        let prev_div: u16 = self.div;
-
-        //Increment Div Register
-        self.div = self.div.wrapping_add(1);
-
-        let mut timer_update: bool = false;
-
-        //Get Timer Clock
-        match self.tac & 0b11 {
-            0b00 => timer_update = ((prev_div & (1 << 9)) == 1) && ((!(self.div & (1 << 9))) == 1),
-
-            0b01 => timer_update = ((prev_div & (1 << 3)) == 1) && ((!(self.div & (1 << 3))) == 1),
-
-            0b10 => timer_update = ((prev_div & (1 << 5)) == 1) && ((!(self.div & (1 << 5))) == 1),
-
-            0b11 => timer_update = ((prev_div & (1 << 7)) == 1) && ((!(self.div & (1 << 7))) == 1),
-
-            _ => (),
-        }
-
-        let cond: u8 = self.tac & (1 << 2);
-
-        //If Clock is enabled
-        if timer_update && cond == 1 {
-            //Increment Counter by 1
-            self.tima = self.tima.wrapping_add(1);
-
-            //If Counter Overflows, request interrupt
-            if self.tima == 0 {
-                self.tima = self.tma;
-                //Request Timer interrupt TODO
-            }
         }
     }
 
@@ -95,6 +45,11 @@ impl Timer {
 
             _ => 123,
         }
+    }
+
+    //Is Clock Enabled
+    pub fn is_clock_enabled(&self) -> bool {
+        self.tac & 0b100 == 1
     }
 
     /// Write u8 value to Timer/Divider register at addr
