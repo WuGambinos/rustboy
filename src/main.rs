@@ -43,9 +43,6 @@ fn main() {
         let cycles_passed =
             (game_boy.interconnect.timer.internal_ticks - game_boy.cpu.last_cycle) * 4;
 
-        game_boy.interconnect.step(cycles_passed);
-        game_boy.interconnect.timer.update();
-
         if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
             let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
             print!("{}", c);
