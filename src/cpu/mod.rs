@@ -5601,13 +5601,6 @@ impl Cpu {
         }
     }
 
-    pub fn emu_cycles(&mut self, interconnect: &mut Interconnect, n: u32) {
-        for _ in 0..n {
-            interconnect.timer.internal_ticks = interconnect.timer.internal_ticks.wrapping_add(1);
-            interconnect.timer.timer_tick();
-        }
-    }
-
     pub fn fetch(&mut self, interconnect: &Interconnect) {
         self.opcode = interconnect.read_mem(self.pc);
     }
