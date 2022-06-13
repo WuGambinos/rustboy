@@ -1,3 +1,5 @@
+use crate::cpu::interrupts::interrupt_request;
+use crate::cpu::interrupts::InterruptType;
 use crate::{Mmu, Timer};
 
 #[derive(Debug)]
@@ -16,17 +18,7 @@ impl Interconnect {
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if addr >= 0xFF04 && addr <= 0xFF07 {
-            match addr {
-                0xFF04 => self.timer.div = 0,
-
-                0xFF05 => self.timer.tima = value,
-
-                0xFF06 => self.timer.tma = value,
-
-                0xFF07 => self.timer.tac = value,
-
-                _ => (),
-            }
+            self.timer.timer_write(addr, value);
         } else {
             self.mmu.memory[addr as usize] = value;
         }
@@ -34,17 +26,7 @@ impl Interconnect {
 
     pub fn read_mem(&self, addr: u16) -> u8 {
         if addr >= 0xFF04 && addr <= 0xFF07 {
-            match addr {
-                0xFF04 => return self.timer.div as u8,
-
-                0xFF05 => return self.timer.tima,
-
-                0xFF06 => return self.timer.tma,
-
-                0xFF07 => return self.timer.tac,
-
-                _ => return 0,
-            }
+            self.timer.timer_read(addr)
         } else {
             self.mmu.memory[addr as usize]
         }
@@ -56,25 +38,50 @@ impl Interconnect {
         }
     }
 
-    // Execute the timer cycle
-    pub fn do_cycle(&mut self, ticks: u32, interconnect: &mut Interconnect) {
-        self.timer.internal_ticks += ticks;
+    pub fn timer_tick(&mut self) {
+        let prev_div: u16 = self.timer.div;
 
-        while self.timer.internal_ticks >= 256 {
-            self.timer.div = self.timer.div.wrapping_add(1);
-            self.timer.internal_ticks -= 256;
+        //Div++
+        self.timer.div = self.timer.div.wrapping_add(1);
+
+        let mut timer_update: bool = false;
+
+        match self.timer.tac & (0b11) {
+            0b00 => {
+                timer_update = (prev_div & (1 << 9)) == 1 && (!(self.timer.div & (1 << 9))) == 1
+            }
+
+            0b01 => {
+                timer_update = (prev_div & (1 << 3)) == 1 && (!(self.timer.div & (1 << 3))) == 1
+            }
+
+            0b10 => {
+                timer_update = (prev_div & (1 << 5)) == 1 && (!(self.timer.div & (1 << 5))) == 1
+            }
+
+            0b11 => {
+                timer_update = (prev_div & (1 << 7)) == 1 && (!(self.timer.div & (1 << 7))) == 1
+            }
+            _ => (),
         }
 
-        //Is Clock Enabled
-        if self.timer.is_clock_enabled() {
-            // Increment counter
-            self.timer.tima.wrapping_add(1);
+        if timer_update && ((self.timer.tac & (1 << 2)) == 1) {
+            self.timer.tima = self.timer.tima.wrapping_add(1);
 
-            if self.timer.tima == 0 {
+            if self.timer.tima == 0xFF {
                 self.timer.tima = self.timer.tma;
 
-                //REQUEST INTERRUPT
+                //Request Interrupt
+                interrupt_request(self, InterruptType::Timer);
             }
+        }
+    }
+
+    pub fn emu_cycles(&mut self, cpu_cycles: i32) {
+        let n: i32 = cpu_cycles * 4;
+        for _ in 0..n {
+            self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
+            self.timer_tick();
         }
     }
 }
