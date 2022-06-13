@@ -1,4 +1,5 @@
 pub mod instructions;
+pub mod interrupts;
 use crate::interconnect::Interconnect;
 
 use self::instructions::*;
@@ -279,7 +280,7 @@ pub struct Cpu {
     ///Current opcode
     pub(crate) opcode: u8,
 
-    pub(crate) last_cycle: u32,
+    pub(crate) last_cycle: u64,
 }
 
 impl Default for Cpu {
@@ -305,6 +306,9 @@ impl Cpu {
 
     ///Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
+        const INTERRUPT_IE: u16 = 0xFFFF;
+        const INTERRUPT_F: u16 = 0xFF0F;
+
         //Check if interrupts are enabled
         if !self.ime && !self.halted {
             return;
@@ -357,12 +361,11 @@ impl Cpu {
         }
 
         //Handle Interrupts
-        self.handle_interrupt(interconnect);
+        //self.handle_interrupt(interconnect);
 
         self.last_cycle = interconnect.timer.internal_ticks;
 
         self.fetch(interconnect);
-        //self.emu_cycles(interconnect, 1);
 
         match self.opcode {
             //NOP
