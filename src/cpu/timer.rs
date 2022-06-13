@@ -18,13 +18,13 @@ pub struct Timer {
     pub(crate) tac: u8,
 
     ///Internal Ticks
-    pub(crate) internal_ticks: u32,
+    pub(crate) internal_ticks: u64,
 }
 
 impl Timer {
     pub fn new() -> Self {
         Self {
-            div: 0xAC00,
+            div: 0xABCC,
             tima: 0,
             tma: 0,
             tac: 0,
@@ -33,7 +33,7 @@ impl Timer {
     }
 
     /// Read u8 valeu from Timer/Divider register at addr
-    fn timer_read(&self, addr: u16) -> u8 {
+    pub fn timer_read(&self, addr: u16) -> u8 {
         match addr {
             0xFF04 => return ((self.div as u16) >> 8) as u8,
 
@@ -46,14 +46,8 @@ impl Timer {
             _ => 123,
         }
     }
-
-    //Is Clock Enabled
-    pub fn is_clock_enabled(&self) -> bool {
-        self.tac & 0b100 == 1
-    }
-
     /// Write u8 value to Timer/Divider register at addr
-    fn timer_write(&mut self, addr: u16, value: u8) {
+    pub fn timer_write(&mut self, addr: u16, value: u8) {
         match addr {
             //DIV
             0xFF04 => self.div = 0,
@@ -69,5 +63,10 @@ impl Timer {
 
             _ => (),
         }
+    }
+
+    //Is Clock Enabled
+    pub fn is_clock_enabled(&self) -> bool {
+        self.tac & 0b100 == 1
     }
 }
