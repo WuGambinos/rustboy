@@ -315,7 +315,8 @@ impl Cpu {
         }
 
         //Check if some interrupt have been triggered
-        let mut triggered = interconnect.read_mem(0xFFFF) & interconnect.read_mem(0xFF0F);
+        let mut triggered =
+            interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
         triggered = 0x04;
 
         if triggered == 0 {
@@ -335,24 +336,14 @@ impl Cpu {
             panic!("Invalid Interrupt Triggered");
         }
 
-        //Clean up the interrupt
-        let mut interrupt_flags = interconnect.read_mem(0xFFFF);
-        interrupt_flags &= !(1 << n);
-        interconnect.write_mem(0xFFFF, interrupt_flags);
-
-        //Save current program pointer
-        /*let pc = self.pc;
-
-        let upper_pc = (pc >> 8) as u8 ;
-        let lower_pc = pc as u8;
-        push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
-
-        //Change th PC value to the interrupt location
-        //handler
-        self.pc = 0x0040 | ((n as u16) << 3);*/
-        self.ime_to_be_enabled = false;
-
         rst(self, interconnect, 0x50);
+
+        //Clean up the interrupt
+        let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
+        interrupt_flags &= !(1 << n);
+        interconnect.write_mem(INTERRUPT_F, interrupt_flags);
+
+        self.ime_to_be_enabled = false;
     }
 
     pub fn execute_instruction(&mut self, interconnect: &mut Interconnect) {
@@ -361,7 +352,7 @@ impl Cpu {
         }
 
         //Handle Interrupts
-        //self.handle_interrupt(interconnect);
+        self.handle_interrupt(interconnect);
 
         self.last_cycle = interconnect.timer.internal_ticks;
 
@@ -5602,6 +5593,8 @@ impl Cpu {
                     interconnect.timer.internal_ticks.wrapping_add(2);
             } //_ => println!("NOT AN OPCODE"),
         }
+        let cycles = interconnect.timer.internal_ticks - self.last_cycle;
+        interconnect.emu_cycles(cycles)
     }
 
     pub fn fetch(&mut self, interconnect: &Interconnect) {
