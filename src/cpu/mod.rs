@@ -317,7 +317,6 @@ impl Cpu {
         //Check if some interrupt have been triggered
         let mut triggered =
             interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
-        triggered = 0x04;
 
         if triggered == 0 {
             return;
@@ -336,7 +335,13 @@ impl Cpu {
             panic!("Invalid Interrupt Triggered");
         }
 
-        rst(self, interconnect, 0x50);
+        //Push Current PC onto stack
+        let lower_pc = self.pc as u8;
+        let upper_pc = (self.pc >> 8) as u8;
+        push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
+
+        //Set PC equal to address of handler
+        self.pc = 0x50;
 
         //Clean up the interrupt
         let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
@@ -349,6 +354,7 @@ impl Cpu {
     pub fn execute_instruction(&mut self, interconnect: &mut Interconnect) {
         if self.ime_to_be_enabled {
             self.ime = true;
+            self.ime_to_be_enabled = false;
         }
 
         //Handle Interrupts
