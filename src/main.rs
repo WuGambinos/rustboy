@@ -22,10 +22,12 @@ fn main() {
     //let args: Vec<String> = env::args().collect();
     //let test_rom = args[1].as_str();
     let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
+    let test_rom2 = "roms/blaargs/instr_timing/instr_timing.gb";
+    let test_rom3 = "roms/mooneye_tests/acceptance/timer/div_write.gb";
     //let file_name = "roms/tetris.gb";
 
     //Path to rom
-    let rom_path: &Path = Path::new(test_rom);
+    let rom_path: &Path = Path::new(test_rom3);
 
     //Contents of rom
     let rom: Vec<u8> = read_file(&rom_path).unwrap();
@@ -45,6 +47,8 @@ fn main() {
             print!("{}", c);
             game_boy.interconnect.write_mem(0xff02, 0x0);
         }
+
+        game_boy.cpu.print_registers();
 
         //("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
     }
