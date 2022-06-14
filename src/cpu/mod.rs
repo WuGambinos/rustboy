@@ -381,7 +381,7 @@ impl Cpu {
                 self.registers.set_bc(data);
 
                 //Increase program counter
-                self.pc += 3;
+                self.pc = self.pc.wrapping_add(3);
 
                 //Increase Timer
                 interconnect.timer.internal_ticks =
@@ -5596,7 +5596,7 @@ impl Cpu {
                 rst(self, interconnect, 0x38);
                 //Increase Timer
                 interconnect.timer.internal_ticks =
-                    interconnect.timer.internal_ticks.wrapping_add(2);
+                    interconnect.timer.internal_ticks.wrapping_add(4);
             } //_ => println!("NOT AN OPCODE"),
         }
         let cycles = interconnect.timer.internal_ticks - self.last_cycle;

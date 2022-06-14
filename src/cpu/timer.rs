@@ -32,7 +32,7 @@ impl Timer {
         }
     }
 
-    /// Read u8 valeu from Timer/Divider register at addr
+    /// Read u8 value from Timer/Divider register at addr
     pub fn timer_read(&self, addr: u16) -> u8 {
         match addr {
             0xFF04 => return ((self.div as u16) >> 8) as u8,
@@ -63,10 +63,5 @@ impl Timer {
 
             _ => (),
         }
-    }
-
-    //Is Clock Enabled
-    pub fn is_clock_enabled(&self) -> bool {
-        self.tac & 0b100 == 1
     }
 }
