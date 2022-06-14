@@ -46,19 +46,6 @@ fn main() {
             game_boy.interconnect.write_mem(0xff02, 0x0);
         }
 
-        /*if game_boy.cpu.pc == 0xC2BE {
-            game_boy.cpu.print_state(&game_boy.interconnect);
-            println!();
-            println!();
-
-            loop {
-                game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
-                game_boy.cpu.print_state(&game_boy.interconnect);
-                println!();
-                println!();
-            }
-        }*/
-
         //("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
     }
 }
