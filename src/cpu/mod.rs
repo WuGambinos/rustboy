@@ -5615,6 +5615,19 @@ impl Cpu {
         ])
     }
 
+    pub fn print_registers(&self) {
+        println!(
+            "A: {} B: {} C: {} D: {} E: {} H: {} L: {}",
+            self.registers.a,
+            self.registers.b,
+            self.registers.c,
+            self.registers.d,
+            self.registers.e,
+            self.registers.h,
+            self.registers.l
+        );
+    }
+
     pub fn print_state(&self, interconnect: &Interconnect) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
