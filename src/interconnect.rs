@@ -77,6 +77,12 @@ impl Interconnect {
         }
     }
 
+    pub fn tick(&mut self, cycles: u64) {
+        self.timer.div_counter = 0;
+        self.timer.tima_counter = 0;
+        self.div = 0;
+    }
+
     pub fn emu_cycles(&mut self, cpu_cycles: u64) {
         let n: u64 = cpu_cycles * 4;
         for _ in 0..n {

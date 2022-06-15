@@ -335,13 +335,21 @@ impl Cpu {
             panic!("Invalid Interrupt Triggered");
         }
 
+        interconnect.emu_cycles(2);
+
         //Push Current PC onto stack
         let lower_pc = self.pc as u8;
         let upper_pc = (self.pc >> 8) as u8;
         push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
 
+        // Pushing pc onto stack consumes 2 M cycles
+        interconnect.emu_cycles(2);
+
         //Set PC equal to address of handler
         self.pc = 0x50;
+
+        //Setting Pc consumes 1 M cycle
+        interconnect.emu_cycles(1);
 
         //Clean up the interrupt
         let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
