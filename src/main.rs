@@ -19,11 +19,11 @@ extern crate text_io;
 
 fn main() {
     //Command Line Arguments
-    //let args: Vec<String> = env::args().collect();
-    //let test_rom = args[1].as_str();
-    let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
+    let args: Vec<String> = env::args().collect();
+    let test_rom = args[1].as_str();
+    /*let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
     let test_rom2 = "roms/blaargs/instr_timing/instr_timing.gb";
-    let test_rom3 = "roms/mooneye_tests/acceptance/timer/div_write.gb";
+    let test_rom3 = "roms/mooneye_tests/acceptance/timer/div_write.gb";*/
     //let file_name = "roms/tetris.gb";
 
     //Path to rom

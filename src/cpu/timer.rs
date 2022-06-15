@@ -44,13 +44,13 @@ impl Timer {
     /// Read u8 value from Timer/Divider register at addr
     pub fn timer_read(&self, addr: u16) -> u8 {
         match addr {
-            0xFF04 => return ((self.div as u16) >> 8) as u8,
+            0xFF04 => ((self.div as u16) >> 8) as u8,
 
-            0xFF05 => return self.tima,
+            0xFF05 => self.tima,
 
-            0xFF06 => return self.tma,
+            0xFF06 => self.tma,
 
-            0xFF07 => return self.tac,
+            0xFF07 => self.tac,
 
             _ => 123,
         }
@@ -72,5 +72,11 @@ impl Timer {
 
             _ => (),
         }
+    }
+}
+
+impl Default for Timer {
+    fn default() -> Self {
+        Self::new()
     }
 }
