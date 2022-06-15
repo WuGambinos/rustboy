@@ -256,6 +256,12 @@ impl Registers {
     }
 }
 
+impl Default for Registers {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 ///Struct that represents the gameboy cpu
 #[derive(Debug)]
 pub struct Cpu {
