@@ -19,6 +19,12 @@ pub struct Timer {
 
     ///Internal Ticks
     pub(crate) internal_ticks: u64,
+
+    pub div_counter: u32,
+
+    pub tima_counter: u32,
+
+    pub dividers: Vec<u32>,
 }
 
 impl Timer {
@@ -29,6 +35,9 @@ impl Timer {
             tma: 0,
             tac: 0,
             internal_ticks: 0,
+            div_counter: 0,
+            tima_counter: 0,
+            dividers: vec![1024, 16, 64, 256],
         }
     }
 

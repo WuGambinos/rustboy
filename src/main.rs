@@ -27,7 +27,7 @@ fn main() {
     //let file_name = "roms/tetris.gb";
 
     //Path to rom
-    let rom_path: &Path = Path::new(test_rom3);
+    let rom_path: &Path = Path::new(test_rom);
 
     //Contents of rom
     let rom: Vec<u8> = read_file(&rom_path).unwrap();
@@ -47,8 +47,6 @@ fn main() {
             print!("{}", c);
             game_boy.interconnect.write_mem(0xff02, 0x0);
         }
-
-        game_boy.cpu.print_registers();
 
         //("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
     }
