@@ -17,7 +17,7 @@ impl Interconnect {
     }
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
-        if addr >= 0xFF04 && addr <= 0xFF07 {
+        if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_write(addr, value);
         } else {
             self.mmu.memory[addr as usize] = value;
@@ -25,7 +25,7 @@ impl Interconnect {
     }
 
     pub fn read_mem(&self, addr: u16) -> u8 {
-        if addr >= 0xFF04 && addr <= 0xFF07 {
+        if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_read(addr)
         } else {
             self.mmu.memory[addr as usize]
@@ -33,7 +33,7 @@ impl Interconnect {
     }
 
     pub fn read_rom(&mut self, rom: &Vec<u8>) {
-        for i in 0..rom.len() {
+        for (i, item) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
     }
@@ -77,17 +77,17 @@ impl Interconnect {
         }
     }
 
-    pub fn tick(&mut self, cycles: u64) {
-        self.timer.div_counter = 0;
-        self.timer.tima_counter = 0;
-        self.div = 0;
-    }
-
     pub fn emu_cycles(&mut self, cpu_cycles: u64) {
         let n: u64 = cpu_cycles * 4;
         for _ in 0..n {
             self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             self.timer_tick();
         }
+    }
+}
+
+impl Default for Interconnect {
+    fn default() -> Self {
+        Self::new()
     }
 }
