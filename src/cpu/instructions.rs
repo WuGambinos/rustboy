@@ -1,5 +1,4 @@
 use super::*;
-use conditional::*;
 
 /************************************************************************
  * 8-bit Arithmetic instructions

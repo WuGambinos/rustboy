@@ -47,25 +47,17 @@ impl Interconnect {
         let mut timer_update: bool = false;
 
         match self.timer.tac & (0b11) {
-            0b00 => {
-                timer_update = (prev_div & (1 << 9)) == 1 && (!(self.timer.div & (1 << 9))) == 1
-            }
+            0b00 => timer_update = (prev_div & (1 << 9)) > 0 && (!(self.timer.div & (1 << 9))) == 1,
 
-            0b01 => {
-                timer_update = (prev_div & (1 << 3)) == 1 && (!(self.timer.div & (1 << 3))) == 1
-            }
+            0b01 => timer_update = (prev_div & (1 << 3)) > 0 && (!(self.timer.div & (1 << 3))) == 1,
 
-            0b10 => {
-                timer_update = (prev_div & (1 << 5)) == 1 && (!(self.timer.div & (1 << 5))) == 1
-            }
+            0b10 => timer_update = (prev_div & (1 << 5)) > 0 && (!(self.timer.div & (1 << 5))) == 1,
 
-            0b11 => {
-                timer_update = (prev_div & (1 << 7)) == 1 && (!(self.timer.div & (1 << 7))) == 1
-            }
+            0b11 => timer_update = (prev_div & (1 << 7)) > 0 && (!(self.timer.div & (1 << 7))) == 1,
             _ => (),
         }
 
-        if timer_update && ((self.timer.tac & (1 << 2)) == 1) {
+        if timer_update && ((self.timer.tac & (1 << 2)) > 0) {
             self.timer.tima = self.timer.tima.wrapping_add(1);
 
             if self.timer.tima == 0xFF {
