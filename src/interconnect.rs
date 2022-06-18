@@ -32,8 +32,8 @@ impl Interconnect {
         }
     }
 
-    pub fn read_rom(&mut self, rom: &Vec<u8>) {
-        for (i, item) in rom.iter().enumerate() {
+    pub fn read_rom(&mut self, rom: &[u8]) {
+        for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
     }
