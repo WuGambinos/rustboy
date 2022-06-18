@@ -1,5 +1,3 @@
-use crate::Mmu;
-
 #[derive(Debug)]
 pub struct Timer {
     /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
