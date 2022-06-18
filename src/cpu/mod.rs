@@ -5614,7 +5614,7 @@ impl Cpu {
             } //_ => println!("NOT AN OPCODE"),
         }
         let cycles = interconnect.timer.internal_ticks - self.last_cycle;
-        interconnect.emu_cycles(cycles)
+        interconnect.emu_cycles(cycles);
     }
 
     pub fn fetch(&mut self, interconnect: &Interconnect) {

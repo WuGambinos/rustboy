@@ -1,4 +1,4 @@
-use super::*;
+use super::{Cpu, Flags, Interconnect};
 
 /************************************************************************
  * 8-bit Arithmetic instructions
