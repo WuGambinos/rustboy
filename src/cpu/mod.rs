@@ -389,7 +389,7 @@ impl Cpu {
             //LD BC, u16
             0x01 => {
                 //Grab u16 value
-                let data = self.get_u16(&interconnect);
+                let data = self.get_u16(interconnect);
 
                 //BC = u16
                 self.registers.set_bc(data);
@@ -470,7 +470,7 @@ impl Cpu {
             //LD (u16), SP
             0x08 => {
                 //memory[u16] = SP
-                let addr: u16 = self.get_u16(&interconnect);
+                let addr: u16 = self.get_u16(interconnect);
 
                 //Lower byte of stack pointer
                 let lower_sp: u8 = (self.sp & 0x00FF) as u8;
@@ -588,7 +588,7 @@ impl Cpu {
             // LD DE, u16
             0x11 => {
                 //DE = u16
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 self.registers.set_de(u16_value);
 
                 //Increase Program Counter
@@ -760,7 +760,7 @@ impl Cpu {
 
             //LD HL, u16
             0x21 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 self.registers.set_hl(u16_value);
                 self.pc += 3;
 
@@ -936,7 +936,7 @@ impl Cpu {
 
             //LD SP, u16
             0x31 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 //SP = u16
                 self.sp = u16_value;
                 self.pc += 3;
@@ -2423,13 +2423,13 @@ impl Cpu {
 
             //JP NZ, u16
             0xC2 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 jp_nz(self, interconnect, u16_value);
             }
 
             //JP u16
             0xC3 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 jp(self, u16_value);
 
                 //Increase Timer
@@ -2439,7 +2439,7 @@ impl Cpu {
 
             //CALL NZ, u16
             0xC4 => {
-                let u16_value: u16 = self.get_u16(&interconnect);
+                let u16_value: u16 = self.get_u16(interconnect);
                 call_nz(self, interconnect, u16_value);
             }
 
@@ -2494,7 +2494,7 @@ impl Cpu {
 
             //JP Z, u16
             0xCA => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 jp_z(self, interconnect, u16_value);
             }
 
@@ -5101,13 +5101,13 @@ impl Cpu {
 
             //CALL Z, u16
             0xCC => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 call_z(self, interconnect, u16_value);
             }
 
             //CALL u16
             0xCD => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 call(self, interconnect, u16_value);
 
                 //Increase Timer
@@ -5157,7 +5157,7 @@ impl Cpu {
 
             //JP NC, u16
             0xD2 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 jp_nc(self, interconnect, u16_value);
             }
 
@@ -5166,7 +5166,7 @@ impl Cpu {
 
             //CALL NC, u16
             0xD4 => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 call_nc(self, interconnect, u16_value);
             }
 
@@ -5220,7 +5220,7 @@ impl Cpu {
 
             //JP C, u16
             0xDA => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 jp_c(self, interconnect, u16_value);
             }
 
@@ -5229,7 +5229,7 @@ impl Cpu {
 
             //CALL C, u16
             0xDC => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 call_c(self, interconnect, u16_value);
             }
 
@@ -5388,7 +5388,7 @@ impl Cpu {
 
             //LD (u16), A
             0xEA => {
-                let u16_value = self.get_u16(&interconnect);
+                let u16_value = self.get_u16(interconnect);
                 interconnect.write_mem(u16_value, self.registers.a);
                 self.pc += 3;
 
@@ -5568,7 +5568,7 @@ impl Cpu {
 
             //LD A, (u16)
             0xFA => {
-                let addr = self.get_u16(&interconnect);
+                let addr = self.get_u16(interconnect);
                 let u8_value = interconnect.read_mem(addr);
                 ld_8bit(&mut self.registers.a, u8_value);
                 self.pc += 3;

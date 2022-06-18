@@ -40,7 +40,7 @@ fn main() {
     game_boy.cpu.pc = 0x100;
 
     loop {
-        game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
+        //game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
         if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
             let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
             print!("{}", c);
