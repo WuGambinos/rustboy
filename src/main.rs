@@ -40,14 +40,31 @@ fn main() {
     game_boy.cpu.pc = 0x100;
 
     loop {
-        //game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
-        if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
+        println!("BEFORE EXECUTION: ");
+        game_boy.interconnect.timer.print_timer();
+        println!();
+        println!();
+
+        println!("OPCODE: {:#X}", game_boy.cpu.opcode);
+        println!();
+        println!();
+
+        game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
+
+        println!("AFATER EXECUTION: ");
+        game_boy.interconnect.timer.print_timer();
+        println!();
+        println!();
+
+        println!("OPCODE: {:#X}", game_boy.cpu.opcode);
+        println!();
+        println!();
+
+        /*if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
             let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
             print!("{}", c);
             game_boy.interconnect.write_mem(0xff02, 0x0);
-        }
-
-        //("OPCODE: {:#X} CYCLE PASSED: {}", cpu.opcode, cycles_passed);
+        }*/
     }
 }
 
