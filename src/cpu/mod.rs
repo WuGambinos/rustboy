@@ -372,7 +372,7 @@ impl Cpu {
         }
 
         //Handle Interrupts
-        self.handle_interrupt(interconnect);
+        //self.handle_interrupt(interconnect);
 
         self.last_cycle = interconnect.timer.internal_ticks;
 

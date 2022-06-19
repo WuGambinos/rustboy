@@ -67,9 +67,6 @@ impl Interconnect {
                 interrupt_request(self, InterruptType::Timer);
             }
         }
-
-        //Printer Timer State
-        self.timer.print_timer();
     }
 
     pub fn emu_cycles(&mut self, cpu_cycles: u64) {
