@@ -67,13 +67,16 @@ impl Interconnect {
                 interrupt_request(self, InterruptType::Timer);
             }
         }
+
+        //Printer Timer State
+        self.timer.print_timer();
     }
 
     pub fn emu_cycles(&mut self, cpu_cycles: u64) {
         let n: u64 = cpu_cycles * 4;
         for _ in 0..n {
-            self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
             self.timer_tick();
+            self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
         }
     }
 }

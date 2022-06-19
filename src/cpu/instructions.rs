@@ -1123,10 +1123,10 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.zero_flag() == 1 {
         jr(cpu, dd);
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     } else {
         cpu.pc += 2;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
@@ -1135,10 +1135,10 @@ pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.zero_flag() == 0 {
         jr(cpu, dd);
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     } else {
         cpu.pc += 2;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
@@ -1147,10 +1147,10 @@ pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.carry_flag() == 1 {
         jr(cpu, dd);
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     } else {
         cpu.pc += 2;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
@@ -1159,10 +1159,10 @@ pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.carry_flag() == 0 {
         jr(cpu, dd);
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     } else {
         cpu.pc += 2;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
@@ -1177,10 +1177,10 @@ pub fn jp(cpu: &mut Cpu, nn: u16) {
 pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         jp(cpu, nn);
-        interconnect.timer.internal_ticks += 4;
+        interconnect.emu_cycles(4);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 ///
@@ -1188,10 +1188,10 @@ pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         jp(cpu, nn);
-        interconnect.timer.internal_ticks += 4;
+        interconnect.emu_cycles(4);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1200,10 +1200,10 @@ pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         jp(cpu, nn);
-        interconnect.timer.internal_ticks += 4;
+        interconnect.emu_cycles(4);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1212,10 +1212,10 @@ pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         jp(cpu, nn);
-        interconnect.timer.internal_ticks += 4;
+        interconnect.emu_cycles(4);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1245,10 +1245,10 @@ pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         call(cpu, interconnect, nn);
-        interconnect.timer.internal_ticks += 6;
+        interconnect.emu_cycles(6);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1256,10 +1256,10 @@ pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         call(cpu, interconnect, nn);
-        interconnect.timer.internal_ticks += 6;
+        interconnect.emu_cycles(6);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1267,10 +1267,10 @@ pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         call(cpu, interconnect, nn);
-        interconnect.timer.internal_ticks += 6;
+        interconnect.emu_cycles(6);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1278,10 +1278,10 @@ pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         call(cpu, interconnect, nn);
-        interconnect.timer.internal_ticks += 6;
+        interconnect.emu_cycles(6);
     } else {
         cpu.pc += 3;
-        interconnect.timer.internal_ticks += 3;
+        interconnect.emu_cycles(3);
     }
 }
 
@@ -1329,40 +1329,40 @@ pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
 pub fn ret_z(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.zero_flag() == 1 {
         ret(cpu, interconnect);
-        interconnect.timer.internal_ticks += 5;
+        interconnect.emu_cycles(5);
     } else {
         cpu.pc += 1;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 pub fn ret_nz(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.zero_flag() == 0 {
         ret(cpu, interconnect);
-        interconnect.timer.internal_ticks += 5;
+        interconnect.emu_cycles(5);
     } else {
         cpu.pc += 1;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
 pub fn ret_c(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.carry_flag() == 1 {
         ret(cpu, interconnect);
-        interconnect.timer.internal_ticks += 5;
+        interconnect.emu_cycles(5);
     } else {
         cpu.pc += 1;
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
 pub fn ret_nc(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.carry_flag() == 0 {
         ret(cpu, interconnect);
-        interconnect.timer.internal_ticks += 5;
+        interconnect.emu_cycles(5);
     } else {
         cpu.pc += 1;
 
-        interconnect.timer.internal_ticks += 2;
+        interconnect.emu_cycles(2);
     }
 }
 
