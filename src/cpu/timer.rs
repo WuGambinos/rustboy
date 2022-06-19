@@ -31,7 +31,7 @@ impl Timer {
     }
     pub fn print_timer(&self) {
         println!(
-            "Ticks: {} DIV: {} TIMA: {} TMA: {} TAC: {}",
+            "Ticks: {:#X} DIV: {} TIMA: {} TMA: {} TAC: {}",
             self.internal_ticks, self.div, self.tima, self.tma, self.tac
         );
     }
