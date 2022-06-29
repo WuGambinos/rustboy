@@ -22,7 +22,7 @@ pub struct Timer {
 impl Timer {
     pub fn new() -> Self {
         Self {
-            div: 0,
+            div: 0xABCC,
             tima: 0,
             tma: 0,
             tac: 0,
