@@ -1,0 +1,24 @@
+BLAARGS TEST  INDIVIDUAL CPU_INSTRS
+
+PASSED:
+01-special.gb
+03-op sp, hl.gb
+04-op r,imm.gb
+05-op rp, gb
+06-ld r,r.gb
+08-misc instrs.gb
+09-op_rr.gb
+10-bit ops.gb
+11-op a,(hl).gb
+
+
+
+
+
+FAILED:
+
+02-interrupts.gb
+
+07-jr,jp,call,ret,rst.gb (almost) 
+
+
