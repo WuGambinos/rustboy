@@ -16,6 +16,13 @@ impl Interconnect {
         }
     }
 
+    pub fn print_timer(&self) {
+        println!(
+            "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
+            self.timer.div, self.timer.tima, self.timer.tma, self.timer.tac
+        );
+    }
+
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_write(addr, value);
@@ -38,7 +45,7 @@ impl Interconnect {
         }
     }
 
-    pub fn timer_tick(&mut self) {
+    /*  pub fn timer_tick(&mut self) {
         let prev_div: u16 = self.timer.div;
 
         //Div++
@@ -67,13 +74,32 @@ impl Interconnect {
                 interrupt_request(self, InterruptType::Timer);
             }
         }
-    }
+    }*/
 
-    pub fn emu_cycles(&mut self, cpu_cycles: u64) {
+    /*pub fn emu_cycles(&mut self, cpu_cycles: u64) {
         let n: u64 = cpu_cycles * 4;
         for _ in 0..n {
             self.timer_tick();
             self.timer.internal_ticks = self.timer.internal_ticks.wrapping_add(1);
+        }
+    }*/
+
+    pub fn emu_cycles(&mut self, cycles: u32) {
+        self.timer.div = self
+            .timer
+            .div
+            .wrapping_add(self.timer.div_clock.next(cycles) as u8);
+        if (self.timer.tac & 0x04) != 0x00 {
+            let n = self.timer.tma_clock.next(cycles);
+
+            for _ in 0..n {
+                self.timer.tima = self.timer.tima.wrapping_add(1);
+
+                if self.timer.tima == 0x00 {
+                    self.timer.tima = self.timer.tma;
+                    interrupt_request(self, InterruptType::Timer);
+                }
+            }
         }
     }
 }
