@@ -341,7 +341,7 @@ impl Cpu {
             panic!("Invalid Interrupt Triggered");
         }
 
-        interconnect.emu_cycles(2);
+        //interconnect.emu_cycles(2);
 
         //Push Current PC onto stack
         let lower_pc = self.pc as u8;
@@ -349,13 +349,13 @@ impl Cpu {
         push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
 
         // Pushing pc onto stack consumes 2 M cycles
-        interconnect.emu_cycles(2);
+        //interconnect.emu_cycles(2);
 
         //Set PC equal to address of handler
         self.pc = 0x50;
 
         //Setting Pc consumes 1 M cycle
-        interconnect.emu_cycles(1);
+        //interconnect.emu_cycles(1);
 
         //Clean up the interrupt
         let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
@@ -363,6 +363,7 @@ impl Cpu {
         interconnect.write_mem(INTERRUPT_F, interrupt_flags);
 
         self.ime_to_be_enabled = false;
+        interconnect.emu_cycles(4);
     }
 
     pub fn execute_instruction(&mut self, interconnect: &mut Interconnect) {
@@ -372,7 +373,7 @@ impl Cpu {
         }
 
         //Handle Interrupts
-        //self.handle_interrupt(interconnect);
+        self.handle_interrupt(interconnect);
 
         self.last_cycle = interconnect.timer.internal_ticks;
 
@@ -1544,8 +1545,10 @@ impl Cpu {
 
             //HALT (NEED TO FINISH)
             0x76 => {
+                self.halted = true;
                 //Increase Timer
                 interconnect.emu_cycles(1);
+                self.pc += 1;
             }
 
             //LD (HL), A
@@ -5195,6 +5198,14 @@ impl Cpu {
         println!("IF: {:#X}", interconnect.read_mem(0xFF0F));
         println!("IE: {:#X}", interconnect.read_mem(0xFFFF));
         println!("mem[FF0F]: {:#X}", interconnect.read_mem(0xFF0F));
+
+        println!(
+            "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
+            interconnect.timer.div,
+            interconnect.timer.tima,
+            interconnect.timer.tma,
+            interconnect.timer.tac
+        );
 
         println!("FLAG: {:#X}", self.registers.f.data);
 
