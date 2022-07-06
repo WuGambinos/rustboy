@@ -1,10 +1,6 @@
-use raylib::models::RaylibMesh;
-
 #[derive(Debug)]
-pub struct MMU {
-    memory: [u8; 0xFFFF],
-    //Interrupt Enable Register
-    interrupt_en: u8,
+pub struct Mmu {
+    pub memory: [u8; 0x10000],
     /*rom_bank: [u8; 16384],
     extra_rom_bank: [u8; 16384],
 
@@ -30,25 +26,25 @@ pub struct MMU {
     high_ram: [u8; 127],*/
 }
 
-impl Default for MMU {
+impl Default for Mmu {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl MMU {
+impl Mmu {
     pub fn new() -> Self {
-        MMU {
-            memory: [0; 0xFFFF],
-            interrupt_en: 0,
+        Mmu {
+            memory: [0; 0x10000],
         }
     }
 
-    pub fn write_mem(&mut self, addr: u16, value: u8) {
+    /*  pub fn write_mem(&mut self, addr: u16, value: u8) {
         self.memory[addr as usize] = value;
     }
 
     pub fn read_mem(&self, addr: u16) -> u8 {
         self.memory[addr as usize]
     }
+    */
 }
