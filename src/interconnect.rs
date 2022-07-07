@@ -84,7 +84,9 @@ impl Interconnect {
         }
     }*/
 
-    pub fn emu_cycles(&mut self, cycles: u32) {
+    pub fn emu_cycles(&mut self, cyc: u32) {
+
+        let cycles = cyc * 4;
         self.timer.div = self
             .timer
             .div
