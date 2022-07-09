@@ -4682,7 +4682,7 @@ impl Cpu {
                 rst(self, interconnect, 0x08);
 
                 //Increase Timer
-                interconnect.emu_cycles(2);
+                interconnect.emu_cycles(4);
             }
 
             //RET NC
