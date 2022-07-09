@@ -2313,6 +2313,8 @@ impl Cpu {
 
                 //Opcode
                 let op = interconnect.read_mem(addr);
+
+                interconnect.emu_cycles(1);
                 match op {
                     //RLC B
                     0x00 => {
@@ -2320,7 +2322,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC C
@@ -2329,7 +2331,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC D
@@ -2338,7 +2340,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC E
@@ -2347,7 +2349,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC H
@@ -2356,7 +2358,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC L
@@ -2365,7 +2367,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RLC (HL)
@@ -2375,7 +2377,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RLC A
@@ -2384,7 +2386,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC B
@@ -2393,7 +2395,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC C
@@ -2402,7 +2404,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC D
@@ -2411,7 +2413,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC E
@@ -2420,7 +2422,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC H
@@ -2429,7 +2431,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC L
@@ -2438,7 +2440,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RRC (HL)
@@ -2448,7 +2450,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RRC A
@@ -2457,7 +2459,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL B
@@ -2466,7 +2468,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL C
@@ -2475,7 +2477,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL D
@@ -2484,7 +2486,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL E
@@ -2493,7 +2495,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL H
@@ -2502,7 +2504,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL L
@@ -2511,7 +2513,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RL (HL)
@@ -2521,7 +2523,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RL A
@@ -2530,7 +2532,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR B
@@ -2539,7 +2541,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR C
@@ -2548,7 +2550,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR D
@@ -2557,7 +2559,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR E
@@ -2566,7 +2568,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR H
@@ -2575,7 +2577,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR L
@@ -2584,7 +2586,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RR (HL)
@@ -2594,7 +2596,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RR A
@@ -2603,7 +2605,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA B
@@ -2612,7 +2614,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA C
@@ -2621,7 +2623,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA D
@@ -2630,7 +2632,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA E
@@ -2639,7 +2641,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA H
@@ -2648,7 +2650,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA L
@@ -2657,7 +2659,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SLA (HL)
@@ -2667,7 +2669,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SLA A
@@ -2676,7 +2678,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA B
@@ -2685,7 +2687,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA C
@@ -2694,7 +2696,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA D
@@ -2703,7 +2705,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA E
@@ -2712,7 +2714,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA H
@@ -2721,7 +2723,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA L
@@ -2730,7 +2732,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRA (HL)
@@ -2740,7 +2742,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SRA A
@@ -2749,7 +2751,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP B
@@ -2758,7 +2760,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP C
@@ -2767,7 +2769,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP D
@@ -2776,7 +2778,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP E
@@ -2785,7 +2787,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP H
@@ -2794,7 +2796,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP L
@@ -2803,7 +2805,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SWAP (HL)
@@ -2813,7 +2815,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SWAP A
@@ -2822,7 +2824,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL B
@@ -2831,7 +2833,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL C
@@ -2840,7 +2842,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL D
@@ -2849,7 +2851,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL E
@@ -2858,7 +2860,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL H
@@ -2867,7 +2869,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL L
@@ -2876,7 +2878,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SRL (HL)
@@ -2886,7 +2888,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SRL A
@@ -2895,7 +2897,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, B
@@ -2904,7 +2906,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, C
@@ -2913,7 +2915,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, D
@@ -2922,7 +2924,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, E
@@ -2931,7 +2933,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, H
@@ -2940,7 +2942,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, L
@@ -2949,7 +2951,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 0, (HL)
@@ -2959,7 +2961,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 0, A
@@ -2968,7 +2970,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, B
@@ -2977,7 +2979,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, C
@@ -2986,7 +2988,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, D
@@ -2995,7 +2997,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, E
@@ -3004,7 +3006,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, H
@@ -3013,7 +3015,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, L
@@ -3022,7 +3024,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 1, (HL)
@@ -3032,7 +3034,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 1, A
@@ -3041,7 +3043,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, B
@@ -3050,7 +3052,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, C
@@ -3059,7 +3061,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, D
@@ -3068,7 +3070,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, E
@@ -3077,7 +3079,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, H
@@ -3086,7 +3088,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, L
@@ -3095,7 +3097,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 2, (HL)
@@ -3105,7 +3107,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 2, A
@@ -3114,7 +3116,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, B
@@ -3123,7 +3125,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, C
@@ -3132,7 +3134,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, D
@@ -3141,7 +3143,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, E
@@ -3150,7 +3152,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, H
@@ -3159,7 +3161,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, L
@@ -3168,7 +3170,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 3, (HL)
@@ -3178,7 +3180,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 3, A
@@ -3187,7 +3189,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, B
@@ -3196,7 +3198,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, C
@@ -3205,7 +3207,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, D
@@ -3214,7 +3216,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, E
@@ -3223,7 +3225,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, H
@@ -3232,7 +3234,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, L
@@ -3241,7 +3243,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 4, (HL)
@@ -3251,7 +3253,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 4, A
@@ -3260,7 +3262,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, B
@@ -3269,7 +3271,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, C
@@ -3278,7 +3280,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, D
@@ -3287,7 +3289,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, E
@@ -3296,7 +3298,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, H
@@ -3305,7 +3307,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, L
@@ -3314,7 +3316,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 5, (HL)
@@ -3324,7 +3326,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 5, A
@@ -3333,7 +3335,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, B
@@ -3342,7 +3344,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, C
@@ -3351,7 +3353,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, D
@@ -3360,7 +3362,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, E
@@ -3369,7 +3371,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, H
@@ -3378,7 +3380,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, L
@@ -3387,7 +3389,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 6, (HL)
@@ -3397,7 +3399,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 6, A
@@ -3406,7 +3408,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, B
@@ -3415,7 +3417,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, C
@@ -3424,7 +3426,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, D
@@ -3433,7 +3435,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, E
@@ -3442,7 +3444,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, H
@@ -3451,7 +3453,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, L
@@ -3460,7 +3462,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //BIT 7, (HL)
@@ -3470,7 +3472,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(3);
+                        interconnect.emu_cycles(2);
                     }
 
                     //BIT 7, A
@@ -3479,7 +3481,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, B
@@ -3488,7 +3490,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, C
@@ -3497,7 +3499,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, D
@@ -3506,7 +3508,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, E
@@ -3515,7 +3517,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, H
@@ -3524,7 +3526,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, L
@@ -3533,7 +3535,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 0, (HL)
@@ -3543,7 +3545,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 0, A
@@ -3552,7 +3554,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, B
@@ -3561,7 +3563,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, C
@@ -3570,7 +3572,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, D
@@ -3579,7 +3581,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, E
@@ -3588,7 +3590,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, H
@@ -3597,7 +3599,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, L
@@ -3606,7 +3608,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 1, (HL)
@@ -3616,7 +3618,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 1, A
@@ -3625,7 +3627,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, B
@@ -3634,7 +3636,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, C
@@ -3643,7 +3645,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, D
@@ -3652,7 +3654,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, E
@@ -3661,7 +3663,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, H
@@ -3670,7 +3672,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, L
@@ -3679,7 +3681,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 2, (HL)
@@ -3689,7 +3691,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 2, A
@@ -3698,7 +3700,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, B
@@ -3707,7 +3709,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, C
@@ -3716,7 +3718,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, D
@@ -3725,7 +3727,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, E
@@ -3734,7 +3736,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, H
@@ -3743,7 +3745,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, L
@@ -3752,7 +3754,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 3, (HL)
@@ -3762,7 +3764,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 3, A
@@ -3771,7 +3773,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, B
@@ -3780,7 +3782,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, C
@@ -3789,7 +3791,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, D
@@ -3798,7 +3800,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, E
@@ -3807,7 +3809,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, H
@@ -3816,7 +3818,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, L
@@ -3825,7 +3827,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 4, (HL)
@@ -3835,7 +3837,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 4, A
@@ -3844,7 +3846,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, B
@@ -3853,7 +3855,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, C
@@ -3862,7 +3864,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, D
@@ -3871,7 +3873,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, E
@@ -3880,7 +3882,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, H
@@ -3889,7 +3891,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, L
@@ -3898,7 +3900,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 5, (HL)
@@ -3908,7 +3910,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 5, A
@@ -3917,7 +3919,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, B
@@ -3926,7 +3928,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, C
@@ -3935,7 +3937,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, D
@@ -3944,7 +3946,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, E
@@ -3953,7 +3955,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, H
@@ -3962,7 +3964,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, L
@@ -3971,7 +3973,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 6, (HL)
@@ -3981,7 +3983,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 6, A
@@ -3990,7 +3992,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, B
@@ -3999,7 +4001,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, C
@@ -4008,7 +4010,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, D
@@ -4017,7 +4019,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, E
@@ -4026,7 +4028,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, H
@@ -4035,7 +4037,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, L
@@ -4044,7 +4046,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //RES 7, (HL)
@@ -4054,7 +4056,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //RES 7, A
@@ -4063,7 +4065,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, B
@@ -4072,7 +4074,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, C
@@ -4081,7 +4083,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, D
@@ -4090,7 +4092,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, E
@@ -4099,7 +4101,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, H
@@ -4108,7 +4110,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, L
@@ -4117,7 +4119,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 0, (HL)
@@ -4127,7 +4129,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 0, A
@@ -4136,7 +4138,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, B
@@ -4145,7 +4147,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, C
@@ -4154,7 +4156,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, D
@@ -4163,7 +4165,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, E
@@ -4172,7 +4174,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, H
@@ -4181,7 +4183,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, L
@@ -4190,7 +4192,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 1, (HL)
@@ -4200,7 +4202,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 1, A
@@ -4209,7 +4211,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, B
@@ -4218,7 +4220,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, C
@@ -4227,7 +4229,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, D
@@ -4236,7 +4238,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, E
@@ -4245,7 +4247,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, H
@@ -4254,7 +4256,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, L
@@ -4263,7 +4265,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 2, (HL)
@@ -4273,7 +4275,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 2, A
@@ -4282,7 +4284,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, B
@@ -4291,7 +4293,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, C
@@ -4300,7 +4302,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, D
@@ -4309,7 +4311,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, E
@@ -4318,7 +4320,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, H
@@ -4327,7 +4329,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, L
@@ -4336,7 +4338,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 3, (HL)
@@ -4346,7 +4348,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 3, A
@@ -4355,7 +4357,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, B
@@ -4364,7 +4366,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, C
@@ -4373,7 +4375,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, D
@@ -4382,7 +4384,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, E
@@ -4391,7 +4393,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, H
@@ -4400,7 +4402,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, L
@@ -4409,7 +4411,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 4, (HL)
@@ -4419,7 +4421,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 4, A
@@ -4428,7 +4430,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, B
@@ -4437,7 +4439,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, C
@@ -4446,7 +4448,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, D
@@ -4455,7 +4457,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, E
@@ -4464,7 +4466,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, H
@@ -4473,7 +4475,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, L
@@ -4482,7 +4484,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 5, (HL)
@@ -4492,7 +4494,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 5, A
@@ -4501,7 +4503,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, B
@@ -4510,7 +4512,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, C
@@ -4519,7 +4521,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, D
@@ -4528,7 +4530,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, E
@@ -4537,7 +4539,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, H
@@ -4546,7 +4548,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, L
@@ -4555,7 +4557,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 6, (HL)
@@ -4565,7 +4567,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 6, A
@@ -4574,7 +4576,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, B
@@ -4583,7 +4585,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, C
@@ -4592,7 +4594,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, D
@@ -4601,7 +4603,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, E
@@ -4610,7 +4612,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, H
@@ -4619,7 +4621,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, L
@@ -4628,7 +4630,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
 
                     //SET 7, (HL)
@@ -4638,7 +4640,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(4);
+                        interconnect.emu_cycles(3);
                     }
 
                     //SET 7, A
@@ -4647,7 +4649,7 @@ impl Cpu {
                         self.pc += 2;
 
                         //Increase Timer
-                        interconnect.emu_cycles(2);
+                        interconnect.emu_cycles(1);
                     }
                 }
             }
