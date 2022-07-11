@@ -1,4 +1,7 @@
 use super::*;
+use crate::Mmu;
+use crate::interconnect::Interconnect;
+
 #[test]
 fn internal() {
     assert_eq!(4, 4);
@@ -7,12 +10,13 @@ fn internal() {
 #[test]
 fn ld_bc_u16() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+
+    let mut interconnect = Interconnect::new();
     cpu.pc = 0;
 
-    mmu.write_mem(0, 0x01);
-    mmu.write_mem(1, 0xFA);
-    mmu.write_mem(2, 0xDC);
+    interconnect.write_mem(0, 0x01);
+    interconnect.write_mem(1, 0xFA);
+    interconnect.write_mem(2, 0xDC);
 
     /*cpu.memory[0] = 0x01;
     cpu.memory[1] = 0xFA;
@@ -20,7 +24,7 @@ fn ld_bc_u16() {
 
     //FADC
 
-    cpu.execute_instruction(&mut mmu);
+    cpu.execute_instruction(&mut interconnect);
 
     assert_eq!(cpu.registers.bc(), 0xDCFA);
 }
@@ -334,15 +338,15 @@ fn sbc_r_borrow_set() {
 fn and_a_hl_test() {
     let mut cpu = Cpu::new();
 
-    let mut mmu = Mmu::new();
+    let mut interconnect = Interconnect::new();
 
     cpu.registers.a = 0xFF;
 
     let addr = cpu.registers.hl();
 
-    mmu.write_mem(addr, 0xA0);
+    interconnect.write_mem(addr, 0xA0);
 
-    and_r_r(&mut cpu, mmu.read_mem(addr));
+    and_r_r(&mut cpu, interconnect.read_mem(addr));
 
     assert_eq!(cpu.registers.a, 0xA0);
 }
@@ -457,7 +461,7 @@ fn load_8bit_test() {
 #[test]
 fn pop_rr_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     cpu.sp = 0x1000;
 
@@ -477,7 +481,7 @@ fn pop_rr_test() {
 #[test]
 fn push_rr_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     cpu.registers.b = 0x22;
     cpu.registers.c = 0x33;
@@ -501,7 +505,7 @@ fn push_rr_test() {
 #[test]
 fn push_af_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     cpu.registers.a = 0x22;
     cpu.registers.f.data = 0x33;
@@ -539,12 +543,13 @@ fn jp_test() {
 #[test]
 fn jp_z_test() {
     let mut cpu: Cpu = Cpu::new();
+    let mut interconnect: Interconnect = Interconnect::new();
 
     let nn: u16 = 0xFF00;
 
     cpu.registers.f.set_zero_flag();
 
-    instructions::jp_z(&mut cpu, nn);
+    instructions::jp_z(&mut cpu, &mut interconnect, nn);
 
     assert_eq!(cpu.pc, nn);
 }
@@ -552,12 +557,13 @@ fn jp_z_test() {
 #[test]
 fn jp_nz_test() {
     let mut cpu: Cpu = Cpu::new();
+    let mut interconnect: Interconnect = Interconnect::new();
 
     let nn: u16 = 0xFF00;
 
     cpu.registers.f.clear_zero_flag();
 
-    instructions::jp_nz(&mut cpu, nn);
+    instructions::jp_nz(&mut cpu,&mut interconnect, nn);
 
     assert_eq!(cpu.pc, nn);
 }
@@ -565,12 +571,12 @@ fn jp_nz_test() {
 #[test]
 fn jp_c_test() {
     let mut cpu: Cpu = Cpu::new();
-
+    let mut interconnect: Interconnect = Interconnect::new();
     let nn: u16 = 0xFF00;
 
     cpu.registers.f.set_carry_flag();
 
-    instructions::jp_c(&mut cpu, nn);
+    instructions::jp_c(&mut cpu, &mut interconnect, nn);
 
     assert_eq!(cpu.pc, nn);
 }
@@ -579,11 +585,12 @@ fn jp_c_test() {
 fn jp_nc_test() {
     let mut cpu: Cpu = Cpu::new();
 
+    let mut interconnect: Interconnect = Interconnect::new();
     let nn: u16 = 0xFF00;
 
     cpu.registers.f.clear_carry_flag();
 
-    instructions::jp_nc(&mut cpu, nn);
+    instructions::jp_nc(&mut cpu, &mut interconnect, nn);
 
     assert_eq!(cpu.pc, nn);
 }
@@ -604,7 +611,7 @@ fn jp_hl_test() {
 #[test]
 fn call_test() {
     let mut cpu: Cpu = Cpu::new();
-    let mut mmu: Mmu = Mmu::new();
+    let mut mmu: Interconnect = Interconnect::new();
 
     cpu.pc = 0x1A47;
     cpu.sp = 0x3002;
@@ -632,7 +639,7 @@ fn call_test() {
 #[test]
 fn call_z_test() {
     let mut cpu: Cpu = Cpu::new();
-    let mut mmu: Mmu = Mmu::new();
+    let mut mmu: Interconnect = Interconnect::new();
 
     cpu.pc = 0x1A47;
     cpu.sp = 0x3002;
@@ -662,7 +669,7 @@ fn call_z_test() {
 #[test]
 fn call_nz_test() {
     let mut cpu: Cpu = Cpu::new();
-    let mut mmu: Mmu = Mmu::new();
+    let mut mmu: Interconnect = Interconnect::new();
 
     cpu.pc = 0x1A47;
     cpu.sp = 0x3002;
@@ -691,7 +698,7 @@ fn call_nz_test() {
 #[test]
 fn ret_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     cpu.pc = 0x3535;
     cpu.sp = 0x2000;
@@ -708,16 +715,16 @@ fn ret_test() {
 #[test]
 fn ret_z_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut interconnect = Interconnect::new();
 
     cpu.registers.f.set_zero_flag();
 
     cpu.pc = 0x3535;
     cpu.sp = 0x2000;
-    mmu.write_mem(cpu.sp, 0xB5);
-    mmu.write_mem(cpu.sp + 1, 0x18);
+    interconnect.write_mem(cpu.sp, 0xB5);
+    interconnect.write_mem(cpu.sp + 1, 0x18);
 
-    instructions::ret_z(&mut cpu, &mmu);
+    instructions::ret_z(&mut cpu, &mut interconnect);
 
     let check: Vec<u16> = vec![0x2002, 0x18B5];
 
@@ -727,16 +734,16 @@ fn ret_z_test() {
 #[test]
 fn ret_nz_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut interconnect = Interconnect::new();
 
     cpu.registers.f.clear_zero_flag();
 
     cpu.pc = 0x3535;
     cpu.sp = 0x2000;
-    mmu.write_mem(cpu.sp, 0xB5);
-    mmu.write_mem(cpu.sp + 1, 0x18);
+    interconnect.write_mem(cpu.sp, 0xB5);
+    interconnect.write_mem(cpu.sp + 1, 0x18);
 
-    instructions::ret_nz(&mut cpu, &mmu);
+    instructions::ret_nz(&mut cpu, &mut interconnect);
 
     let check: Vec<u16> = vec![0x2002, 0x18B5];
 
@@ -816,7 +823,7 @@ fn rlc_r_test() {
 #[test]
 fn rlc_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
 
@@ -868,7 +875,7 @@ fn rrc_test() {
 fn rrc_hl_test() {
     let mut cpu = Cpu::new();
 
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr: u16 = 0xFFF;
     let value: u8 = 0x31;
@@ -895,7 +902,7 @@ fn rl_test() {
 #[test]
 fn rl_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
     let value = 0x8F;
@@ -925,7 +932,7 @@ fn rr_test() {
 #[test]
 fn rr_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
     let value = 0xDD;
@@ -954,7 +961,7 @@ fn sla_test() {
 #[test]
 fn sla_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
     let value = 0xB1;
@@ -982,7 +989,7 @@ fn sra_test() {
 #[test]
 fn sra_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
     let value = 0xB8;
@@ -1008,7 +1015,7 @@ fn swap_test() {
 #[test]
 fn swap_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFF;
     let value = 0xBC;
@@ -1036,7 +1043,7 @@ fn srl_test() {
 #[test]
 fn srl_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
     let value = 0x8F;
@@ -1066,7 +1073,7 @@ fn bit_n_r_test() {
 #[test]
 fn bit_n_hl_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
 
@@ -1092,7 +1099,7 @@ fn res_n_r_test() {
 
 #[test]
 fn res_n_hl_test() {
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr: u16 = 0xFFF;
 
@@ -1117,7 +1124,7 @@ fn set_n_r_test() {
 #[test]
 
 fn set_n_hl_test() {
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let addr: u16 = 0xFFF;
 
@@ -1135,7 +1142,7 @@ fn set_n_hl_test() {
 #[test]
 fn ld_a_from_io_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let offset: u8 = 0x02;
     let value = 0xAB;
@@ -1149,7 +1156,7 @@ fn ld_a_from_io_test() {
 #[test]
 fn ld_a_from_io_c_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let value = 0xAB;
 
@@ -1163,7 +1170,7 @@ fn ld_a_from_io_c_test() {
 #[test]
 fn ld_io_from_a_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     let offset = 0x02;
 
@@ -1177,7 +1184,7 @@ fn ld_io_from_a_test() {
 #[test]
 fn ld_io_c_from_a_test() {
     let mut cpu = Cpu::new();
-    let mut mmu = Mmu::new();
+    let mut mmu = Interconnect::new();
 
     cpu.registers.a = 0x81;
 
