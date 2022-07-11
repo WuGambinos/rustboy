@@ -42,8 +42,11 @@ pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
 
 ///Increment vlaue in memory using HL pointer
 pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
+    let hl = cpu.registers.hl();
+
     //Grab value in memory
-    let mut value = interconnect.read_mem(cpu.registers.hl());
+    let mut value = interconnect.read_mem(hl);
+    interconnect.emu_cycles(1);
 
     //Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(value, 1);
@@ -53,6 +56,7 @@ pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 
     //Write new incremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
+    interconnect.emu_cycles(1);
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
@@ -65,6 +69,7 @@ pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     //Grab value in memory
     let mut value: u8 = interconnect.read_mem(cpu.registers.hl());
+    interconnect.emu_cycles(1);
 
     //Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(value, 1);
@@ -74,6 +79,7 @@ pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 
     //Write new decremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
+    interconnect.emu_cycles(1);
 
     //Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
@@ -484,7 +490,7 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
 pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     //Value in memory at addr
     let mut value = interconnect.read_mem(addr);
-
+    interconnect.emu_cycles(1);
     //Conent of 7th bit
     let lmb: u8 = (value & 0x80) >> 7;
 
@@ -512,6 +518,7 @@ pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value into memroy
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /// Rotate Register Right
@@ -557,6 +564,7 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
 /// Contents of Bit 0 are copied to Carry Flag and also to bit 7.
 pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //Content of 0th bit
     let rmb: u8 = value & 0x01;
@@ -583,6 +591,7 @@ pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value into memory
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /// Rotate Left
@@ -628,6 +637,7 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
 /// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
 pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     let lmb: u8 = (value & 0x80) >> 7;
 
@@ -654,6 +664,7 @@ pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value into memory
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /// Rotate Right
@@ -693,6 +704,7 @@ pub fn rr(f: &mut Flags, r: &mut u8) {
 
 pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     let rmb: u8 = value & 0x01;
 
@@ -719,6 +731,7 @@ pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value to memory
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /// Shift Left Arithmetic
@@ -760,6 +773,7 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
 /// Contents of bit 7 are copied ot carry flag
 pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //7th bit
     let lmb: u8 = (value & 0x80) >> 7;
@@ -784,6 +798,7 @@ pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value into memory
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 ///Shift Right Arithmetic
@@ -823,6 +838,7 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
 //Shift Right Arithmetic
 pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //7th bit
     let lmb: u8 = value & 0x80;
@@ -852,6 +868,7 @@ pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     f.clear_half_carry_flag();
 
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 ///Swap r
@@ -884,6 +901,7 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
 /// Exchange lower and higher nibbles
 pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //Lower Nibble
     let low: u8 = value & 0x0F;
@@ -903,6 +921,7 @@ pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     f.clear_half_carry_flag();
 
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /// Shift Right Logical
@@ -946,6 +965,7 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
 /// 7th bit is cleared
 pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //0th bit
     let rmb: u8 = value & 0x01;
@@ -971,6 +991,7 @@ pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     //Write new value to memory
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 /************************************************************************
  * 16-bit Arithmetic instructions
@@ -1504,11 +1525,13 @@ pub fn set_n_r(r: &mut u8, n: u8) {
 
 pub fn set_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //Set the nth bit
     value |= 1 << n;
 
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 ///
@@ -1524,11 +1547,13 @@ pub fn res_n_r(r: &mut u8, n: u8) {
 
 pub fn res_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_cycles(1);
 
     //Clear the nth bit
     value &= !(1 << n);
 
     interconnect.write_mem(addr, value);
+    interconnect.emu_cycles(1);
 }
 
 /************************************************************************
