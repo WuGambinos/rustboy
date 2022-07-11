@@ -3,7 +3,7 @@ pub use cpu::Cpu;
 
 mod gameboy;
 pub mod mmu;
-
+pub mod ppu;
 pub mod interconnect;
 
 use gameboy::GameBoy;
