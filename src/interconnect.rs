@@ -2,6 +2,9 @@ use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
 use crate::{Mmu, Timer};
 
+/// Struct used to link CPU to other components of system
+///
+/// Contains MMU and Timer (so far)
 #[derive(Debug)]
 pub struct Interconnect {
     pub mmu: Mmu,
@@ -9,6 +12,7 @@ pub struct Interconnect {
 }
 
 impl Interconnect {
+    /// Constructor
     pub fn new() -> Self {
         Self {
             mmu: Mmu::new(),
@@ -16,6 +20,7 @@ impl Interconnect {
         }
     }
 
+    /// Prints the state of the Timer
     pub fn print_timer(&self) {
         println!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
@@ -23,6 +28,7 @@ impl Interconnect {
         );
     }
 
+    /// Write u8 to memory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_write(addr, value);
@@ -31,6 +37,7 @@ impl Interconnect {
         }
     }
 
+    /// Read u8 value from memory
     pub fn read_mem(&self, addr: u16) -> u8 {
         if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_read(addr)
@@ -39,15 +46,19 @@ impl Interconnect {
         }
     }
 
+    /// Read gameboy rom and write it into memory
     pub fn read_rom(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
     }
 
+    /// Tick Timer
     pub fn emu_cycles(&mut self, cyc: u32) {
-
+        // Convert M cycles to T cycles
         let cycles = cyc * 4;
+
+        // Increase Div
         self.timer.div = self
             .timer
             .div
@@ -60,6 +71,8 @@ impl Interconnect {
 
                 if self.timer.tima == 0x00 {
                     self.timer.tima = self.timer.tma;
+
+                    // Trigger Interrupt
                     interrupt_request(self, InterruptType::Timer);
                 }
             }
