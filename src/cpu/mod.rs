@@ -1,11 +1,10 @@
-pub mod instructions;
+mod instructions;
 pub mod interrupts;
-use crate::interconnect::Interconnect;
 
-use self::instructions::*;
+use crate::interconnect::Interconnect;
+use crate::cpu::instructions::*;
 
 ///Struct that represents flags of the Gameboy CPU
-
 #[derive(Debug)]
 pub struct Flags {
     pub data: u8,
@@ -930,7 +929,7 @@ impl Cpu {
                 inc_mem(self, interconnect);
 
                 self.pc += 1;
-                
+
                 //Increase Timer
                 interconnect.emu_cycles(1);
             }

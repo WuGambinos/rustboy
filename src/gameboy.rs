@@ -1,5 +1,6 @@
-use crate::interconnect::Interconnect;
 use crate::Cpu;
+use crate::interconnect::Interconnect;
+
 pub struct GameBoy {
     pub cpu: Cpu,
     pub interconnect: Interconnect,

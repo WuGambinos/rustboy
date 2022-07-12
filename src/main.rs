@@ -1,15 +1,16 @@
-pub mod cpu;
-pub use cpu::Cpu;
-
+mod cpu;
 mod gameboy;
-pub mod mmu;
-pub mod ppu;
-pub mod interconnect;
+mod interconnect;
+mod mmu;
+mod ppu;
 
+pub use cpu::Cpu;
+pub use mmu::Mmu;
+
+use cpu::timer::Timer;
 use gameboy::GameBoy;
-pub use mmu::*;
 
-use crate::cpu::timer::Timer;
+use raylib::prelude::*;
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -21,9 +22,6 @@ fn main() {
     //Command Line Arguments
     let args: Vec<String> = env::args().collect();
     let test_rom = args[1].as_str();
-    //let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
-    //let test_rom = "roms/blaargs/instr_timing/instr_timing.gb";
-    //let test_rom3 = "roms/mooneye_tests/acceptance/timer/div_write.gb";
 
     //Path to rom
     let rom_path: &Path = Path::new(test_rom);
@@ -39,8 +37,16 @@ fn main() {
 
     game_boy.cpu.pc = 0x100;
 
-    let end = 10;
     loop {
+        let (mut rl, thread) = raylib::init().size(640, 480).title("Rustboy").build();
+
+        while !rl.window_should_close() {
+            let mut d = rl.begin_drawing(&thread);
+
+            d.clear_background(Color::WHITE);
+            d.draw_text("Hello World", 12, 12, 20, Color::BLACK);
+        }
+        /*
         if !game_boy.cpu.halted {
             game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
             if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
@@ -56,7 +62,7 @@ fn main() {
             if IF != 0 {
                 game_boy.cpu.halted = false;
             }
-        }
+        }*/
     }
 }
 

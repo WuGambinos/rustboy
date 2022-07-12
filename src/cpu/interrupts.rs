@@ -1,4 +1,4 @@
-use crate::interconnect::Interconnect;
+use super::Interconnect;
 
 pub enum InterruptType {
     VBlank,
