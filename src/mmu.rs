@@ -1,3 +1,4 @@
+/// Memory Mapped Unit
 #[derive(Debug)]
 pub struct Mmu {
     pub memory: [u8; 0x10000],
@@ -33,6 +34,8 @@ impl Default for Mmu {
 }
 
 impl Mmu {
+
+    /// Constructor
     pub fn new() -> Self {
         Mmu {
             memory: [0; 0x10000],
