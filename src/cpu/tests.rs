@@ -1,5 +1,4 @@
 use super::*;
-use crate::Mmu;
 use crate::interconnect::Interconnect;
 
 #[test]
