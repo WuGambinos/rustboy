@@ -19,25 +19,28 @@ use std::path::Path;
 extern crate text_io;
 
 fn main() {
-    //Command Line Arguments
+    // Command Line Arguments
     let args: Vec<String> = env::args().collect();
     let test_rom = args[1].as_str();
 
-    //Path to rom
+    // Path to rom
     let rom_path: &Path = Path::new(test_rom);
 
-    //Contents of rom
+    // Contents of rom
     let rom: Vec<u8> = read_file(rom_path).unwrap();
 
-    //GameBoy
+    // GameBoy
     let mut game_boy: GameBoy = GameBoy::new();
 
-    //Read Rom into memory
+    // Read Rom into memory
     game_boy.interconnect.read_rom(&rom);
 
+    // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x100;
 
     loop {
+
+        // Setup Raylib Window
         let (mut rl, thread) = raylib::init().size(640, 480).title("Rustboy").build();
 
         while !rl.window_should_close() {
