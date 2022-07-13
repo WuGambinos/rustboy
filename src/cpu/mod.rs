@@ -845,6 +845,8 @@ impl Cpu {
 
                 // H = u8
                 self.registers.h = u8_value;
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -854,6 +856,8 @@ impl Cpu {
             // DAA
             0x27 => {
                 daa(self);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -870,6 +874,8 @@ impl Cpu {
             0x29 => {
                 // HL = HL + HL
                 add_rr_hl(self, "HL");
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -883,6 +889,8 @@ impl Cpu {
 
                 // HL++
                 self.registers.set_hl(self.registers.hl().wrapping_add(1));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -893,6 +901,8 @@ impl Cpu {
             0x2B => {
                 // HL--
                 dec_16bit(self, "HL");
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -903,6 +913,8 @@ impl Cpu {
             0x2C => {
                 // L++
                 inc_8bit(&mut self.registers.f, &mut self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -913,6 +925,8 @@ impl Cpu {
             0x2D => {
                 // L--
                 dec_8bit(&mut self.registers.f, &mut self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -924,6 +938,8 @@ impl Cpu {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 // L = u8
                 self.registers.l = u8_value;
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -936,6 +952,8 @@ impl Cpu {
                 self.registers.a ^= 0xFF;
                 self.registers.f.set_sub_flag();
                 self.registers.f.set_half_carry_flag();
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -953,6 +971,8 @@ impl Cpu {
                 let u16_value = self.get_u16(interconnect);
                 // SP = u16
                 self.sp = u16_value;
+
+                // Increase Program Counter
                 self.pc += 3;
 
                 // Increase Timer
@@ -967,6 +987,7 @@ impl Cpu {
                 // HL--
                 self.registers.set_hl(self.registers.hl().wrapping_sub(1));
 
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -977,6 +998,8 @@ impl Cpu {
             0x33 => {
                 // SP++
                 inc_16bit(self, "SP");
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -988,6 +1011,7 @@ impl Cpu {
                 // memory[HL]++
                 inc_mem(self, interconnect);
 
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -998,6 +1022,8 @@ impl Cpu {
             0x35 => {
                 // memory[HL]--
                 dec_mem(self, interconnect);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1017,6 +1043,7 @@ impl Cpu {
                 // Increase Timer
                 interconnect.emu_cycles(2);
 
+                // Increase Program Counter
                 self.pc += 2;
             }
 
@@ -1025,6 +1052,8 @@ impl Cpu {
                 self.registers.f.set_carry_flag();
                 self.registers.f.clear_sub_flag();
                 self.registers.f.clear_half_carry_flag();
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1041,6 +1070,8 @@ impl Cpu {
             0x39 => {
                 // HL = HL + SP
                 add_rr_hl(self, "SP");
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1058,6 +1089,7 @@ impl Cpu {
                 // HL--
                 self.registers.set_hl(self.registers.hl().wrapping_sub(1));
 
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1068,6 +1100,8 @@ impl Cpu {
             0x3B => {
                 // SP--
                 dec_16bit(self, "SP");
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1078,6 +1112,8 @@ impl Cpu {
             0x3C => {
                 // A++
                 inc_8bit(&mut self.registers.f, &mut self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1088,6 +1124,8 @@ impl Cpu {
             0x3D => {
                 // A--
                 dec_8bit(&mut self.registers.f, &mut self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1099,6 +1137,8 @@ impl Cpu {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 // A = u8
                 self.registers.a = u8_value;
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -1115,6 +1155,8 @@ impl Cpu {
                 }
                 self.registers.f.clear_half_carry_flag();
                 self.registers.f.clear_sub_flag();
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1123,6 +1165,7 @@ impl Cpu {
 
             // LD B, B
             0x40 => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1131,7 +1174,10 @@ impl Cpu {
 
             // LD B, C
             0x41 => {
+                // B = C
                 ld_8bit(&mut self.registers.b, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1140,7 +1186,10 @@ impl Cpu {
 
             // LD B, D
             0x42 => {
+                // B = D
                 ld_8bit(&mut self.registers.b, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1149,7 +1198,10 @@ impl Cpu {
 
             // LD B, E
             0x43 => {
+                // B = E
                 ld_8bit(&mut self.registers.b, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1158,7 +1210,10 @@ impl Cpu {
 
             // LD B, H
             0x44 => {
+                // B = H
                 ld_8bit(&mut self.registers.b, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1167,7 +1222,10 @@ impl Cpu {
 
             // LD B, L
             0x45 => {
+                // B = L
                 ld_8bit(&mut self.registers.b, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1177,7 +1235,10 @@ impl Cpu {
             // LD B, (HL)
             0x46 => {
                 let addr: u16 = self.registers.hl();
+                // B = mem[HL]
                 ld_8bit(&mut self.registers.b, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1186,7 +1247,10 @@ impl Cpu {
 
             // LD B, A
             0x47 => {
+                // B = A
                 ld_8bit(&mut self.registers.b, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1195,7 +1259,10 @@ impl Cpu {
 
             // LD C, B
             0x48 => {
+                // C = B
                 ld_8bit(&mut self.registers.c, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1204,6 +1271,7 @@ impl Cpu {
 
             // LD C, C
             0x49 => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1212,7 +1280,10 @@ impl Cpu {
 
             // LD C, D
             0x4A => {
+                // C = D
                 ld_8bit(&mut self.registers.c, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1221,7 +1292,10 @@ impl Cpu {
 
             // LD C, E
             0x4B => {
+                // C = E
                 ld_8bit(&mut self.registers.c, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1230,7 +1304,10 @@ impl Cpu {
 
             // LD C, H
             0x4C => {
+                // C = H
                 ld_8bit(&mut self.registers.c, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1239,7 +1316,10 @@ impl Cpu {
 
             // LD C, L
             0x4D => {
+                // C = L
                 ld_8bit(&mut self.registers.c, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1249,7 +1329,10 @@ impl Cpu {
             // LD C, (HL)
             0x4E => {
                 let addr: u16 = self.registers.hl();
+                // C = mem[HL]
                 ld_8bit(&mut self.registers.c, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1258,7 +1341,10 @@ impl Cpu {
 
             // LD C, A
             0x4F => {
+                // C = A
                 ld_8bit(&mut self.registers.c, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1267,7 +1353,10 @@ impl Cpu {
 
             // LD D, B
             0x50 => {
+                // D = B
                 ld_8bit(&mut self.registers.d, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1276,7 +1365,10 @@ impl Cpu {
 
             // LD D, C
             0x51 => {
+                // D = C
                 ld_8bit(&mut self.registers.d, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1285,6 +1377,7 @@ impl Cpu {
 
             // LD D, D
             0x52 => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1293,7 +1386,10 @@ impl Cpu {
 
             // LD D, E
             0x53 => {
+                // D = E
                 ld_8bit(&mut self.registers.d, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1302,7 +1398,10 @@ impl Cpu {
 
             // LD D, H
             0x54 => {
+                // D = H
                 ld_8bit(&mut self.registers.d, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1311,7 +1410,10 @@ impl Cpu {
 
             // LD D, L
             0x55 => {
+                // D = L
                 ld_8bit(&mut self.registers.d, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1321,7 +1423,10 @@ impl Cpu {
             // LD D, (HL)
             0x56 => {
                 let addr: u16 = self.registers.hl();
+                // D = mem[HL]
                 ld_8bit(&mut self.registers.d, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1330,7 +1435,10 @@ impl Cpu {
 
             // LD D, A
             0x57 => {
+                // D = A
                 ld_8bit(&mut self.registers.d, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1339,7 +1447,10 @@ impl Cpu {
 
             // LD E, B
             0x58 => {
+                // E = B
                 ld_8bit(&mut self.registers.e, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1348,7 +1459,10 @@ impl Cpu {
 
             // LD E, C
             0x59 => {
+                // E = C
                 ld_8bit(&mut self.registers.e, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1357,7 +1471,10 @@ impl Cpu {
 
             // LD E, D
             0x5A => {
+                // E = D
                 ld_8bit(&mut self.registers.e, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1366,6 +1483,7 @@ impl Cpu {
 
             // LD E, E
             0x5B => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1374,7 +1492,10 @@ impl Cpu {
 
             // LD E, H
             0x5C => {
+                // E = H
                 ld_8bit(&mut self.registers.e, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1383,7 +1504,10 @@ impl Cpu {
 
             // LD E, L
             0x5D => {
+                // E = L
                 ld_8bit(&mut self.registers.e, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1393,7 +1517,10 @@ impl Cpu {
             // LD E, (HL)
             0x5E => {
                 let addr: u16 = self.registers.hl();
+                // E = mem[HL]
                 ld_8bit(&mut self.registers.e, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1402,7 +1529,10 @@ impl Cpu {
 
             // LD E, A
             0x5F => {
+                // E = A
                 ld_8bit(&mut self.registers.e, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1411,7 +1541,10 @@ impl Cpu {
 
             // LD H, B
             0x60 => {
+                // H = B
                 ld_8bit(&mut self.registers.h, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1420,7 +1553,10 @@ impl Cpu {
 
             // LD H, C
             0x61 => {
+                // H = C
                 ld_8bit(&mut self.registers.h, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1429,7 +1565,10 @@ impl Cpu {
 
             // LD H, D
             0x62 => {
+                // H = D
                 ld_8bit(&mut self.registers.h, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1438,7 +1577,10 @@ impl Cpu {
 
             // LD H, E
             0x63 => {
+                // H = E
                 ld_8bit(&mut self.registers.h, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1447,6 +1589,7 @@ impl Cpu {
 
             // LD H, H
             0x64 => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1455,7 +1598,10 @@ impl Cpu {
 
             // LD H, L
             0x65 => {
+                // H = L
                 ld_8bit(&mut self.registers.h, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1465,7 +1611,10 @@ impl Cpu {
             // LD H, (HL)
             0x66 => {
                 let addr: u16 = self.registers.hl();
+                // H = mem[HL]
                 ld_8bit(&mut self.registers.h, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1474,7 +1623,10 @@ impl Cpu {
 
             // LD H, A
             0x67 => {
+                // H = A
                 ld_8bit(&mut self.registers.h, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1483,7 +1635,10 @@ impl Cpu {
 
             // LD L, B
             0x68 => {
+                // L = B
                 ld_8bit(&mut self.registers.l, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1492,7 +1647,10 @@ impl Cpu {
 
             // LD L, C
             0x69 => {
+                // L = C
                 ld_8bit(&mut self.registers.l, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1501,7 +1659,10 @@ impl Cpu {
 
             // LD L, D
             0x6A => {
+                // L = D
                 ld_8bit(&mut self.registers.l, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1510,7 +1671,10 @@ impl Cpu {
 
             // LD L, E
             0x6B => {
+                // L = E
                 ld_8bit(&mut self.registers.l, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1519,7 +1683,10 @@ impl Cpu {
 
             // LD L, H
             0x6C => {
+                // L = H
                 ld_8bit(&mut self.registers.l, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1528,6 +1695,7 @@ impl Cpu {
 
             // LD L, L
             0x6D => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1537,7 +1705,10 @@ impl Cpu {
             // LD L, (HL)
             0x6E => {
                 let addr: u16 = self.registers.hl();
+                // L = mem[HL]
                 ld_8bit(&mut self.registers.l, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1546,7 +1717,10 @@ impl Cpu {
 
             // LD L, A
             0x6F => {
+                // L = A
                 ld_8bit(&mut self.registers.l, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1555,7 +1729,10 @@ impl Cpu {
 
             // LD (HL), B
             0x70 => {
+                // mem[HL] = B
                 interconnect.write_mem(self.registers.hl(), self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1564,7 +1741,10 @@ impl Cpu {
 
             // LD (HL), C
             0x71 => {
+                // mem[HL] = C
                 interconnect.write_mem(self.registers.hl(), self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1573,7 +1753,10 @@ impl Cpu {
 
             // LD (HL), D
             0x72 => {
+                // mem[HL] = D
                 interconnect.write_mem(self.registers.hl(), self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1582,7 +1765,10 @@ impl Cpu {
 
             // LD (HL), E
             0x73 => {
+                // mem[HL] = E
                 interconnect.write_mem(self.registers.hl(), self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1591,7 +1777,10 @@ impl Cpu {
 
             // LD (HL), H
             0x74 => {
+                // mem[HL] = H
                 interconnect.write_mem(self.registers.hl(), self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1600,24 +1789,33 @@ impl Cpu {
 
             // LD (HL), L
             0x75 => {
+                // mem[HL] = L
                 interconnect.write_mem(self.registers.hl(), self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
                 interconnect.emu_cycles(2);
             }
 
-            // HALT (NEED TO FINISH)
+            // HALT
             0x76 => {
                 self.halted = true;
+
+                // Increase Program Counter
+                self.pc += 1;
+
                 // Increase Timer
                 interconnect.emu_cycles(1);
-                self.pc += 1;
             }
 
             // LD (HL), A
             0x77 => {
+                // mem[HL] = A
                 interconnect.write_mem(self.registers.hl(), self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1626,7 +1824,10 @@ impl Cpu {
 
             // LD A, B
             0x78 => {
+                // A = B
                 ld_8bit(&mut self.registers.a, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1635,7 +1836,10 @@ impl Cpu {
 
             // LD A, C
             0x79 => {
+                // A = C
                 ld_8bit(&mut self.registers.a, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1644,7 +1848,10 @@ impl Cpu {
 
             // LD A, D
             0x7A => {
+                // A = D
                 ld_8bit(&mut self.registers.a, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1653,7 +1860,10 @@ impl Cpu {
 
             // LD A, E
             0x7B => {
+                // A = E
                 ld_8bit(&mut self.registers.a, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1662,7 +1872,10 @@ impl Cpu {
 
             // LD A, H
             0x7C => {
+                // A = H
                 ld_8bit(&mut self.registers.a, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1671,7 +1884,10 @@ impl Cpu {
 
             // LD A, L
             0x7D => {
+                // A = L
                 ld_8bit(&mut self.registers.a, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1681,7 +1897,10 @@ impl Cpu {
             // LD A, (HL)
             0x7E => {
                 let addr: u16 = self.registers.hl();
+                // A = mem[HL]
                 ld_8bit(&mut self.registers.a, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1690,6 +1909,7 @@ impl Cpu {
 
             // LD A, A
             0x7F => {
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1699,6 +1919,8 @@ impl Cpu {
             // ADD A, B
             0x80 => {
                 add_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1708,6 +1930,8 @@ impl Cpu {
             // ADD A, C
             0x81 => {
                 add_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1717,6 +1941,8 @@ impl Cpu {
             // ADD A, D
             0x82 => {
                 add_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1726,6 +1952,8 @@ impl Cpu {
             // ADD A, E
             0x83 => {
                 add_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1735,6 +1963,8 @@ impl Cpu {
             // ADD A, H
             0x84 => {
                 add_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1744,6 +1974,8 @@ impl Cpu {
             // ADD A, L
             0x85 => {
                 add_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1754,6 +1986,8 @@ impl Cpu {
             0x86 => {
                 let addr: u16 = self.registers.hl();
                 add_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1763,6 +1997,8 @@ impl Cpu {
             // ADD A, A
             0x87 => {
                 add_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1772,6 +2008,8 @@ impl Cpu {
             // ADC A, B
             0x88 => {
                 adc_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1781,6 +2019,8 @@ impl Cpu {
             // ADC A, C
             0x89 => {
                 adc_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1790,6 +2030,8 @@ impl Cpu {
             // ADC A, D
             0x8A => {
                 adc_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1799,6 +2041,8 @@ impl Cpu {
             // ADC A, E
             0x8B => {
                 adc_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1808,6 +2052,8 @@ impl Cpu {
             // ADC A, H
             0x8C => {
                 adc_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1817,6 +2063,8 @@ impl Cpu {
             // ADC A, L
             0x8D => {
                 adc_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1827,6 +2075,8 @@ impl Cpu {
             0x8E => {
                 let addr: u16 = self.registers.hl();
                 adc_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1836,6 +2086,8 @@ impl Cpu {
             // ADC A, A
             0x8F => {
                 adc_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1845,6 +2097,8 @@ impl Cpu {
             // SUB A, B
             0x90 => {
                 sub_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1854,6 +2108,8 @@ impl Cpu {
             // SUB A, C
             0x91 => {
                 sub_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1863,6 +2119,8 @@ impl Cpu {
             // SUB A, D
             0x92 => {
                 sub_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1872,6 +2130,8 @@ impl Cpu {
             // SUB A, E
             0x93 => {
                 sub_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1881,6 +2141,8 @@ impl Cpu {
             // SUB A, H
             0x94 => {
                 sub_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1890,6 +2152,8 @@ impl Cpu {
             // SUB A, L
             0x95 => {
                 sub_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1900,6 +2164,8 @@ impl Cpu {
             0x96 => {
                 let addr: u16 = self.registers.hl();
                 sub_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1909,6 +2175,8 @@ impl Cpu {
             // SUB  A, A
             0x97 => {
                 sub_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1918,6 +2186,8 @@ impl Cpu {
             // SBC A, B
             0x98 => {
                 sbc_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1927,6 +2197,8 @@ impl Cpu {
             // SBC A, C
             0x99 => {
                 sbc_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1936,6 +2208,8 @@ impl Cpu {
             // SBC A, D
             0x9A => {
                 sbc_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1945,6 +2219,8 @@ impl Cpu {
             // SBC A, E
             0x9B => {
                 sbc_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1954,6 +2230,8 @@ impl Cpu {
             // SBC A, H
             0x9C => {
                 sbc_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1963,6 +2241,8 @@ impl Cpu {
             // SBC A, L
             0x9D => {
                 sbc_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1973,6 +2253,8 @@ impl Cpu {
             0x9E => {
                 let addr: u16 = self.registers.hl();
                 sbc_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1982,6 +2264,8 @@ impl Cpu {
             // SBC A, A
             0x9F => {
                 sbc_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -1991,6 +2275,8 @@ impl Cpu {
             // AND A, B
             0xA0 => {
                 and_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2000,6 +2286,8 @@ impl Cpu {
             // AND A, C
             0xA1 => {
                 and_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2009,6 +2297,8 @@ impl Cpu {
             // AND A, D
             0xA2 => {
                 and_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2018,6 +2308,8 @@ impl Cpu {
             // AND A, E
             0xA3 => {
                 and_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2027,6 +2319,8 @@ impl Cpu {
             // AND A, H
             0xA4 => {
                 and_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2036,6 +2330,8 @@ impl Cpu {
             // AND A, L
             0xA5 => {
                 and_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2046,6 +2342,8 @@ impl Cpu {
             0xA6 => {
                 let addr: u16 = self.registers.hl();
                 and_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2055,6 +2353,8 @@ impl Cpu {
             // AND A, A
             0xA7 => {
                 and_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc = self.pc.wrapping_add(1);
 
                 // Increase Timer
@@ -2064,6 +2364,8 @@ impl Cpu {
             // XOR A, B
             0xA8 => {
                 xor_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2073,6 +2375,8 @@ impl Cpu {
             // XOR A, C
             0xA9 => {
                 xor_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2082,6 +2386,8 @@ impl Cpu {
             // XOR A, D
             0xAA => {
                 xor_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2091,6 +2397,8 @@ impl Cpu {
             // XOR A, E
             0xAB => {
                 xor_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2100,6 +2408,8 @@ impl Cpu {
             // XOR A, H
             0xAC => {
                 xor_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2109,6 +2419,8 @@ impl Cpu {
             // XOR A, L
             0xAD => {
                 xor_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2119,6 +2431,8 @@ impl Cpu {
             0xAE => {
                 let addr: u16 = self.registers.hl();
                 xor_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2128,6 +2442,8 @@ impl Cpu {
             // XOR A, A
             0xAF => {
                 xor_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2137,6 +2453,8 @@ impl Cpu {
             // OR A, B
             0xB0 => {
                 or_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2146,6 +2464,8 @@ impl Cpu {
             // OR A, C
             0xB1 => {
                 or_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2155,6 +2475,8 @@ impl Cpu {
             // OR A, D
             0xB2 => {
                 or_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2164,6 +2486,8 @@ impl Cpu {
             // OR A, E
             0xB3 => {
                 or_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2173,6 +2497,8 @@ impl Cpu {
             // OR A, H
             0xB4 => {
                 or_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2182,6 +2508,8 @@ impl Cpu {
             // OR A, L
             0xB5 => {
                 or_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2192,6 +2520,8 @@ impl Cpu {
             0xB6 => {
                 let addr: u16 = self.registers.hl();
                 or_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2201,6 +2531,8 @@ impl Cpu {
             // OR A, A
             0xB7 => {
                 or_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2210,6 +2542,8 @@ impl Cpu {
             // CP A, B
             0xB8 => {
                 cp_a_r(self, self.registers.b);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2219,6 +2553,8 @@ impl Cpu {
             // CP A, C
             0xB9 => {
                 cp_a_r(self, self.registers.c);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2228,6 +2564,8 @@ impl Cpu {
             // CP A, D
             0xBA => {
                 cp_a_r(self, self.registers.d);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2237,6 +2575,8 @@ impl Cpu {
             // CP A, E
             0xBB => {
                 cp_a_r(self, self.registers.e);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2246,6 +2586,8 @@ impl Cpu {
             // CP A, H
             0xBC => {
                 cp_a_r(self, self.registers.h);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2255,6 +2597,8 @@ impl Cpu {
             // CP A, L
             0xBD => {
                 cp_a_r(self, self.registers.l);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2265,6 +2609,8 @@ impl Cpu {
             0xBE => {
                 let addr: u16 = self.registers.hl();
                 cp_a_r(self, interconnect.read_mem(addr));
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2274,6 +2620,8 @@ impl Cpu {
             // CP A, A
             0xBF => {
                 cp_a_r(self, self.registers.a);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2293,6 +2641,8 @@ impl Cpu {
                     &mut self.registers.c,
                     &mut self.sp,
                 );
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2328,6 +2678,8 @@ impl Cpu {
                     self.registers.c,
                     &mut self.sp,
                 );
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -2339,6 +2691,8 @@ impl Cpu {
                 let addr = self.pc + 1;
                 let u8_value = interconnect.read_mem(addr);
                 add_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -2383,6 +2737,8 @@ impl Cpu {
                     // RLC B
                     0x00 => {
                         rlc(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2392,6 +2748,8 @@ impl Cpu {
                     // RLC C
                     0x01 => {
                         rlc(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2401,6 +2759,8 @@ impl Cpu {
                     // RLC D
                     0x02 => {
                         rlc(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2410,6 +2770,8 @@ impl Cpu {
                     // RLC E
                     0x03 => {
                         rlc(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2419,6 +2781,8 @@ impl Cpu {
                     // RLC H
                     0x04 => {
                         rlc(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2428,6 +2792,8 @@ impl Cpu {
                     // RLC L
                     0x05 => {
                         rlc(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2438,6 +2804,8 @@ impl Cpu {
                     0x06 => {
                         let addr = self.registers.hl();
                         rlc_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2447,6 +2815,8 @@ impl Cpu {
                     // RLC A
                     0x07 => {
                         rlc(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2456,6 +2826,8 @@ impl Cpu {
                     // RRC B
                     0x08 => {
                         rrc(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2465,6 +2837,8 @@ impl Cpu {
                     // RRC C
                     0x09 => {
                         rrc(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2474,6 +2848,8 @@ impl Cpu {
                     // RRC D
                     0x0A => {
                         rrc(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2483,6 +2859,8 @@ impl Cpu {
                     // RRC E
                     0x0B => {
                         rrc(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2492,6 +2870,8 @@ impl Cpu {
                     // RRC H
                     0x0C => {
                         rrc(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2501,6 +2881,8 @@ impl Cpu {
                     // RRC L
                     0x0D => {
                         rrc(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2511,6 +2893,8 @@ impl Cpu {
                     0x0E => {
                         let addr = self.registers.hl();
                         rrc_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2520,6 +2904,8 @@ impl Cpu {
                     // RRC A
                     0x0F => {
                         rrc(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2529,6 +2915,8 @@ impl Cpu {
                     // RL B
                     0x10 => {
                         rl(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2538,6 +2926,8 @@ impl Cpu {
                     // RL C
                     0x11 => {
                         rl(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2547,6 +2937,8 @@ impl Cpu {
                     // RL D
                     0x12 => {
                         rl(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2556,6 +2948,8 @@ impl Cpu {
                     // RL E
                     0x13 => {
                         rl(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2565,6 +2959,8 @@ impl Cpu {
                     // RL H
                     0x14 => {
                         rl(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2574,6 +2970,8 @@ impl Cpu {
                     // RL L
                     0x15 => {
                         rl(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2584,6 +2982,8 @@ impl Cpu {
                     0x16 => {
                         let addr = self.registers.hl();
                         rl_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2593,6 +2993,8 @@ impl Cpu {
                     // RL A
                     0x17 => {
                         rl(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2602,6 +3004,8 @@ impl Cpu {
                     // RR B
                     0x18 => {
                         rr(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2611,6 +3015,8 @@ impl Cpu {
                     // RR C
                     0x19 => {
                         rr(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2620,6 +3026,8 @@ impl Cpu {
                     // RR D
                     0x1A => {
                         rr(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2629,6 +3037,8 @@ impl Cpu {
                     // RR E
                     0x1B => {
                         rr(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2638,6 +3048,8 @@ impl Cpu {
                     // RR H
                     0x1C => {
                         rr(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2647,6 +3059,8 @@ impl Cpu {
                     // RR L
                     0x1D => {
                         rr(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2657,6 +3071,8 @@ impl Cpu {
                     0x1E => {
                         let addr = self.registers.hl();
                         rr_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2666,6 +3082,8 @@ impl Cpu {
                     // RR A
                     0x1F => {
                         rr(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2675,6 +3093,8 @@ impl Cpu {
                     // SLA B
                     0x20 => {
                         sla(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2684,6 +3104,8 @@ impl Cpu {
                     // SLA C
                     0x21 => {
                         sla(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2693,6 +3115,8 @@ impl Cpu {
                     // SLA D
                     0x22 => {
                         sla(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2702,6 +3126,8 @@ impl Cpu {
                     // SLA E
                     0x23 => {
                         sla(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2711,6 +3137,8 @@ impl Cpu {
                     // SLA H
                     0x24 => {
                         sla(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2720,6 +3148,8 @@ impl Cpu {
                     // SLA L
                     0x25 => {
                         sla(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2730,6 +3160,8 @@ impl Cpu {
                     0x26 => {
                         let addr = self.registers.hl();
                         sla_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2739,6 +3171,8 @@ impl Cpu {
                     // SLA A
                     0x27 => {
                         sla(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2748,6 +3182,8 @@ impl Cpu {
                     // SRA B
                     0x28 => {
                         sra(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2757,6 +3193,8 @@ impl Cpu {
                     // SRA C
                     0x29 => {
                         sra(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2766,6 +3204,8 @@ impl Cpu {
                     // SRA D
                     0x2A => {
                         sra(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2775,6 +3215,8 @@ impl Cpu {
                     // SRA E
                     0x2B => {
                         sra(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2784,6 +3226,8 @@ impl Cpu {
                     // SRA H
                     0x2C => {
                         sra(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2793,6 +3237,8 @@ impl Cpu {
                     // SRA L
                     0x2D => {
                         sra(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2803,6 +3249,8 @@ impl Cpu {
                     0x2E => {
                         let addr = self.registers.hl();
                         sra_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2812,6 +3260,8 @@ impl Cpu {
                     // SRA A
                     0x2F => {
                         sra(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2821,6 +3271,8 @@ impl Cpu {
                     // SWAP B
                     0x30 => {
                         swap(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2830,6 +3282,8 @@ impl Cpu {
                     // SWAP C
                     0x31 => {
                         swap(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2839,6 +3293,8 @@ impl Cpu {
                     // SWAP D
                     0x32 => {
                         swap(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2848,6 +3304,8 @@ impl Cpu {
                     // SWAP E
                     0x33 => {
                         swap(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2857,6 +3315,8 @@ impl Cpu {
                     // SWAP H
                     0x34 => {
                         swap(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2866,6 +3326,8 @@ impl Cpu {
                     // SWAP L
                     0x35 => {
                         swap(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2876,6 +3338,8 @@ impl Cpu {
                     0x36 => {
                         let addr = self.registers.hl();
                         swap_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2885,6 +3349,8 @@ impl Cpu {
                     // SWAP A
                     0x37 => {
                         swap(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2894,6 +3360,8 @@ impl Cpu {
                     // SRL B
                     0x38 => {
                         srl(&mut self.registers.f, &mut self.registers.b);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2903,6 +3371,8 @@ impl Cpu {
                     // SRL C
                     0x39 => {
                         srl(&mut self.registers.f, &mut self.registers.c);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2912,6 +3382,8 @@ impl Cpu {
                     // SRL D
                     0x3A => {
                         srl(&mut self.registers.f, &mut self.registers.d);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2921,6 +3393,8 @@ impl Cpu {
                     // SRL E
                     0x3B => {
                         srl(&mut self.registers.f, &mut self.registers.e);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2930,6 +3404,8 @@ impl Cpu {
                     // SRL H
                     0x3C => {
                         srl(&mut self.registers.f, &mut self.registers.h);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2939,6 +3415,8 @@ impl Cpu {
                     // SRL L
                     0x3D => {
                         srl(&mut self.registers.f, &mut self.registers.l);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2949,6 +3427,8 @@ impl Cpu {
                     0x3E => {
                         let addr = self.registers.hl();
                         srl_hl(&mut self.registers.f, interconnect, addr);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2958,6 +3438,8 @@ impl Cpu {
                     // SRL A
                     0x3F => {
                         srl(&mut self.registers.f, &mut self.registers.a);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2967,6 +3449,8 @@ impl Cpu {
                     // BIT 0, B
                     0x40 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2976,6 +3460,8 @@ impl Cpu {
                     // BIT 0, C
                     0x41 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2985,6 +3471,8 @@ impl Cpu {
                     // BIT 0, D
                     0x42 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -2994,6 +3482,8 @@ impl Cpu {
                     // BIT 0, E
                     0x43 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3003,6 +3493,8 @@ impl Cpu {
                     // BIT 0, H
                     0x44 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3012,6 +3504,8 @@ impl Cpu {
                     // BIT 0, L
                     0x45 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3022,6 +3516,8 @@ impl Cpu {
                     0x46 => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3031,6 +3527,8 @@ impl Cpu {
                     // BIT 0, A
                     0x47 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3040,6 +3538,8 @@ impl Cpu {
                     // BIT 1, B
                     0x48 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3049,6 +3549,8 @@ impl Cpu {
                     // BIT 1, C
                     0x49 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3058,6 +3560,8 @@ impl Cpu {
                     // BIT 1, D
                     0x4A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3067,6 +3571,8 @@ impl Cpu {
                     // BIT 1, E
                     0x4B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3076,6 +3582,8 @@ impl Cpu {
                     // BIT 1, H
                     0x4C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3085,6 +3593,8 @@ impl Cpu {
                     // BIT 1, L
                     0x4D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3095,6 +3605,8 @@ impl Cpu {
                     0x4E => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3104,6 +3616,8 @@ impl Cpu {
                     // BIT 1, A
                     0x4F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3113,6 +3627,8 @@ impl Cpu {
                     // BIT 2, B
                     0x50 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3122,6 +3638,8 @@ impl Cpu {
                     // BIT 2, C
                     0x51 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3131,6 +3649,8 @@ impl Cpu {
                     // BIT 2, D
                     0x52 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3140,6 +3660,8 @@ impl Cpu {
                     // BIT 2, E
                     0x53 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3149,6 +3671,8 @@ impl Cpu {
                     // BIT 2, H
                     0x54 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3158,6 +3682,8 @@ impl Cpu {
                     // BIT 2, L
                     0x55 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3168,6 +3694,8 @@ impl Cpu {
                     0x56 => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3177,6 +3705,8 @@ impl Cpu {
                     // BIT 2, A
                     0x57 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3186,6 +3716,8 @@ impl Cpu {
                     // BIT 3, B
                     0x58 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3195,6 +3727,8 @@ impl Cpu {
                     // BIT 3, C
                     0x59 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3204,6 +3738,8 @@ impl Cpu {
                     // BIT 3, D
                     0x5A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3213,6 +3749,8 @@ impl Cpu {
                     // BIT 3, E
                     0x5B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3222,6 +3760,8 @@ impl Cpu {
                     // BIT 3, H
                     0x5C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3231,6 +3771,8 @@ impl Cpu {
                     // BIT 3, L
                     0x5D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3241,6 +3783,8 @@ impl Cpu {
                     0x5E => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3250,6 +3794,8 @@ impl Cpu {
                     // BIT 3, A
                     0x5F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3259,6 +3805,8 @@ impl Cpu {
                     // BIT 4, B
                     0x60 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3268,6 +3816,8 @@ impl Cpu {
                     // BIT 4, C
                     0x61 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3277,6 +3827,8 @@ impl Cpu {
                     // BIT 4, D
                     0x62 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3286,6 +3838,8 @@ impl Cpu {
                     // BIT 4, E
                     0x63 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3295,6 +3849,8 @@ impl Cpu {
                     // BIT 4, H
                     0x64 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3304,6 +3860,8 @@ impl Cpu {
                     // BIT 4, L
                     0x65 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3314,6 +3872,8 @@ impl Cpu {
                     0x66 => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3323,6 +3883,8 @@ impl Cpu {
                     // BIT 4, A
                     0x67 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3332,6 +3894,8 @@ impl Cpu {
                     // BIT 5, B
                     0x68 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3341,6 +3905,8 @@ impl Cpu {
                     // BIT 5, C
                     0x69 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3350,6 +3916,8 @@ impl Cpu {
                     // BIT 5, D
                     0x6A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3359,6 +3927,8 @@ impl Cpu {
                     // BIT 5, E
                     0x6B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3368,6 +3938,8 @@ impl Cpu {
                     // BIT 5, H
                     0x6C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3377,6 +3949,8 @@ impl Cpu {
                     // BIT 5, L
                     0x6D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3387,6 +3961,8 @@ impl Cpu {
                     0x6E => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3396,6 +3972,8 @@ impl Cpu {
                     // BIT 5, A
                     0x6F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3405,6 +3983,8 @@ impl Cpu {
                     // BIT 6, B
                     0x70 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3414,6 +3994,8 @@ impl Cpu {
                     // BIT 6, C
                     0x71 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3423,6 +4005,8 @@ impl Cpu {
                     // BIT 6, D
                     0x72 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3432,6 +4016,8 @@ impl Cpu {
                     // BIT 6, E
                     0x73 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3441,6 +4027,8 @@ impl Cpu {
                     // BIT 6, H
                     0x74 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3450,6 +4038,8 @@ impl Cpu {
                     // BIT 6, L
                     0x75 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3460,6 +4050,8 @@ impl Cpu {
                     0x76 => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3469,6 +4061,8 @@ impl Cpu {
                     // BIT 6, A
                     0x77 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3478,6 +4072,8 @@ impl Cpu {
                     // BIT 7, B
                     0x78 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.b, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3487,6 +4083,8 @@ impl Cpu {
                     // BIT 7, C
                     0x79 => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.c, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3496,6 +4094,8 @@ impl Cpu {
                     // BIT 7, D
                     0x7A => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.d, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3505,6 +4105,8 @@ impl Cpu {
                     // BIT 7, E
                     0x7B => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.e, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3514,6 +4116,8 @@ impl Cpu {
                     // BIT 7, H
                     0x7C => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.h, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3523,6 +4127,8 @@ impl Cpu {
                     // BIT 7, L
                     0x7D => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.l, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3533,6 +4139,8 @@ impl Cpu {
                     0x7E => {
                         let addr = self.registers.hl();
                         bit_n_hl(&mut self.registers.f, interconnect, addr, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3542,6 +4150,8 @@ impl Cpu {
                     // BIT 7, A
                     0x7F => {
                         bit_n_r(&mut self.registers.f, &mut self.registers.a, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3551,6 +4161,8 @@ impl Cpu {
                     // RES 0, B
                     0x80 => {
                         res_n_r(&mut self.registers.b, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3560,6 +4172,8 @@ impl Cpu {
                     // RES 0, C
                     0x81 => {
                         res_n_r(&mut self.registers.c, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3569,6 +4183,8 @@ impl Cpu {
                     // RES 0, D
                     0x82 => {
                         res_n_r(&mut self.registers.d, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3578,6 +4194,8 @@ impl Cpu {
                     // RES 0, E
                     0x83 => {
                         res_n_r(&mut self.registers.e, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3587,6 +4205,8 @@ impl Cpu {
                     // RES 0, H
                     0x84 => {
                         res_n_r(&mut self.registers.h, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3596,6 +4216,8 @@ impl Cpu {
                     // RES 0, L
                     0x85 => {
                         res_n_r(&mut self.registers.l, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3606,6 +4228,8 @@ impl Cpu {
                     0x86 => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3615,6 +4239,8 @@ impl Cpu {
                     // RES 0, A
                     0x87 => {
                         res_n_r(&mut self.registers.a, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3624,6 +4250,8 @@ impl Cpu {
                     // RES 1, B
                     0x88 => {
                         res_n_r(&mut self.registers.b, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3633,6 +4261,8 @@ impl Cpu {
                     // RES 1, C
                     0x89 => {
                         res_n_r(&mut self.registers.c, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3642,6 +4272,8 @@ impl Cpu {
                     // RES 1, D
                     0x8A => {
                         res_n_r(&mut self.registers.d, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3651,6 +4283,8 @@ impl Cpu {
                     // RES 1, E
                     0x8B => {
                         res_n_r(&mut self.registers.e, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3660,6 +4294,8 @@ impl Cpu {
                     // RES 1, H
                     0x8C => {
                         res_n_r(&mut self.registers.h, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3669,6 +4305,8 @@ impl Cpu {
                     // RES 1, L
                     0x8D => {
                         res_n_r(&mut self.registers.l, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3679,6 +4317,8 @@ impl Cpu {
                     0x8E => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3688,6 +4328,8 @@ impl Cpu {
                     // RES 1, A
                     0x8F => {
                         res_n_r(&mut self.registers.a, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3697,6 +4339,8 @@ impl Cpu {
                     // RES 2, B
                     0x90 => {
                         res_n_r(&mut self.registers.b, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3706,6 +4350,8 @@ impl Cpu {
                     // RES 2, C
                     0x91 => {
                         res_n_r(&mut self.registers.c, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3715,6 +4361,8 @@ impl Cpu {
                     // RES 2, D
                     0x92 => {
                         res_n_r(&mut self.registers.d, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3724,6 +4372,8 @@ impl Cpu {
                     // RES 2, E
                     0x93 => {
                         res_n_r(&mut self.registers.e, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3733,6 +4383,8 @@ impl Cpu {
                     // RES 2, H
                     0x94 => {
                         res_n_r(&mut self.registers.h, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3742,6 +4394,8 @@ impl Cpu {
                     // RES 2, L
                     0x95 => {
                         res_n_r(&mut self.registers.l, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3752,6 +4406,8 @@ impl Cpu {
                     0x96 => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3761,6 +4417,8 @@ impl Cpu {
                     // RES 2, A
                     0x97 => {
                         res_n_r(&mut self.registers.a, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3770,6 +4428,8 @@ impl Cpu {
                     // RES 3, B
                     0x98 => {
                         res_n_r(&mut self.registers.b, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3779,6 +4439,8 @@ impl Cpu {
                     // RES 3, C
                     0x99 => {
                         res_n_r(&mut self.registers.c, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3788,6 +4450,8 @@ impl Cpu {
                     // RES 3, D
                     0x9A => {
                         res_n_r(&mut self.registers.d, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3797,6 +4461,8 @@ impl Cpu {
                     // RES 3, E
                     0x9B => {
                         res_n_r(&mut self.registers.e, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3806,6 +4472,8 @@ impl Cpu {
                     // RES 3, H
                     0x9C => {
                         res_n_r(&mut self.registers.h, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3815,6 +4483,8 @@ impl Cpu {
                     // RES 3, L
                     0x9D => {
                         res_n_r(&mut self.registers.l, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3825,6 +4495,8 @@ impl Cpu {
                     0x9E => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3834,6 +4506,8 @@ impl Cpu {
                     // RES 3, A
                     0x9F => {
                         res_n_r(&mut self.registers.a, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3843,6 +4517,8 @@ impl Cpu {
                     // RES 4, B
                     0xA0 => {
                         res_n_r(&mut self.registers.b, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3852,6 +4528,8 @@ impl Cpu {
                     // RES 4, C
                     0xA1 => {
                         res_n_r(&mut self.registers.c, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3861,6 +4539,8 @@ impl Cpu {
                     // RES 4, D
                     0xA2 => {
                         res_n_r(&mut self.registers.d, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3870,6 +4550,8 @@ impl Cpu {
                     // RES 4, E
                     0xA3 => {
                         res_n_r(&mut self.registers.e, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3879,6 +4561,8 @@ impl Cpu {
                     // RES 4, H
                     0xA4 => {
                         res_n_r(&mut self.registers.h, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3888,6 +4572,8 @@ impl Cpu {
                     // RES 4, L
                     0xA5 => {
                         res_n_r(&mut self.registers.l, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3898,6 +4584,8 @@ impl Cpu {
                     0xA6 => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3907,6 +4595,8 @@ impl Cpu {
                     // RES 4, A
                     0xA7 => {
                         res_n_r(&mut self.registers.a, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3916,6 +4606,8 @@ impl Cpu {
                     // RES 5, B
                     0xA8 => {
                         res_n_r(&mut self.registers.b, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3925,6 +4617,8 @@ impl Cpu {
                     // RES 5, C
                     0xA9 => {
                         res_n_r(&mut self.registers.c, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3934,6 +4628,8 @@ impl Cpu {
                     // RES 5, D
                     0xAA => {
                         res_n_r(&mut self.registers.d, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3943,6 +4639,8 @@ impl Cpu {
                     // RES 5, E
                     0xAB => {
                         res_n_r(&mut self.registers.e, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3952,6 +4650,8 @@ impl Cpu {
                     // RES 5, H
                     0xAC => {
                         res_n_r(&mut self.registers.h, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3961,6 +4661,8 @@ impl Cpu {
                     // RES 5, L
                     0xAD => {
                         res_n_r(&mut self.registers.l, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3971,6 +4673,8 @@ impl Cpu {
                     0xAE => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3980,6 +4684,8 @@ impl Cpu {
                     // RES 5, A
                     0xAF => {
                         res_n_r(&mut self.registers.a, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3989,6 +4695,8 @@ impl Cpu {
                     // RES 6, B
                     0xB0 => {
                         res_n_r(&mut self.registers.b, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -3998,6 +4706,8 @@ impl Cpu {
                     // RES 6, C
                     0xB1 => {
                         res_n_r(&mut self.registers.c, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4007,6 +4717,8 @@ impl Cpu {
                     // RES 6, D
                     0xB2 => {
                         res_n_r(&mut self.registers.d, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4016,6 +4728,8 @@ impl Cpu {
                     // RES 6, E
                     0xB3 => {
                         res_n_r(&mut self.registers.e, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4025,6 +4739,8 @@ impl Cpu {
                     // RES 6, H
                     0xB4 => {
                         res_n_r(&mut self.registers.h, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4034,6 +4750,8 @@ impl Cpu {
                     // RES 6, L
                     0xB5 => {
                         res_n_r(&mut self.registers.l, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4044,6 +4762,8 @@ impl Cpu {
                     0xB6 => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4053,6 +4773,8 @@ impl Cpu {
                     // RES 6, A
                     0xB7 => {
                         res_n_r(&mut self.registers.a, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4062,6 +4784,8 @@ impl Cpu {
                     // RES 7, B
                     0xB8 => {
                         res_n_r(&mut self.registers.b, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4071,6 +4795,8 @@ impl Cpu {
                     // RES 7, C
                     0xB9 => {
                         res_n_r(&mut self.registers.c, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4080,6 +4806,8 @@ impl Cpu {
                     // RES 7, D
                     0xBA => {
                         res_n_r(&mut self.registers.d, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4089,6 +4817,8 @@ impl Cpu {
                     // RES 7, E
                     0xBB => {
                         res_n_r(&mut self.registers.e, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4098,6 +4828,8 @@ impl Cpu {
                     // RES 7, H
                     0xBC => {
                         res_n_r(&mut self.registers.h, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4107,6 +4839,8 @@ impl Cpu {
                     // RES 7, L
                     0xBD => {
                         res_n_r(&mut self.registers.l, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4117,6 +4851,8 @@ impl Cpu {
                     0xBE => {
                         let addr = self.registers.hl();
                         res_n_hl(interconnect, addr, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4126,6 +4862,8 @@ impl Cpu {
                     // RES 7, A
                     0xBF => {
                         res_n_r(&mut self.registers.a, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4135,6 +4873,8 @@ impl Cpu {
                     // SET 0, B
                     0xC0 => {
                         set_n_r(&mut self.registers.b, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4144,6 +4884,8 @@ impl Cpu {
                     // SET 0, C
                     0xC1 => {
                         set_n_r(&mut self.registers.c, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4153,6 +4895,8 @@ impl Cpu {
                     // SET 0, D
                     0xC2 => {
                         set_n_r(&mut self.registers.d, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4162,6 +4906,8 @@ impl Cpu {
                     // SET 0, E
                     0xC3 => {
                         set_n_r(&mut self.registers.e, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4171,6 +4917,8 @@ impl Cpu {
                     // SET 0, H
                     0xC4 => {
                         set_n_r(&mut self.registers.h, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4180,6 +4928,8 @@ impl Cpu {
                     // SET 0, L
                     0xC5 => {
                         set_n_r(&mut self.registers.l, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4190,6 +4940,8 @@ impl Cpu {
                     0xC6 => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4199,6 +4951,8 @@ impl Cpu {
                     // SET 0, A
                     0xC7 => {
                         set_n_r(&mut self.registers.a, 0);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4208,6 +4962,8 @@ impl Cpu {
                     // SET 1, B
                     0xC8 => {
                         set_n_r(&mut self.registers.b, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4217,6 +4973,8 @@ impl Cpu {
                     // SET 1, C
                     0xC9 => {
                         set_n_r(&mut self.registers.c, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4226,6 +4984,8 @@ impl Cpu {
                     // SET 1, D
                     0xCA => {
                         set_n_r(&mut self.registers.d, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4235,6 +4995,8 @@ impl Cpu {
                     // SET 1, E
                     0xCB => {
                         set_n_r(&mut self.registers.e, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4244,6 +5006,8 @@ impl Cpu {
                     // SET 1, H
                     0xCC => {
                         set_n_r(&mut self.registers.h, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4253,6 +5017,8 @@ impl Cpu {
                     // SET 1, L
                     0xCD => {
                         set_n_r(&mut self.registers.l, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4263,6 +5029,8 @@ impl Cpu {
                     0xCE => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4272,6 +5040,8 @@ impl Cpu {
                     // SET 1, A
                     0xCF => {
                         set_n_r(&mut self.registers.a, 1);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4281,6 +5051,8 @@ impl Cpu {
                     // SET 2, B
                     0xD0 => {
                         set_n_r(&mut self.registers.b, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4290,6 +5062,8 @@ impl Cpu {
                     // SET 2, C
                     0xD1 => {
                         set_n_r(&mut self.registers.c, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4299,6 +5073,8 @@ impl Cpu {
                     // SET 2, D
                     0xD2 => {
                         set_n_r(&mut self.registers.d, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4308,6 +5084,8 @@ impl Cpu {
                     // SET 2, E
                     0xD3 => {
                         set_n_r(&mut self.registers.e, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4317,6 +5095,8 @@ impl Cpu {
                     // SET 2, H
                     0xD4 => {
                         set_n_r(&mut self.registers.h, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4326,6 +5106,8 @@ impl Cpu {
                     // SET 2, L
                     0xD5 => {
                         set_n_r(&mut self.registers.l, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4336,6 +5118,8 @@ impl Cpu {
                     0xD6 => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4345,6 +5129,8 @@ impl Cpu {
                     // SET 2, A
                     0xD7 => {
                         set_n_r(&mut self.registers.a, 2);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4354,6 +5140,8 @@ impl Cpu {
                     // SET 3, B
                     0xD8 => {
                         set_n_r(&mut self.registers.b, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4363,6 +5151,8 @@ impl Cpu {
                     // SET 3, C
                     0xD9 => {
                         set_n_r(&mut self.registers.c, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4372,6 +5162,8 @@ impl Cpu {
                     // SET 3, D
                     0xDA => {
                         set_n_r(&mut self.registers.d, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4381,6 +5173,8 @@ impl Cpu {
                     // SET 3, E
                     0xDB => {
                         set_n_r(&mut self.registers.e, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4390,6 +5184,8 @@ impl Cpu {
                     // SET 3, H
                     0xDC => {
                         set_n_r(&mut self.registers.h, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4399,6 +5195,8 @@ impl Cpu {
                     // SET 3, L
                     0xDD => {
                         set_n_r(&mut self.registers.l, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4409,6 +5207,8 @@ impl Cpu {
                     0xDE => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4418,6 +5218,8 @@ impl Cpu {
                     // SET 3, A
                     0xDF => {
                         set_n_r(&mut self.registers.a, 3);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4427,6 +5229,8 @@ impl Cpu {
                     // SET 4, B
                     0xE0 => {
                         set_n_r(&mut self.registers.b, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4436,6 +5240,8 @@ impl Cpu {
                     // SET 4, C
                     0xE1 => {
                         set_n_r(&mut self.registers.c, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4445,6 +5251,8 @@ impl Cpu {
                     // SET 4, D
                     0xE2 => {
                         set_n_r(&mut self.registers.d, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4454,6 +5262,8 @@ impl Cpu {
                     // SET 4, E
                     0xE3 => {
                         set_n_r(&mut self.registers.e, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4463,6 +5273,8 @@ impl Cpu {
                     // SET 4, H
                     0xE4 => {
                         set_n_r(&mut self.registers.h, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4472,6 +5284,8 @@ impl Cpu {
                     // SET 4, L
                     0xE5 => {
                         set_n_r(&mut self.registers.l, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4482,6 +5296,8 @@ impl Cpu {
                     0xE6 => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4491,6 +5307,8 @@ impl Cpu {
                     // SET 4, A
                     0xE7 => {
                         set_n_r(&mut self.registers.a, 4);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4500,6 +5318,8 @@ impl Cpu {
                     // SET 5, B
                     0xE8 => {
                         set_n_r(&mut self.registers.b, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4509,6 +5329,8 @@ impl Cpu {
                     // SET 5, C
                     0xE9 => {
                         set_n_r(&mut self.registers.c, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4518,6 +5340,8 @@ impl Cpu {
                     // SET 5, D
                     0xEA => {
                         set_n_r(&mut self.registers.d, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4527,6 +5351,8 @@ impl Cpu {
                     // SET 5, E
                     0xEB => {
                         set_n_r(&mut self.registers.e, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4536,6 +5362,8 @@ impl Cpu {
                     // SET 5, H
                     0xEC => {
                         set_n_r(&mut self.registers.h, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4545,6 +5373,8 @@ impl Cpu {
                     // SET 5, L
                     0xED => {
                         set_n_r(&mut self.registers.l, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4555,6 +5385,8 @@ impl Cpu {
                     0xEE => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4564,6 +5396,8 @@ impl Cpu {
                     // SET 5, A
                     0xEF => {
                         set_n_r(&mut self.registers.a, 5);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4573,6 +5407,8 @@ impl Cpu {
                     // SET 6, B
                     0xF0 => {
                         set_n_r(&mut self.registers.b, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4582,6 +5418,8 @@ impl Cpu {
                     // SET 6, C
                     0xF1 => {
                         set_n_r(&mut self.registers.c, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4591,6 +5429,8 @@ impl Cpu {
                     // SET 6, D
                     0xF2 => {
                         set_n_r(&mut self.registers.d, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4600,6 +5440,8 @@ impl Cpu {
                     // SET 6, E
                     0xF3 => {
                         set_n_r(&mut self.registers.e, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4609,6 +5451,8 @@ impl Cpu {
                     // SET 6, H
                     0xF4 => {
                         set_n_r(&mut self.registers.h, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4618,6 +5462,8 @@ impl Cpu {
                     // SET 6, L
                     0xF5 => {
                         set_n_r(&mut self.registers.l, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4628,6 +5474,8 @@ impl Cpu {
                     0xF6 => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4637,6 +5485,8 @@ impl Cpu {
                     // SET 6, A
                     0xF7 => {
                         set_n_r(&mut self.registers.a, 6);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4646,6 +5496,8 @@ impl Cpu {
                     // SET 7, B
                     0xF8 => {
                         set_n_r(&mut self.registers.b, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4655,6 +5507,8 @@ impl Cpu {
                     // SET 7, C
                     0xF9 => {
                         set_n_r(&mut self.registers.c, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4664,6 +5518,8 @@ impl Cpu {
                     // SET 7, D
                     0xFA => {
                         set_n_r(&mut self.registers.d, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4673,6 +5529,8 @@ impl Cpu {
                     // SET 7, E
                     0xFB => {
                         set_n_r(&mut self.registers.e, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4682,6 +5540,8 @@ impl Cpu {
                     // SET 7, H
                     0xFC => {
                         set_n_r(&mut self.registers.h, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4691,6 +5551,8 @@ impl Cpu {
                     // SET 7, L
                     0xFD => {
                         set_n_r(&mut self.registers.l, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4701,6 +5563,8 @@ impl Cpu {
                     0xFE => {
                         let addr = self.registers.hl();
                         set_n_hl(interconnect, addr, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4710,6 +5574,8 @@ impl Cpu {
                     // SET 7, A
                     0xFF => {
                         set_n_r(&mut self.registers.a, 7);
+
+                        // Increase Program Counter
                         self.pc += 2;
 
                         // Increase Timer
@@ -4737,6 +5603,7 @@ impl Cpu {
             0xCE => {
                 let operand = interconnect.read_mem(self.pc + 1);
                 adc_a_r(self, operand);
+
                 self.pc += 2;
 
                 // Increase Timer
@@ -4764,6 +5631,8 @@ impl Cpu {
                     &mut self.registers.e,
                     &mut self.sp,
                 );
+
+                // Increase Program Couter
                 self.pc += 1;
 
                 // Increase Timer
@@ -4793,6 +5662,8 @@ impl Cpu {
                     self.registers.e,
                     &mut self.sp,
                 );
+
+                // Increase Program Couter
                 self.pc += 1;
 
                 // Increase Timer
@@ -4803,6 +5674,8 @@ impl Cpu {
             0xD6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 sub_a_r(self, u8_value);
+
+                // Increase Program Couter
                 self.pc += 2;
 
                 // Increase Timer
@@ -4820,7 +5693,7 @@ impl Cpu {
             // RET C
             0xD8 => ret_c(self, interconnect),
 
-            // RETI (NEED TO FIX)
+            // RETI 
             0xD9 => {
                 ret(self, interconnect);
                 ei(self);
@@ -4851,6 +5724,8 @@ impl Cpu {
             0xDE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 sbc_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -4874,9 +5749,12 @@ impl Cpu {
 
                 ld_io_from_a(self, interconnect, u8_value);
 
+                // Increase Program Counter
+                self.pc += 2;
+
                 // Increase Timer
                 interconnect.emu_cycles(2);
-                self.pc += 2;
+
             }
 
             // POP HL
@@ -4887,6 +5765,8 @@ impl Cpu {
                     &mut self.registers.l,
                     &mut self.sp,
                 );
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -4896,6 +5776,8 @@ impl Cpu {
             // LD (0xFF00 + C), A
             0xE2 => {
                 ld_io_c_from_a(self, interconnect);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -4916,6 +5798,8 @@ impl Cpu {
                     self.registers.l,
                     &mut self.sp,
                 );
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -4926,6 +5810,8 @@ impl Cpu {
             0xE6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 and_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -4977,6 +5863,8 @@ impl Cpu {
                 // SP = SP + i8
                 self.sp = c;
 
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -4994,10 +5882,15 @@ impl Cpu {
             // LD (u16), A
             0xEA => {
                 let u16_value = self.get_u16(interconnect);
+                
+                //Increase Timer
                 interconnect.emu_cycles(2);
                 interconnect.write_mem(u16_value, self.registers.a);
-
+                
+                // Increase Timer
                 interconnect.emu_cycles(2);
+
+                // Increase Program Counter
                 self.pc += 3;
             }
 
@@ -5014,6 +5907,8 @@ impl Cpu {
             0xEE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 xor_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -5023,6 +5918,7 @@ impl Cpu {
             // RST 0x28
             0xEF => {
                 rst(self, interconnect, 0x28);
+
                 // Increase Timer
                 interconnect.emu_cycles(4);
             }
@@ -5035,6 +5931,8 @@ impl Cpu {
                 interconnect.emu_cycles(1);
 
                 ld_a_from_io(self, interconnect, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -5052,6 +5950,8 @@ impl Cpu {
 
                 // Clear Lower Nibble of F register
                 self.registers.f.data &= 0xF0;
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5061,6 +5961,8 @@ impl Cpu {
             // LD A, (FF00 + C)
             0xF2 => {
                 ld_a_from_io_c(self, interconnect);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5070,6 +5972,8 @@ impl Cpu {
             // DI
             0xF3 => {
                 di(self);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5087,6 +5991,8 @@ impl Cpu {
                     self.registers.f.data,
                     &mut self.sp,
                 );
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5097,6 +6003,8 @@ impl Cpu {
             0xF6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 or_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -5148,6 +6056,7 @@ impl Cpu {
                 // HL = SP + i8
                 self.registers.set_hl(c);
 
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -5157,6 +6066,8 @@ impl Cpu {
             // LD SP, HL
             0xF9 => {
                 self.sp = self.registers.hl();
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5175,6 +6086,8 @@ impl Cpu {
                 interconnect.emu_cycles(1);
 
                 ld_8bit(&mut self.registers.a, u8_value);
+
+                // Increase Program Counter
                 self.pc += 3;
 
                 // Increase Timer
@@ -5184,6 +6097,8 @@ impl Cpu {
             // EI
             0xFB => {
                 ei(self);
+
+                // Increase Program Counter
                 self.pc += 1;
 
                 // Increase Timer
@@ -5200,6 +6115,8 @@ impl Cpu {
             0xFE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
                 cp_a_r(self, u8_value);
+
+                // Increase Program Counter
                 self.pc += 2;
 
                 // Increase Timer
@@ -5213,22 +6130,22 @@ impl Cpu {
                 interconnect.emu_cycles(4);
             } // _ => println!("NOT AN OPCODE"),
         }
-        /*let cycles = interconnect.timer.internal_ticks - self.last_cycle;
-        interconnect.emu_cycles(cycles);*/
     }
 
+    /// Fetch opcode
     pub fn fetch(&mut self, interconnect: &Interconnect) {
         self.opcode = interconnect.read_mem(self.pc);
     }
 
+    /// Retrieve u16 value after opcode
     pub fn get_u16(&mut self, interconnect: &Interconnect) -> u16 {
-        // (interconnect.read_mem(self.pc + 2) as u16) << 8 | interconnect.read_mem(self.pc + 1) as u16
         u16::from_be_bytes([
             interconnect.read_mem(self.pc + 2),
             interconnect.read_mem(self.pc + 1),
         ])
     }
 
+    /// Print State of registers
     pub fn print_registers(&self) {
         println!(
             "A: {} B: {} C: {} D: {} E: {} H: {} L: {}",
@@ -5242,6 +6159,7 @@ impl Cpu {
         );
     }
 
+    /// Print State of Emulator
     pub fn print_state(&self, interconnect: &Interconnect) {
         println!("PC: {:#X}", self.pc);
         println!("SP: {:#X}", self.sp);
@@ -5296,4 +6214,4 @@ impl Cpu {
 
 #[cfg(test)]
 mod tests;
-pub(crate) mod timer;
+pub mod timer;
