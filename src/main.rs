@@ -41,15 +41,14 @@ fn main() {
     loop {
 
         // Setup Raylib Window
-        let (mut rl, thread) = raylib::init().size(640, 480).title("Rustboy").build();
+       /* let (mut rl, thread) = raylib::init().size(640, 480).title("Rustboy").build();
 
         while !rl.window_should_close() {
             let mut d = rl.begin_drawing(&thread);
 
             d.clear_background(Color::WHITE);
             d.draw_text("Hello World", 12, 12, 20, Color::BLACK);
-        }
-        /*
+        }*/
         if !game_boy.cpu.halted {
             game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
             if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
@@ -65,7 +64,7 @@ fn main() {
             if IF != 0 {
                 game_boy.cpu.halted = false;
             }
-        }*/
+        }
     }
 }
 

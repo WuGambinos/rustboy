@@ -227,7 +227,7 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
 /// Half Carry: Dependent
 ///
 /// Carry: Dependent
-pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn sub_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     // Update Half Carry
@@ -263,7 +263,7 @@ pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
 /// Half Carry: Dependent
 ///
 /// Carry: Dependent
-pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn sbc_a_r(cpu: &mut Cpu, operand: u8) {
     // Accumulator
     let a = cpu.registers.a as i16;
 
@@ -315,7 +315,7 @@ pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
 /// Half Carry: Set
 ///
 /// Carry: Clear
-pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn and_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     // and
@@ -350,7 +350,7 @@ pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
 /// Half Carry: Clear
 ///
 /// Carry: Clear
-pub fn xor_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn xor_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     // xor
@@ -386,7 +386,7 @@ pub fn xor_r_r(cpu: &mut Cpu, operand: u8) {
 ///
 /// Carry: Clear
 ///
-pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn or_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
     //or
@@ -408,7 +408,7 @@ pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.a = a;
 }
 
-pub fn cp_r_r(cpu: &mut Cpu, operand: u8) {
+pub fn cp_a_r(cpu: &mut Cpu, operand: u8) {
     let a: u8 = cpu.registers.a;
 
     let res = a.wrapping_sub(operand);
