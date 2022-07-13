@@ -4,6 +4,15 @@ use super::{Cpu, Flags, Interconnect};
  * 8-bit Arithmetic instructions
  * *********************************************************************/
 
+/// Increment 8-bit register
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Dependent
 pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     let mut value: u8 = *register;
 
@@ -19,9 +28,20 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     //Clear Sub Flag
     flags.clear_sub_flag();
 
+    //Store value back in register
     *register = value;
 }
 
+
+/// Decrement 8-bit register
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Set
+///
+/// Half Carry: Dependent 
 pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     let mut value = *register;
 
@@ -37,54 +57,79 @@ pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     //Set Sub Flag
     flags.set_sub_flag();
 
+    //Store new value back in register
     *register = value;
 }
 
-///Increment vlaue in memory using HL pointer
+/// Increment value in memory using HL pointer
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub Flag: Clear
+///
+/// Half Carry: Dependent
 pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     let hl = cpu.registers.hl();
 
-    //Grab value in memory
+    // Grab value in memory
     let mut value = interconnect.read_mem(hl);
+
+    // Increase Timer
     interconnect.emu_cycles(1);
 
-    //Check for Half Carry
+    // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(value, 1);
 
-    //Increment value
+    // Increment value
     value = value.wrapping_add(1);
 
-    //Write new incremented value back into memory
+    // Write new incremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
+
+    // Increase Timer
     interconnect.emu_cycles(1);
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
 
-    //Clear Sub Flag
+    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 }
 
-///Decrement value in memory using HL pointer
+/// Decrement value in memory using HL pointer
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Set
+///
+/// Half Carry: Dependent
 pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
-    //Grab value in memory
+    // Grab value in memory
     let mut value: u8 = interconnect.read_mem(cpu.registers.hl());
+
+    // Increase Timer
     interconnect.emu_cycles(1);
 
-    //Check for Half Carry
+    // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(value, 1);
 
-    //Decrement Value
+    // Decrement Value
     value = value.wrapping_sub(1);
 
-    //Write new decremented value back into memory
+    // Write new decremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
+
+    // Increase Timer
     interconnect.emu_cycles(1);
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
 
-    //Set sub flag
+    // Set sub flag
     cpu.registers.f.set_sub_flag();
 }
 
@@ -93,170 +138,254 @@ pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 /// a = r + a
 ///
 /// Flags: Z0HC
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Dependent
+///
+/// Carry: Dependent
 pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
-    //Update Half Carry
+    // Update Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(a, operand);
 
-    //Update Carry Flag
+    // Update Carry Flag
     cpu.registers.f.update_carry_flag_sum_8bit(a, operand);
 
-    //a = r + a
+    // a = r + a
     a = a.wrapping_add(operand);
 
-    //Clear Sub Flag
+    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
 
-    //Set Actual accumulator equal to resulting value
+    // Store new value in accumulator
     cpu.registers.a = a;
 }
 
-///Adds Accumulator(register A), another register, and carry all together, storing result in the accumulator
+/// Adds Accumulator(register A), another register, and carry all together, storing result in the accumulator
 ///
 /// a = a + r + c
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Dependent
+///
+/// Carry: Dependent
 pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
-    //Accumulator
+    // Accumulator
     let mut a: u8 = cpu.registers.a;
 
-    //Result
+    // Result
     let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
 
-    //Calculate Half Carry
+    // Calculate Half Carry
     let half_carry: bool = ((a & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F;
 
-    //Clear Sub Flag
+    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 
-    //Update Half Carry Flag
+    // Update Half Carry Flag
     if half_carry {
         cpu.registers.f.set_half_carry_flag();
     } else {
         cpu.registers.f.clear_half_carry_flag();
     }
 
-    //Update Carry Flag
+    // Update Carry Flag
     if c > 0xFF {
         cpu.registers.f.set_carry_flag();
     } else {
         cpu.registers.f.clear_carry_flag();
     }
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(c as u8);
 
+    // Store new value in accumulator
     cpu.registers.a = c as u8;
 }
 
-///Subtracts another register from the accumulator, storing the result in the accumulator
+/// Subtracts another register from the accumulator, storing the result in the accumulator
 ///
 /// a = a - r
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Set
+///
+/// Half Carry: Dependent
+///
+/// Carry: Dependent
 pub fn sub_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
-    //Update Half Carry
+    // Update Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(a, operand);
 
-    //Update Carry(Borrow) Flag
+    // Update Carry(Borrow) Flag
     cpu.registers.f.update_carry_flag_sub_8bit(a, operand);
 
-    //a = a - r
+    // a = a - r
     a = a.wrapping_sub(operand);
 
-    //Set Sub flag
+    // Set Sub flag
     cpu.registers.f.set_sub_flag();
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
 
-    //Set actual accumulator equal to resulting value
+    // Store new value in accumulator  
     cpu.registers.a = a;
 }
 
+
+/// Subtracts another register and carry from the accumulator, storing the result in the accumulator
+///
+/// a = a - r - c
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Set
+///
+/// Half Carry: Dependent
+///
+/// Carry: Dependent
 pub fn sbc_r_r(cpu: &mut Cpu, operand: u8) {
-    //Accumulator
+    // Accumulator
     let a = cpu.registers.a as i16;
 
-    //Operand
+    // Operand
     let b = operand as i16;
 
-    //Result
+    // Result
     let c = a
         .wrapping_sub(b)
         .wrapping_sub(cpu.registers.f.carry_flag() as i16);
 
-    //Calculate Half Carry
+    // Calculate Half Carry
     let half_carry = ((a & 0x0F) - (b & 0x0F) - (cpu.registers.f.carry_flag() as i16)) < 0;
 
-    //Set Sub Flag
+    // Set Sub Flag
     cpu.registers.f.set_sub_flag();
 
-    //Update Half Carry Flag
+    // Update Half Carry Flag
     if half_carry {
         cpu.registers.f.set_half_carry_flag();
     } else {
         cpu.registers.f.clear_half_carry_flag();
     }
 
-    //Update Carry(Borrow) Flag
+    // Update Carry(Borrow) Flag
     if c < 0 {
         cpu.registers.f.set_carry_flag();
     } else {
         cpu.registers.f.clear_carry_flag();
     }
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(c as u8);
 
+    // Store new value in accumulator
     cpu.registers.a = c as u8;
 }
 
+/// Stores the logical "and" of accumulator and register in accumluator 
+///
+/// a = a & r
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Set
+///
+/// Carry: Clear
 pub fn and_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
-    //and
+    // and
     a &= operand;
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
 
-    //Clear Sub Flag
+    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 
-    //Set Half Carry
+    // Set Half Carry
     cpu.registers.f.set_half_carry_flag();
 
-    //Clear Carry Flag
+    // Clear Carry Flag
     cpu.registers.f.clear_carry_flag();
 
-    //Set actual accumualtor equal to resulting value
+    // Store new value in accumulator
     cpu.registers.a = a;
 }
 
+/// Stores logical xor of accumulator and register in accumulator
+///
+/// a = a ^ r
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Clear
+///
+/// Carry: Clear
 pub fn xor_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 
-    //xor
+    // xor
     a ^= operand;
 
-    //Update Zero Flag
+    // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
 
-    //Clear Sub Flag
+    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 
-    //Clear Half Carry
+    // Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
 
-    //Clear Carry
+    // Clear Carry
     cpu.registers.f.clear_carry_flag();
 
-    //Set actual accumualtor equal to resulting value
+    // Set actual accumualtor equal to resulting value
     cpu.registers.a = a;
 }
 
+/// Stores logical or of accumulator and register in accumulator
+///
+/// a = a | r
+///
+/// Flags:
+///
+/// Zero: Dependent
+///
+/// Sub: Clear
+///
+/// Half Carry: Clear
+///
+/// Carry: Clear
+///
 pub fn or_r_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
 

@@ -17,25 +17,26 @@ impl Clock {
     }
 }
 
+/// Gameboy Timer 
 #[derive(Debug)]
 pub struct Timer {
     /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
     /// resets it to 0x00
-    pub(crate) div: u8,
+    pub div: u8,
 
     /// Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
     /// When the value overflows then it will be reset to value specified in TMA and interrupt
     /// will be request
-    pub(crate) tima: u8,
+    pub tima: u8,
 
     /// Timer Modulo (R/W)
-    pub(crate) tma: u8,
+    pub tma: u8,
 
-    ///Timer Control (R/W)
-    pub(crate) tac: u8,
+    /// Timer Control (R/W)
+    pub tac: u8,
 
-    ///Internal Ticks
-    pub(crate) internal_ticks: u64,
+    /// Internal Ticks
+    pub internal_ticks: u64,
 
     pub div_clock: Clock,
 
@@ -78,20 +79,22 @@ impl Timer {
     /// Write u8 value to Timer/Divider register at addr
     pub fn timer_write(&mut self, addr: u16, value: u8) {
         match addr {
-            //DIV
+            // DIV
             0xFF04 => {
                 self.div = 0x00;
                 self.div_clock.n = 0x00;
             }
 
-            //TIMA
+            // TIMA
             0xFF05 => self.tima = value,
 
-            //TMA
+            // TMA
             0xFF06 => self.tma = value,
 
-            //TAC
+            // TAC
             0xFF07 => {
+
+                // If Clock is enabled
                 if (self.tac & 0x03) != (value & 0x03) {
                     self.tma_clock.n = 0x00;
                     self.tma_clock.period = match value & 0x03 {

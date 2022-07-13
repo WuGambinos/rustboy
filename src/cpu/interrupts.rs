@@ -1,5 +1,6 @@
 use super::Interconnect;
 
+/// Different types of interrupts
 pub enum InterruptType {
     VBlank,
     LcdStat,
@@ -8,6 +9,7 @@ pub enum InterruptType {
     Joypad,
 }
 
+/// Trigger interrupt depending on type passed 
 pub fn interrupt_request(interconnect: &mut Interconnect, interrput_type: InterruptType) {
     match interrput_type {
         InterruptType::VBlank => {
