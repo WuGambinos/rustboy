@@ -1784,7 +1784,7 @@ impl Cpu {
 
             //SUB A, B
             0x90 => {
-                sub_r_r(self, self.registers.b);
+                sub_a_r(self, self.registers.b);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1793,7 +1793,7 @@ impl Cpu {
 
             //SUB A, C
             0x91 => {
-                sub_r_r(self, self.registers.c);
+                sub_a_r(self, self.registers.c);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1802,7 +1802,7 @@ impl Cpu {
 
             //SUB A, D
             0x92 => {
-                sub_r_r(self, self.registers.d);
+                sub_a_r(self, self.registers.d);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1811,7 +1811,7 @@ impl Cpu {
 
             //SUB A, E
             0x93 => {
-                sub_r_r(self, self.registers.e);
+                sub_a_r(self, self.registers.e);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1820,7 +1820,7 @@ impl Cpu {
 
             //SUB A, H
             0x94 => {
-                sub_r_r(self, self.registers.h);
+                sub_a_r(self, self.registers.h);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1829,7 +1829,7 @@ impl Cpu {
 
             //SUB A, L
             0x95 => {
-                sub_r_r(self, self.registers.l);
+                sub_a_r(self, self.registers.l);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1839,7 +1839,7 @@ impl Cpu {
             //SUB A, (HL)
             0x96 => {
                 let addr: u16 = self.registers.hl();
-                sub_r_r(self, interconnect.read_mem(addr));
+                sub_a_r(self, interconnect.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
@@ -1848,7 +1848,7 @@ impl Cpu {
 
             //SUB  A, A
             0x97 => {
-                sub_r_r(self, self.registers.a);
+                sub_a_r(self, self.registers.a);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1857,7 +1857,7 @@ impl Cpu {
 
             //SBC A, B
             0x98 => {
-                sbc_r_r(self, self.registers.b);
+                sbc_a_r(self, self.registers.b);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1866,7 +1866,7 @@ impl Cpu {
 
             //SBC A, C
             0x99 => {
-                sbc_r_r(self, self.registers.c);
+                sbc_a_r(self, self.registers.c);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1875,7 +1875,7 @@ impl Cpu {
 
             //SBC A, D
             0x9A => {
-                sbc_r_r(self, self.registers.d);
+                sbc_a_r(self, self.registers.d);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1884,7 +1884,7 @@ impl Cpu {
 
             //SBC A, E
             0x9B => {
-                sbc_r_r(self, self.registers.e);
+                sbc_a_r(self, self.registers.e);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1893,7 +1893,7 @@ impl Cpu {
 
             //SBC A, H
             0x9C => {
-                sbc_r_r(self, self.registers.h);
+                sbc_a_r(self, self.registers.h);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1902,7 +1902,7 @@ impl Cpu {
 
             //SBC A, L
             0x9D => {
-                sbc_r_r(self, self.registers.l);
+                sbc_a_r(self, self.registers.l);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1912,7 +1912,7 @@ impl Cpu {
             //SBC A, (HL)
             0x9E => {
                 let addr: u16 = self.registers.hl();
-                sbc_r_r(self, interconnect.read_mem(addr));
+                sbc_a_r(self, interconnect.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
@@ -1921,7 +1921,7 @@ impl Cpu {
 
             //SBC A, A
             0x9F => {
-                sbc_r_r(self, self.registers.a);
+                sbc_a_r(self, self.registers.a);
                 self.pc += 1;
 
                 //Increase Timer
@@ -1930,7 +1930,7 @@ impl Cpu {
 
             //AND A, B
             0xA0 => {
-                and_r_r(self, self.registers.b);
+                and_a_r(self, self.registers.b);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1939,7 +1939,7 @@ impl Cpu {
 
             //AND A, C
             0xA1 => {
-                and_r_r(self, self.registers.c);
+                and_a_r(self, self.registers.c);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1948,7 +1948,7 @@ impl Cpu {
 
             //AND A, D
             0xA2 => {
-                and_r_r(self, self.registers.d);
+                and_a_r(self, self.registers.d);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1957,7 +1957,7 @@ impl Cpu {
 
             //AND A, E
             0xA3 => {
-                and_r_r(self, self.registers.e);
+                and_a_r(self, self.registers.e);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1966,7 +1966,7 @@ impl Cpu {
 
             //AND A, H
             0xA4 => {
-                and_r_r(self, self.registers.h);
+                and_a_r(self, self.registers.h);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1975,7 +1975,7 @@ impl Cpu {
 
             //AND A, L
             0xA5 => {
-                and_r_r(self, self.registers.l);
+                and_a_r(self, self.registers.l);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1985,7 +1985,7 @@ impl Cpu {
             //AND A, (HL)
             0xA6 => {
                 let addr: u16 = self.registers.hl();
-                and_r_r(self, interconnect.read_mem(addr));
+                and_a_r(self, interconnect.read_mem(addr));
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -1994,7 +1994,7 @@ impl Cpu {
 
             //AND A, A
             0xA7 => {
-                and_r_r(self, self.registers.a);
+                and_a_r(self, self.registers.a);
                 self.pc = self.pc.wrapping_add(1);
 
                 //Increase Timer
@@ -2003,7 +2003,7 @@ impl Cpu {
 
             //XOR A, B
             0xA8 => {
-                xor_r_r(self, self.registers.b);
+                xor_a_r(self, self.registers.b);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2012,7 +2012,7 @@ impl Cpu {
 
             //XOR A, C
             0xA9 => {
-                xor_r_r(self, self.registers.c);
+                xor_a_r(self, self.registers.c);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2021,7 +2021,7 @@ impl Cpu {
 
             //XOR A, D
             0xAA => {
-                xor_r_r(self, self.registers.d);
+                xor_a_r(self, self.registers.d);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2030,7 +2030,7 @@ impl Cpu {
 
             //XOR A, E
             0xAB => {
-                xor_r_r(self, self.registers.e);
+                xor_a_r(self, self.registers.e);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2039,7 +2039,7 @@ impl Cpu {
 
             //XOR A, H
             0xAC => {
-                xor_r_r(self, self.registers.h);
+                xor_a_r(self, self.registers.h);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2048,7 +2048,7 @@ impl Cpu {
 
             //XOR A, L
             0xAD => {
-                xor_r_r(self, self.registers.l);
+                xor_a_r(self, self.registers.l);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2058,7 +2058,7 @@ impl Cpu {
             //XOR A, (HL)
             0xAE => {
                 let addr: u16 = self.registers.hl();
-                xor_r_r(self, interconnect.read_mem(addr));
+                xor_a_r(self, interconnect.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
@@ -2067,7 +2067,7 @@ impl Cpu {
 
             //XOR A, A
             0xAF => {
-                xor_r_r(self, self.registers.a);
+                xor_a_r(self, self.registers.a);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2076,7 +2076,7 @@ impl Cpu {
 
             //OR A, B
             0xB0 => {
-                or_r_r(self, self.registers.b);
+                or_a_r(self, self.registers.b);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2085,7 +2085,7 @@ impl Cpu {
 
             //OR A, C
             0xB1 => {
-                or_r_r(self, self.registers.c);
+                or_a_r(self, self.registers.c);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2094,7 +2094,7 @@ impl Cpu {
 
             //OR A, D
             0xB2 => {
-                or_r_r(self, self.registers.d);
+                or_a_r(self, self.registers.d);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2103,7 +2103,7 @@ impl Cpu {
 
             //OR A, E
             0xB3 => {
-                or_r_r(self, self.registers.e);
+                or_a_r(self, self.registers.e);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2112,7 +2112,7 @@ impl Cpu {
 
             //OR A, H
             0xB4 => {
-                or_r_r(self, self.registers.h);
+                or_a_r(self, self.registers.h);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2121,7 +2121,7 @@ impl Cpu {
 
             //OR A, L
             0xB5 => {
-                or_r_r(self, self.registers.l);
+                or_a_r(self, self.registers.l);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2131,7 +2131,7 @@ impl Cpu {
             //OR A, (HL)
             0xB6 => {
                 let addr: u16 = self.registers.hl();
-                or_r_r(self, interconnect.read_mem(addr));
+                or_a_r(self, interconnect.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
@@ -2140,7 +2140,7 @@ impl Cpu {
 
             //OR A, A
             0xB7 => {
-                or_r_r(self, self.registers.a);
+                or_a_r(self, self.registers.a);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2149,7 +2149,7 @@ impl Cpu {
 
             //CP A, B
             0xB8 => {
-                cp_r_r(self, self.registers.b);
+                cp_a_r(self, self.registers.b);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2158,7 +2158,7 @@ impl Cpu {
 
             //CP A, C
             0xB9 => {
-                cp_r_r(self, self.registers.c);
+                cp_a_r(self, self.registers.c);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2167,7 +2167,7 @@ impl Cpu {
 
             //CP A, D
             0xBA => {
-                cp_r_r(self, self.registers.d);
+                cp_a_r(self, self.registers.d);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2176,7 +2176,7 @@ impl Cpu {
 
             //CP A, E
             0xBB => {
-                cp_r_r(self, self.registers.e);
+                cp_a_r(self, self.registers.e);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2185,7 +2185,7 @@ impl Cpu {
 
             //CP A, H
             0xBC => {
-                cp_r_r(self, self.registers.h);
+                cp_a_r(self, self.registers.h);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2194,7 +2194,7 @@ impl Cpu {
 
             //CP A, L
             0xBD => {
-                cp_r_r(self, self.registers.l);
+                cp_a_r(self, self.registers.l);
                 self.pc += 1;
 
                 //Increase Timer
@@ -2204,7 +2204,7 @@ impl Cpu {
             //CP A, (HL)
             0xBE => {
                 let addr: u16 = self.registers.hl();
-                cp_r_r(self, interconnect.read_mem(addr));
+                cp_a_r(self, interconnect.read_mem(addr));
                 self.pc += 1;
 
                 //Increase Timer
@@ -2213,7 +2213,7 @@ impl Cpu {
 
             //CP A, A
             0xBF => {
-                cp_r_r(self, self.registers.a);
+                cp_a_r(self, self.registers.a);
                 self.pc += 1;
 
                 //Increase Timer
@@ -4742,7 +4742,7 @@ impl Cpu {
             //SUB A, u8
             0xD6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                sub_r_r(self, u8_value);
+                sub_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
@@ -4790,7 +4790,7 @@ impl Cpu {
             //SBC A, u8
             0xDE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                sbc_r_r(self, u8_value);
+                sbc_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
@@ -4865,7 +4865,7 @@ impl Cpu {
             //AND A, u8
             0xE6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                and_r_r(self, u8_value);
+                and_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
@@ -4953,7 +4953,7 @@ impl Cpu {
             //XOR A, u8
             0xEE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                xor_r_r(self, u8_value);
+                xor_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
@@ -5036,7 +5036,7 @@ impl Cpu {
             //OR A, u8
             0xF6 => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                or_r_r(self, u8_value);
+                or_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
@@ -5139,7 +5139,7 @@ impl Cpu {
             //CP A, u8
             0xFE => {
                 let u8_value = interconnect.read_mem(self.pc + 1);
-                cp_r_r(self, u8_value);
+                cp_a_r(self, u8_value);
                 self.pc += 2;
 
                 //Increase Timer
