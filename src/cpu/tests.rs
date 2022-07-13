@@ -269,7 +269,7 @@ fn sub_r() {
 
     let b: u8 = cpu.registers.b;
 
-    instructions::sub_r_r(&mut cpu, b);
+    instructions::sub_a_r(&mut cpu, b);
 
     //Check resulting register value and flags
     let check = vec![cpu.registers.a, cpu.registers.f.data];
@@ -288,7 +288,7 @@ fn sbc_r() {
 
     let b: u8 = cpu.registers.b;
 
-    instructions::sbc_r_r(&mut cpu, b);
+    instructions::sbc_a_r(&mut cpu, b);
 
     //Check resulting register value and flags
     let check = vec![cpu.registers.a, cpu.registers.f.data];
@@ -306,7 +306,7 @@ fn sub_r_borrow() {
 
     let b: u8 = cpu.registers.b;
 
-    instructions::sub_r_r(&mut cpu, b);
+    instructions::sub_a_r(&mut cpu, b);
 
     //Check resulting register value and flags
     let check = vec![cpu.registers.a, cpu.registers.f.data];
@@ -325,7 +325,7 @@ fn sbc_r_borrow_set() {
 
     let b: u8 = cpu.registers.b;
 
-    instructions::sbc_r_r(&mut cpu, b);
+    instructions::sbc_a_r(&mut cpu, b);
 
     //Check resulting register value and flags
     let check = vec![cpu.registers.a, cpu.registers.f.data];
@@ -345,7 +345,7 @@ fn and_a_hl_test() {
 
     interconnect.write_mem(addr, 0xA0);
 
-    and_r_r(&mut cpu, interconnect.read_mem(addr));
+    and_a_r(&mut cpu, interconnect.read_mem(addr));
 
     assert_eq!(cpu.registers.a, 0xA0);
 }
