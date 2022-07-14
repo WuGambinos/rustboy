@@ -1,5 +1,6 @@
 use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
+use crate::ppu::PPU;
 use crate::{Mmu, Timer};
 
 /// Struct used to link CPU to other components of system
@@ -9,6 +10,7 @@ use crate::{Mmu, Timer};
 pub struct Interconnect {
     pub mmu: Mmu,
     pub timer: Timer,
+    pub ppu: PPU,
 }
 
 impl Interconnect {
@@ -17,6 +19,7 @@ impl Interconnect {
         Self {
             mmu: Mmu::new(),
             timer: Timer::new(),
+            ppu: PPU::new(),
         }
     }
 
@@ -32,6 +35,8 @@ impl Interconnect {
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_write(addr, value);
+        } else if (0xFE00..=0xFE9F).contains(&addr) {
+            self.ppu.write_oam(addr, value);
         } else {
             self.mmu.memory[addr as usize] = value;
         }
@@ -41,6 +46,8 @@ impl Interconnect {
     pub fn read_mem(&self, addr: u16) -> u8 {
         if (0xFF04..=0xFF07).contains(&addr) {
             self.timer.timer_read(addr)
+        } else if (0xFE00..=0xFE9F).contains(&addr) {
+            self.ppu.read_oam(addr)
         } else {
             self.mmu.memory[addr as usize]
         }
