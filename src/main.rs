@@ -10,15 +10,24 @@ pub use mmu::Mmu;
 use cpu::timer::Timer;
 use gameboy::GameBoy;
 
-use raylib::prelude::*;
 use std::env;
 use std::fs;
 use std::path::Path;
 
 #[macro_use]
 extern crate text_io;
+extern crate sdl2;
+
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use std::time::Duration;
 
 fn main() {
+    const SCREEN_WIDTH: u32 = 1024;
+    const SCREEN_HEIGHT: u32 = 768;
+    const SCALE: i32 = 4;
+
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
     let test_rom = args[1].as_str();
@@ -38,17 +47,16 @@ fn main() {
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x100;
 
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
+
+    let window = video_subsystem
+        .window("Rustboy", SCREEN_WIDTH, SCREEN_HEIGHT)
+        .position_centered()
+        .build()
+        .unwrap();
+
     loop {
-
-        // Setup Raylib Window
-       /* let (mut rl, thread) = raylib::init().size(640, 480).title("Rustboy").build();
-
-        while !rl.window_should_close() {
-            let mut d = rl.begin_drawing(&thread);
-
-            d.clear_background(Color::WHITE);
-            d.draw_text("Hello World", 12, 12, 20, Color::BLACK);
-        }*/
         if !game_boy.cpu.halted {
             game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
             if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
@@ -67,6 +75,8 @@ fn main() {
         }
     }
 }
+
+fn update() {}
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector

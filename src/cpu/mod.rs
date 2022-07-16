@@ -4,81 +4,81 @@ pub mod interrupts;
 use crate::cpu::instructions::*;
 use crate::interconnect::Interconnect;
 
-// /Struct that represents flags of the Gameboy CPU
+///Struct that represents flags of the Gameboy CPU
 #[derive(Debug)]
 pub struct Flags {
     pub data: u8,
 }
 
 impl Flags {
-    // / Constructor
+    /// Constructor
     fn new() -> Self {
         Flags { data: 0x80 }
     }
 
-    // / Retrieves Zero Flag
+    /// Retrieves Zero Flag
     pub fn zero_flag(&self) -> u8 {
         (self.data >> 7) & 1
     }
 
-    // / Retrieves Sub Flag
+    /// Retrieves Sub Flag
     pub fn sub_flag(&self) -> u8 {
         (self.data >> 6) & 1
     }
 
-    // / Retrieves Half Carry Flag
+    /// Retrieves Half Carry Flag
     pub fn half_carry_flag(&self) -> u8 {
         (self.data >> 5) & 1
     }
 
-    // / Retrieves Carry Flag
+    /// Retrieves Carry Flag
     pub fn carry_flag(&self) -> u8 {
         (self.data >> 4) & 1
     }
 
-    // / Set Zero Flag
+    /// Set Zero Flag
     pub fn set_zero_flag(&mut self) {
         self.data |= 1 << 7;
     }
 
-    // / Clear Zero Flag
+    /// Clear Zero Flag
     pub fn clear_zero_flag(&mut self) {
         self.data &= !(1 << 7);
     }
 
-    // / Set Sub Flag
+    /// Set Sub Flag
     pub fn set_sub_flag(&mut self) {
         self.data |= 1 << 6;
     }
 
-    // / Clear Sub Flag
+    /// Clear Sub Flag
     pub fn clear_sub_flag(&mut self) {
         self.data &= !(1 << 6);
     }
 
-    // / Set Half Carry Flag
+    /// Set Half Carry Flag
     pub fn set_half_carry_flag(&mut self) {
         self.data |= 1 << 5;
     }
 
-    // / Clear Half Carry Flag
+    /// Clear Half Carry Flag
     pub fn clear_half_carry_flag(&mut self) {
         self.data &= !(1 << 5)
     }
 
-    // / Set Carry Flag
+    /// Set Carry Flag
     pub fn set_carry_flag(&mut self) {
         self.data |= 1 << 4;
     }
 
-    // / Clear Carry Flag
+    /// Clear Carry Flag
     pub fn clear_carry_flag(&mut self) {
         self.data &= !(1 << 4);
     }
 
-    // / Updates Carry flag
-    // /
-    // / Carry flag is set when operation results in overflow
+    /// Updates Carry flag
+    ///
+    /// Carry flag is set when operation results in overflow
     pub fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         let mut res: u16 = (register as u16) + (operand as u16);
 
@@ -115,9 +115,9 @@ impl Flags {
         }
     }
 
-    // / Updates the half carry flag when there is an addition
-    // /
-    // / In 8bit addition, half carry is set when there is a carry from bit 3 to bit
+    /// Updates the half carry flag when there is an addition
+    ///
+    /// In 8bit addition, half carry is set when there is a carry from bit 3 to bit
     fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         if ((register & 0xF) + (operand & 0xF)) > 0xF {
             self.set_half_carry_flag();
@@ -136,7 +136,7 @@ impl Flags {
         }
     }
 
-    // Updates the half carry flag where there is a subtraction
+    /// Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
         if (register & 0xF) < (operand & 0xF) {
             self.set_half_carry_flag();
@@ -153,9 +153,9 @@ impl Flags {
         }
     }
 
-    // / Updates the zero flag
-    // /
-    // / Zero flag is set when operation results in 0
+    /// Updates the zero flag
+    ///
+    /// Zero flag is set when operation results in 0
     fn update_zero_flag(&mut self, v: u8) {
         if v == 0 {
             self.set_zero_flag();
@@ -165,36 +165,36 @@ impl Flags {
     }
 }
 
-// / Struct that represents registers for the Gameboy CPU
+/// Struct that represents registers for the Gameboy CPU
 #[derive(Debug)]
 pub struct Registers {
-    // / Accumulator
+    /// Accumulator
     pub a: u8,
 
-    // / B Register
+    /// B Register
     pub b: u8,
 
-    // / C Register
+    /// C Register
     pub c: u8,
 
-    // / D Register
+    /// D Register
     pub d: u8,
 
-    // / E Register
+    /// E Register
     pub e: u8,
 
-    // / H Register
+    /// H Register
     pub h: u8,
 
-    // / L Register
+    /// L Register
     pub l: u8,
 
-    // / F Register (FLAGS)
+    /// F Register (FLAGS)
     pub f: Flags,
 }
 
 impl Registers {
-    // / Constructor
+    /// Constructor
     pub fn new() -> Self {
         Registers {
             a: 0x11,
@@ -208,48 +208,48 @@ impl Registers {
         }
     }
 
-    // / Retrieve register pair BC
+    /// Retrieve register pair BC
     pub fn bc(&self) -> u16 {
         u16::from_be_bytes([self.b, self.c])
     }
 
-    // / Store value in register pair BC
+    /// Store value in register pair BC
     pub fn set_bc(&mut self, data: u16) {
         let [b, c] = data.to_be_bytes();
         self.b = b;
         self.c = c;
     }
 
-    // / Retrieve register pair DE
+    /// Retrieve register pair DE
     pub fn de(&self) -> u16 {
         u16::from_be_bytes([self.d, self.e])
     }
 
-    // / Store value in register pair DE
+    /// Store value in register pair DE
     pub fn set_de(&mut self, data: u16) {
         let [d, e] = data.to_be_bytes();
         self.d = d;
         self.e = e;
     }
 
-    // / Retrieve register pair HL
+    /// Retrieve register pair HL
     pub fn hl(&self) -> u16 {
         u16::from_be_bytes([self.h, self.l])
     }
 
-    // / Store value in register pair HL
+    /// Store value in register pair HL
     pub fn set_hl(&mut self, data: u16) {
         let [h, l] = data.to_be_bytes();
         self.h = h;
         self.l = l;
     }
 
-    // / Get Register Pair AF
+    /// Get Register Pair AF
     pub fn af(&self) -> u16 {
         u16::from_be_bytes([self.a, self.f.data])
     }
 
-    // / Store value in register pair AF
+    /// Store value in register pair AF
     pub fn set_af(&mut self, data: u16) {
         let [a, f] = data.to_be_bytes();
         self.a = a;
@@ -263,31 +263,31 @@ impl Default for Registers {
     }
 }
 
-// / Struct that represents the gameboy cpu
+/// Struct that represents the gameboy cpu
 #[derive(Debug)]
 pub struct Cpu {
-    // / Registers
+    /// Registers
     pub registers: Registers,
 
-    // / Stack pointer
+    /// Stack pointer
     pub sp: u16,
 
-    // / Program counter
+    /// Program counter
     pub pc: u16,
 
-    // / Interrupt Master Enable
+    /// Interrupt Master Enable
     pub ime: bool,
 
-    // / Help with enabled IME
+    /// Help with enabled IME
     pub ime_to_be_enabled: bool,
 
-    // / Halt
+    /// Halt
     pub halted: bool,
 
-    // / Current opcode
+    /// Current opcode
     pub opcode: u8,
 
-    // / Last Cycle
+    /// Last Cycle
     pub last_cycle: u64,
 }
 
@@ -298,7 +298,7 @@ impl Default for Cpu {
 }
 
 impl Cpu {
-    // / Constructor
+    /// Constructor
     pub fn new() -> Self {
         Cpu {
             registers: Registers::new(),
@@ -312,7 +312,7 @@ impl Cpu {
         }
     }
 
-    // / Handle Interrupts
+    /// Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
         const INTERRUPT_IE: u16 = 0xFFFF;
         const INTERRUPT_F: u16 = 0xFF0F;
