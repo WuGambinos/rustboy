@@ -33,10 +33,12 @@ impl Interconnect {
 
     /// Write u8 to memory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
-        if (0xFF04..=0xFF07).contains(&addr) {
-            self.timer.timer_write(addr, value);
+        if (0x8000..0x9FFF).contains(&addr) {
+            self.ppu.write_vram(addr, value);
         } else if (0xFE00..=0xFE9F).contains(&addr) {
             self.ppu.write_oam(addr, value);
+        } else if (0xFF04..=0xFF07).contains(&addr) {
+            self.timer.timer_write(addr, value);
         } else {
             self.mmu.memory[addr as usize] = value;
         }
@@ -44,10 +46,12 @@ impl Interconnect {
 
     /// Read u8 value from memory
     pub fn read_mem(&self, addr: u16) -> u8 {
-        if (0xFF04..=0xFF07).contains(&addr) {
-            self.timer.timer_read(addr)
+        if (0x8000..0x9FFF).contains(&addr) {
+            self.ppu.read_vram(addr)
         } else if (0xFE00..=0xFE9F).contains(&addr) {
             self.ppu.read_oam(addr)
+        } else if (0xFF04..=0xFF07).contains(&addr) {
+            self.timer.timer_read(addr)
         } else {
             self.mmu.memory[addr as usize]
         }
