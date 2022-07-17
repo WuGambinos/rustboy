@@ -31,6 +31,16 @@ impl Interconnect {
         );
     }
 
+    pub fn print_vram(&self) {
+        for i in 0x8000..0x9FFF {
+            println!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
+        }
+    }
+
+    pub fn print_oam() {
+
+    }
+
     /// Write u8 to memory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if (0x8000..0x9FFF).contains(&addr) {
@@ -61,6 +71,7 @@ impl Interconnect {
     pub fn read_rom(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
+            println!("i: {:#X}", i);
         }
     }
 
