@@ -37,33 +37,92 @@ impl Interconnect {
         }
     }
 
-    pub fn print_oam() {
-
-    }
+    pub fn print_oam() {}
 
     /// Write u8 to memory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
-        if (0x8000..0x9FFF).contains(&addr) {
+        // ROM Bank
+        if (0x0000..0x8000).contains(&addr) {
+            self.mmu.rom_bank[addr as usize] = value;
+        }
+        // VRAM
+        else if (0x8000..0xA000).contains(&addr) {
             self.ppu.write_vram(addr, value);
-        } else if (0xFE00..=0xFE9F).contains(&addr) {
+        }
+        // External RAM
+        else if (0xA000..0xC000).contains(&addr) {
+            self.mmu.external_ram[(addr - 0xA000) as usize] = value;
+        }
+        // Work RAM
+        else if (0xC000..0xE000).contains(&addr) {
+            self.mmu.work_ram[(addr - 0xC000) as usize] = value;
+        }
+        // OAM
+        else if (0xFE00..0xFEA0).contains(&addr) {
             self.ppu.write_oam(addr, value);
-        } else if (0xFF04..=0xFF07).contains(&addr) {
+        }
+        // Timer
+        else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_write(addr, value);
+        }
+        // IO registers
+        else if (0xFF00..0xFF80).contains(&addr) {
+            self.mmu.io[(addr - 0xFF00) as usize] = value;
+        }
+        // High RAM (HRAM)
+        else if (0xFF80..0xFFFF).contains(&addr) {
+            self.mmu.hram[(addr - 0xFF80) as usize] = value;
+        }
+        // Interrupt Enable
+        else if addr == 0xFFFF {
+            self.mmu.interrupt_enable = value;
         } else {
-            self.mmu.memory[addr as usize] = value;
+            println!("UNREACHABLE Addr: {:#X}", addr);
         }
     }
 
     /// Read u8 value from memory
     pub fn read_mem(&self, addr: u16) -> u8 {
-        if (0x8000..0x9FFF).contains(&addr) {
+        // ROM Bank
+        if (0x0000..0x8000).contains(&addr) {
+            self.mmu.rom_bank[addr as usize]
+        }
+        // VRAM
+        else if (0x8000..0xA000).contains(&addr) {
             self.ppu.read_vram(addr)
-        } else if (0xFE00..=0xFE9F).contains(&addr) {
+        }
+        // External RAM
+        else if (0xA000..0xC000).contains(&addr) {
+            self.mmu.external_ram[(addr - 0xA000) as usize]
+        }
+        // Work RAM
+        else if (0xC000..0xE000).contains(&addr) {
+            self.mmu.work_ram[(addr - 0xC000) as usize]
+        }
+        // OAM
+        else if (0xFE00..0xFEA0).contains(&addr) {
             self.ppu.read_oam(addr)
-        } else if (0xFF04..=0xFF07).contains(&addr) {
+        }
+        // Timer
+        else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
-        } else {
-            self.mmu.memory[addr as usize]
+        }
+        // IO Regsiters
+        else if (0xFF00..0xFF80).contains(&addr) {
+            self.mmu.io[(addr - 0xFF00) as usize]
+        }
+        // High RAM
+        else if (0xFF80..0xFFFF).contains(&addr) {
+            self.mmu.hram[(addr - 0xFF80) as usize]
+        }
+
+        // Interrupt Enable
+        else if addr == 0xFFFF {
+            self.mmu.interrupt_enable
+        }
+        else {
+            println!("NOT REACHABLE ADDR: {:#X}", addr);
+            0
         }
     }
 

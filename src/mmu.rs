@@ -1,10 +1,24 @@
 /// Memory Mapped Unit
 #[derive(Debug)]
 pub struct Mmu {
-    pub memory: [u8; 0x10000],
-    /*rom_bank: [u8; 16384],
-    extra_rom_bank: [u8; 16384],
+    //pub memory: [u8; 0x10000],
+    /// ROM Bank
+    pub rom_bank: [u8; 0x8000],
 
+    /// IO Registers
+    pub io: [u8; 0x80],
+
+    /// High RAM (HRAM)
+    pub hram: [u8; 0x7F],
+
+    /// External RAM
+    pub external_ram: [u8; 0x2000],
+
+    /// Work RAM
+    pub work_ram: [u8; 0x2000],
+
+    pub interrupt_enable: u8,
+    /*
     //Video Ram
     video_ram: [u8; 8192],
 
@@ -34,11 +48,16 @@ impl Default for Mmu {
 }
 
 impl Mmu {
-
     /// Constructor
     pub fn new() -> Self {
         Mmu {
-            memory: [0; 0x10000],
+            //memory: [0; 0x10000],
+            rom_bank: [0; 0x8000],
+            io: [0; 0x80],
+            hram: [0; 0x7F],
+            external_ram: [0; 0x2000],
+            work_ram: [0; 0x2000],
+            interrupt_enable: 0,
         }
     }
 
