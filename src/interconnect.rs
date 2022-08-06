@@ -37,7 +37,13 @@ impl Interconnect {
         }
     }
 
-    pub fn print_oam() {}
+    pub fn dma_transfer(&mut self, value: u8) {
+        let addr: u16 = (value as u16) << 8;
+
+        for i in 0..0xA0 {
+            self.write_mem(0xFE00 + i, self.read_mem(addr + i));
+        }
+    }
 
     /// Write u8 to memory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
@@ -64,6 +70,12 @@ impl Interconnect {
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_write(addr, value);
+        }
+        // Trigger DMA
+        else if addr == 0xFF46 {
+            self.dma_transfer(value);
+            println!("DMA TRIGGERED");
+            std::process::exit(0);
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -115,12 +127,10 @@ impl Interconnect {
         else if (0xFF80..0xFFFF).contains(&addr) {
             self.mmu.hram[(addr - 0xFF80) as usize]
         }
-
         // Interrupt Enable
         else if addr == 0xFFFF {
             self.mmu.interrupt_enable
-        }
-        else {
+        } else {
             println!("NOT REACHABLE ADDR: {:#X}", addr);
             0
         }

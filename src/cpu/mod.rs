@@ -377,6 +377,10 @@ impl Cpu {
         // Fetch opcode
         self.fetch(interconnect);
 
+        println!(
+            "PC: {:#X} OPCODE: {:#X} A: {:#X}",
+            self.pc, self.opcode, self.registers.a
+        );
         match self.opcode {
             // NOP
             0x00 => {
@@ -5693,7 +5697,7 @@ impl Cpu {
             // RET C
             0xD8 => ret_c(self, interconnect),
 
-            // RETI 
+            // RETI
             0xD9 => {
                 ret(self, interconnect);
                 ei(self);
@@ -5754,7 +5758,6 @@ impl Cpu {
 
                 // Increase Timer
                 interconnect.emu_cycles(2);
-
             }
 
             // POP HL
@@ -5863,7 +5866,6 @@ impl Cpu {
                 // SP = SP + i8
                 self.sp = c;
 
-
                 // Increase Program Counter
                 self.pc += 2;
 
@@ -5882,11 +5884,11 @@ impl Cpu {
             // LD (u16), A
             0xEA => {
                 let u16_value = self.get_u16(interconnect);
-                
+
                 //Increase Timer
                 interconnect.emu_cycles(2);
                 interconnect.write_mem(u16_value, self.registers.a);
-                
+
                 // Increase Timer
                 interconnect.emu_cycles(2);
 

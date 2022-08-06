@@ -17,7 +17,6 @@ use std::path::Path;
 
 #[macro_use]
 extern crate text_io;
-extern crate sdl2;
 
 use raylib::prelude::*;
 use std::time::Duration;
