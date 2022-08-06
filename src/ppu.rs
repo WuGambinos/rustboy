@@ -1,4 +1,5 @@
 use modular_bitfield::prelude::*;
+
 /// Single Entry in OAM (Object Atribute Memory)
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
