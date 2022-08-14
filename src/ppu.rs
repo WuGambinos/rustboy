@@ -29,6 +29,25 @@ pub struct OamEntry {
     cbg_pn: B3,
 }
 
+#[derive(Debug)]
+pub struct Dma {
+    pub active: bool,
+    pub byte: u8,
+    pub value: u8,
+    pub start_delay: u8,
+}
+
+impl Dma {
+    fn new() -> Self {
+        Self {
+            active: false,
+            byte: 0,
+            start_delay: 0,
+            value: 0,
+        }
+    }
+}
+
 /// Pixel Processing Unit
 ///
 /// Used to display graphics
@@ -39,6 +58,8 @@ pub struct PPU {
 
     //OAM
     oam: [OamEntry; 40],
+
+    pub dma: Dma,
 }
 
 impl PPU {
@@ -47,6 +68,7 @@ impl PPU {
         Self {
             vram: [0; 0x2000],
             oam: [OamEntry::new(); 40],
+            dma: Dma::new(),
         }
     }
 
@@ -69,4 +91,5 @@ impl PPU {
     }
 
     pub fn tick() {}
+
 }

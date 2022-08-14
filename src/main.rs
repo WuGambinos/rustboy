@@ -32,12 +32,19 @@ fn main() {
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
     let test_rom = args[1].as_str();
+    let boot_rom = "roms/blaargs/boot-rom.gb";
 
     // Path to rom
     let rom_path: &Path = Path::new(test_rom);
 
+    // Path to boot rom
+    let boot_path: &Path = Path::new(boot_rom);
+
     // Contents of rom
     let rom: Vec<u8> = read_file(rom_path).unwrap();
+
+    // Contents of boot rom
+    let boot: Vec<u8> = read_file(boot_path).unwrap();
 
     // GameBoy
     let mut game_boy: GameBoy = GameBoy::new();
@@ -45,19 +52,39 @@ fn main() {
     // Read Rom into memory
     game_boy.interconnect.read_rom(&rom);
 
-    // Put PC at beginning of ROM
-    game_boy.cpu.pc = 0x100;
+    // Read boot rom into memory
+    game_boy.interconnect.read_boot(&boot);
 
-    /*let (mut rl, thread) = raylib::init()
+    // Put PC at beginning of ROM
+    game_boy.cpu.pc = 0x000;
+
+    let (mut rl, thread) = raylib::init()
         .size(DEBUG_WIDTH, DEBUG_HEIGHT)
         .title("Debug")
         .build();
-    
+
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
 
         window::update_debug_window(&mut d, &game_boy.interconnect);
-    }*/
+        // GAME LOOP GOES HERE
+        if !game_boy.cpu.halted {
+            game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
+            if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
+                let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
+                print!("{}", c);
+                game_boy.interconnect.write_mem(0xff02, 0x0);
+            }
+        } else {
+            game_boy.interconnect.emu_cycles(1);
+
+            let IF = game_boy.interconnect.read_mem(0xFF0F);
+
+            if IF != 0 {
+                game_boy.cpu.halted = false;
+            }
+        }
+    }
 
     loop {
         // GAME LOOP GOES HERE
@@ -78,8 +105,6 @@ fn main() {
             }
         }
     }
-
-
 }
 
 fn update() {}

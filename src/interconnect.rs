@@ -1,7 +1,11 @@
+use core::time;
+
 use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
 use crate::ppu::PPU;
 use crate::{Mmu, Timer};
+
+static mut ly: u8 = 0;
 
 /// Struct used to link CPU to other components of system
 ///
@@ -32,7 +36,7 @@ impl Interconnect {
     }
 
     pub fn print_vram(&self) {
-        for i in 0x8000..0x9FFF {
+        for i in (0x8000..0x9FFF).rev() {
             println!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
         }
     }
@@ -73,7 +77,7 @@ impl Interconnect {
         }
         // Trigger DMA
         else if addr == 0xFF46 {
-            self.dma_transfer(value);
+            self.dma_start(value);
             println!("DMA TRIGGERED");
             std::process::exit(0);
         }
@@ -118,6 +122,13 @@ impl Interconnect {
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
+        } else if addr == 0xFF44 {
+            unsafe {
+                let new_ly = ly.wrapping_add(1);
+                ly = new_ly;
+
+                ly
+            }
         }
         // IO Regsiters
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -138,6 +149,13 @@ impl Interconnect {
 
     /// Read gameboy rom and write it into memory
     pub fn read_rom(&mut self, rom: &[u8]) {
+        for (i, _) in rom.iter().enumerate() {
+            self.write_mem(i as u16, rom[i]);
+        }
+    }
+
+    // Read gameboy boot rom and write it into memory
+    pub fn read_boot(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
@@ -166,6 +184,41 @@ impl Interconnect {
                     interrupt_request(self, InterruptType::Timer);
                 }
             }
+        }
+
+        self.dma_tick();
+    }
+
+    pub fn dma_start(&mut self, value: u8) {
+        self.ppu.dma.active = true;
+        self.ppu.dma.byte = 0;
+        self.ppu.dma.start_delay = 2;
+        self.ppu.dma.value = value;
+    }
+
+    pub fn dma_tick(&mut self) {
+        if !self.ppu.dma.active {
+            return;
+        }
+
+        if self.ppu.dma.start_delay > 0 {
+            self.ppu.dma.start_delay = self.ppu.dma.start_delay.wrapping_sub(1);
+            return;
+        }
+
+        let addr: u16 = (((self.ppu.dma.value as u16) * 0x100) as u16) + (self.ppu.dma.byte as u16);
+
+        self.ppu
+            .write_oam(self.ppu.dma.byte as u16, self.read_mem(addr));
+
+        self.ppu.dma.byte = self.ppu.dma.byte.wrapping_add(1);
+
+        self.ppu.dma.active = self.ppu.dma.byte < 0xA0;
+
+        if !self.ppu.dma.active {
+            println!("DMA DONE!");
+            let secs = time::Duration::from_secs(2);
+            std::thread::sleep(secs);
         }
     }
 }
