@@ -58,7 +58,7 @@ fn main() {
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x000;
 
-    let (mut rl, thread) = raylib::init()
+    /*let (mut rl, thread) = raylib::init()
         .size(DEBUG_WIDTH, DEBUG_HEIGHT)
         .title("Debug")
         .build();
@@ -84,10 +84,14 @@ fn main() {
                 game_boy.cpu.halted = false;
             }
         }
-    }
+    }*/
 
     loop {
         // GAME LOOP GOES HERE
+        if game_boy.cpu.pc > 0x100 {
+            game_boy.interconnect.print_vram();
+            break;
+        }
         if !game_boy.cpu.halted {
             game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
             if game_boy.interconnect.read_mem(0xFF02) == 0x81 {

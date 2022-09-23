@@ -377,10 +377,10 @@ impl Cpu {
         // Fetch opcode
         self.fetch(interconnect);
 
-        /*println!(
+        println!(
             "PC: {:#X} OPCODE: {:#X} A: {:#X}",
             self.pc, self.opcode, self.registers.a
-        );*/
+        );
         match self.opcode {
             // NOP
             0x00 => {

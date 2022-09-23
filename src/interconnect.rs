@@ -93,7 +93,7 @@ impl Interconnect {
         else if addr == 0xFFFF {
             self.mmu.interrupt_enable = value;
         } else {
-            println!("UNREACHABLE Addr: {:#X}", addr);
+            //println!("UNREACHABLE Addr: {:#X}", addr);
         }
     }
 
@@ -126,7 +126,6 @@ impl Interconnect {
             unsafe {
                 let new_ly = ly.wrapping_add(1);
                 ly = new_ly;
-
                 ly
             }
         }
@@ -142,7 +141,7 @@ impl Interconnect {
         else if addr == 0xFFFF {
             self.mmu.interrupt_enable
         } else {
-            println!("NOT REACHABLE ADDR: {:#X}", addr);
+            //println!("NOT REACHABLE ADDR: {:#X}", addr);
             0
         }
     }
