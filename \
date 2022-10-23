@@ -26,8 +26,8 @@ fn main() {
     const SCREEN_HEIGHT: u32 = 768;
     const SCALE: i32 = 4;
 
-    //const DEBUG_WIDTH: i32 = 16 * 8 * SCALE;
-    //const DEBUG_HEIGHT: i32 = 32 * 8 * SCALE;
+    const DEBUG_WIDTH: i32 = 16 * 8 * SCALE;
+    const DEBUG_HEIGHT: i32 = 32 * 8 * SCALE;
 
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
@@ -53,13 +53,13 @@ fn main() {
     game_boy.interconnect.read_rom(&rom);
 
     // Read boot rom into memory
-    game_boy.interconnect.read_boot(&boot);
+    //game_boy.interconnect.read_boot(&boot);
 
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x000;
 
     let (mut rl, thread) = raylib::init()
-        .size(SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32)
+        .size(DEBUG_WIDTH as i32, DEBUG_HEIGHT as i32)
         .title("Debug")
         .build();
 
@@ -158,7 +158,7 @@ fn display_tile(
     for tile_y in (0..16).step_by(2) {
         let addr: u16 = start_loc + (tile_num * 16) + tile_y;
 
-        /*let b1: u8 = interconnect.read_mem(addr);
+        let b1: u8 = interconnect.read_mem(addr);
         let b2: u8 = interconnect.read_mem(addr + 1);
 
         for bit in (0..7).rev() {
@@ -180,9 +180,10 @@ fn display_tile(
             let w = SCALE as i32;
             let h = SCALE as i32;
             //println!("ADDR_VALUE: {:#X} ADDR1_VALUE {:#X} ADDR: {:#X} ADDR+1: {:#X} HI: {:#X} LO: {:#X} COLOR: {}",b1, b2, addr, addr +1, hi, lo, color);
+
             canvas.draw_rectangle(new_x, new_y, w, h, TILE_COLORS[color as usize]);
-        }*/
-        //Get First BYTE
+        }
+        /* //Get First BYTE
         let second_byte: u8 = interconnect.read_mem(addr);
 
         //Get Second BYTE
@@ -208,8 +209,8 @@ fn display_tile(
 
             let w = SCALE as i32;
             let h = SCALE as i32;
-            canvas.draw_rectangle(new_x, new_y, w, h,TILE_COLORS[color as usize]);
-        }
+            canvas.draw_rectangle(new_x, new_y, w, h, tile_colors[color as usize]);
+        }*/
     }
 }
 
