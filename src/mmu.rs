@@ -1,7 +1,11 @@
 /// Memory Mapped Unit
 #[derive(Debug)]
 pub struct Mmu {
+
     //pub memory: [u8; 0x10000],
+
+    /// BOOT ROM
+    pub boot: [u8; 0x100],
     /// ROM Bank
     pub rom_bank: [u8; 0x8000],
 
@@ -52,6 +56,7 @@ impl Mmu {
     pub fn new() -> Self {
         Mmu {
             //memory: [0; 0x10000],
+            boot: [0; 0x100],
             rom_bank: [0; 0x8000],
             io: [0; 0x80],
             hram: [0; 0x7F],

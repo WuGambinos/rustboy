@@ -13,8 +13,8 @@ pub fn update_debug_window(canvas: &mut RaylibDrawHandle, interconnect: &Interco
     let w: u32 = 16 * 8 * 4;
     let h: u32 = 32 * 8 * 4;
 
-    canvas.clear_background(Color::GRAY);
-
+    //canvas.clear_background(Color::GRAY);
+    canvas.clear_background(Color::WHITE);
     let addr: u16 = 0x8000;
 
     // 384 tiles 24x16
