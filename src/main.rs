@@ -123,8 +123,8 @@ fn debug_window(canvas: &mut RaylibDrawHandle, interconnect: &Interconnect) {
     let mut y_draw = 0;
     let mut tile_num = 0;
 
-    let w: u32 = 16 * 8 * 4;
-    let h: u32 = 32 * 8 * 4;
+    let _w: u32 = 16 * 8 * 4;
+    let _h: u32 = 32 * 8 * 4;
 
     canvas.clear_background(Color::WHITE);
     let addr: u16 = 0x8000;
@@ -182,13 +182,16 @@ fn display_tile(
             //println!("ADDR_VALUE: {:#X} ADDR1_VALUE {:#X} ADDR: {:#X} ADDR+1: {:#X} HI: {:#X} LO: {:#X} COLOR: {}",b1, b2, addr, addr +1, hi, lo, color);
             canvas.draw_rectangle(new_x, new_y, w, h, TILE_COLORS[color as usize]);
         }*/
-        //Get First BYTE
+        // Get First BYTE
         let second_byte: u8 = interconnect.read_mem(addr);
 
-        //Get Second BYTE
+        // Get Second BYTE
         let first_byte: u8 = interconnect.read_mem(addr + 1);
 
+        // Index for tile color
         let mut color: u8 = 0;
+
+        // Iterate over bits of first and second byte
         for bit in (0..7).rev() {
             let first_bit = (first_byte >> bit) & 1;
             let second_bit = (second_byte >> bit) & 1;
@@ -201,7 +204,6 @@ fn display_tile(
             } else {
                 color = 3;
             }
-
 
             let new_x = (x as i32) + ((7 - bit) * SCALE);
             let new_y = (y as i32) + ((tile_y as i32) / 2 * SCALE);
