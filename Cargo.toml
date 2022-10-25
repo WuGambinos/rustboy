@@ -9,3 +9,4 @@ edition = "2021"
 raylib = {version = "3.7"}
 text_io = "0.1.9"
 modular-bitfield = "0.11.2"
+sdl2 = "0.35.2"
