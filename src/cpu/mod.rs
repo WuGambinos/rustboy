@@ -13,7 +13,7 @@ pub struct Flags {
 impl Flags {
     /// Constructor
     fn new() -> Self {
-        Flags { data: 0x80 }
+        Flags { data: 0xB0 }
     }
 
     /// Retrieves Zero Flag
@@ -197,13 +197,13 @@ impl Registers {
     /// Constructor
     pub fn new() -> Self {
         Registers {
-            a: 0x11,
+            a: 0x01,
             b: 0x00,
-            c: 0x00,
-            d: 0xFF,
-            e: 0x56,
-            h: 0x00,
-            l: 0x00,
+            c: 0x13,
+            d: 0x00,
+            e: 0xD8,
+            h: 0x01,
+            l: 0x4D,
             f: Flags::new(),
         }
     }
@@ -349,7 +349,7 @@ impl Cpu {
         push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
 
         // Set PC equal to address of handler
-        self.pc = 0x50;
+        self.pc = 0x40;
 
         // Clean up the interrupt
         let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
@@ -376,11 +376,36 @@ impl Cpu {
 
         // Fetch opcode
         self.fetch(interconnect);
-
+        
         /*println!(
-            "PC: {:#X} OPCODE: {:#X} A: {:#X}",
-            self.pc, self.opcode, self.registers.a
-        );*/
+            "PC: {:#X} OPCODE: {:#X} F: {:#X} MEM[PC+1]: {:#X}",
+            self.pc,
+            self.opcode,
+            self.registers.f.data,
+            interconnect.read_mem(self.pc + 1),
+        );
+
+        println!(
+            "MEM[FF0F]: {:#X} MEM[FFFF]: {:#X}",
+            interconnect.read_mem(0xFF0F),
+            interconnect.read_mem(0xFFFF)
+        );
+        
+
+        println!(
+            "LY: {} A: {:#X} B: {:#X} C: {:#X} D: {:#X} E: {:#X} H: {:#X} L: {:#X}",
+            Interconnect::get_ly(),
+            self.registers.a,
+            self.registers.b,
+            self.registers.c,
+            self.registers.d,
+            self.registers.e,
+            self.registers.h,
+            self.registers.l,
+        );
+        println!();
+        */
+
         match self.opcode {
             // NOP
             0x00 => {

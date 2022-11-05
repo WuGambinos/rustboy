@@ -27,6 +27,12 @@ impl Interconnect {
         }
     }
 
+    pub fn get_ly() -> u8 {
+        unsafe {
+            return ly;
+        }
+    }
+
     /// Prints the state of the Timer
     pub fn print_timer(&self) {
         println!(
@@ -78,7 +84,7 @@ impl Interconnect {
         // Trigger DMA
         else if addr == 0xFF46 {
             self.dma_start(value);
-            println!("DMA TRIGGERED");
+            println!("DMA START");
             std::process::exit(0);
         }
         // IO registers
@@ -94,6 +100,7 @@ impl Interconnect {
             self.mmu.interrupt_enable = value;
         } else {
             //println!("UNREACHABLE Addr: {:#X}", addr);
+            
         }
     }
 
@@ -122,11 +129,14 @@ impl Interconnect {
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
-        } else if addr == 0xFF44 {
+        }
+
+        else if addr == 0xFF44 {
             unsafe {
+                let old_ly = ly;
                 let new_ly = ly.wrapping_add(1);
                 ly = new_ly;
-                ly
+                old_ly
             }
         }
         // IO Regsiters
@@ -185,7 +195,9 @@ impl Interconnect {
             }
         }
 
-        self.dma_tick();
+        for _ in 0..(cyc / 4) {
+            self.dma_tick();
+        }
     }
 
     pub fn dma_start(&mut self, value: u8) {
