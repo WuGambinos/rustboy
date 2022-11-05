@@ -58,10 +58,10 @@ fn main() {
     game_boy.interconnect.read_rom(&rom);
 
     // Read boot rom into memory
-    game_boy.interconnect.read_boot(&boot);
+    //game_boy.interconnect.read_boot(&boot);
 
     // Put PC at beginning of ROM
-    game_boy.cpu.pc = 0x000;
+    game_boy.cpu.pc = 0x100;
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -75,32 +75,72 @@ fn main() {
     let mut canvas: WindowCanvas = window.into_canvas().build().unwrap();
     canvas.clear();
     canvas.present();
-
     let mut event_pump = sdl_context.event_pump().unwrap();
 
+    let mut j = 0;
+    'running: loop {
+        canvas.clear();
+        if !game_boy.cpu.halted {
+            game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
+            if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
+                let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
+                print!("{}", c);
+                game_boy.interconnect.write_mem(0xff02, 0x0);
+            }
+        } else {
+            game_boy.interconnect.emu_cycles(1);
+
+            let IF = game_boy.interconnect.read_mem(0xFF0F);
+
+            if IF != 0 {
+                game_boy.cpu.halted = false;
+            }
+        }
+        println!("J: {}", j);
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                _ => {}
+            }
+        }
+        debug_window(&mut canvas, &game_boy.interconnect);
+
+        canvas.present();
+        j += 1;
+    }
+
+    let mut i = 0;
+
     loop {
+        /*'running: loop {
+            canvas.clear();
+            for event in event_pump.poll_iter() {
+                match event {
+                    Event::Quit { .. }
+                    | Event::KeyDown {
+                        keycode: Some(Keycode::Escape),
+                        ..
+                    } => break 'running,
+                    _ => {}
+                }
+            }
+            debug_window(&mut canvas, &game_boy.interconnect);
+
+            canvas.present();
+        }*/
+
         if !game_boy.cpu.halted {
             game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
             if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
                 let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
                 print!("{}", c);
                 if c == 'd' {
-                    'running: loop {
-                        canvas.clear();
-                        for event in event_pump.poll_iter() {
-                            match event {
-                                Event::Quit { .. }
-                                | Event::KeyDown {
-                                    keycode: Some(Keycode::Escape),
-                                    ..
-                                } => break 'running,
-                                _ => {}
-                            }
-                        }
-                        debug_window(&mut canvas, &game_boy.interconnect);
-
-                        canvas.present();
-                    }
+                    println!("I: {}", i);
+                    break;
                 }
                 game_boy.interconnect.write_mem(0xff02, 0x0);
             }
@@ -113,6 +153,7 @@ fn main() {
                 game_boy.cpu.halted = false;
             }
         }
+        i += 1; 
     }
 }
 
@@ -139,8 +180,9 @@ fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
     let _w: u32 = 16 * 8 * 4;
     let _h: u32 = 32 * 8 * 4;
 
-    canvas.set_draw_color(Color::RGB(255, 255, 255));
+    canvas.set_draw_color(Color::RGB(17, 17, 17));
     canvas.clear();
+    canvas.fill_rect(sdl2::rect::Rect::new(0, 0, 800, 600));
     let addr: u16 = 0x8000;
 
     for y in 0..24 {
@@ -207,7 +249,7 @@ fn display_tile(
         let mut color: u8 = 0;
 
         // Iterate over bits of first and second byte
-        for bit in (0..7).rev() {
+        for bit in (0..8).rev() {
             let first_bit = (first_byte >> bit) & 1;
             let second_bit = (second_byte >> bit) & 1;
             if first_bit == 0 && second_bit == 0 {
@@ -220,8 +262,8 @@ fn display_tile(
                 color = 3;
             }
 
-            let new_x = (x as i32) + ((7 - bit) * SCALE );
-            let new_y = (y as i32) + ((tile_y as i32) / 2 * SCALE );
+            let new_x = (x as i32) + ((7 - bit) * SCALE);
+            let new_y = (y as i32) + ((tile_y as i32) / 2 * SCALE);
 
             let w = SCALE as u32;
             let h = SCALE as u32;
