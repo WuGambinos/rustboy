@@ -85,7 +85,7 @@ impl Interconnect {
         else if addr == 0xFF46 {
             self.dma_start(value);
             println!("DMA START");
-            std::process::exit(0);
+            //std::process::exit(0);
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -233,6 +233,7 @@ impl Interconnect {
             println!("DMA DONE!");
             let secs = time::Duration::from_secs(2);
             std::thread::sleep(secs);
+            std::process::exit(0);
         }
     }
 }
