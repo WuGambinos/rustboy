@@ -4,6 +4,7 @@ mod interconnect;
 mod mmu;
 mod ppu;
 mod window;
+mod constants;
 
 pub use cpu::Cpu;
 use interconnect::Interconnect;
@@ -17,18 +18,16 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
-#[macro_use]
+/*#[macro_use]
 extern crate text_io;
-
 extern crate sdl2;
+*/
+
 use sdl2::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
-const SCALE: i32 = 4;
-const SCREEN_WIDTH: u32 = 16 * 8 * (SCALE as u32); 
-const SCREEN_HEIGHT: u32 = 32 * 8 * (SCALE as u32);
 fn main() {
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
