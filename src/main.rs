@@ -31,8 +31,8 @@ use sdl2::*;
 fn main() {
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
-    //let test_rom = args[1].as_str();
-    let test_rom = "roms/blaargs/cpu_instrs/individual/01-special.gb";
+    let test_rom = args[1].as_str();
+    //let test_rom = "roms/blaargs/cpu_instrs/individual/01-special.gb";
     let boot_rom = "roms/blaargs/boot-rom.gb";
 
     // Path to rom

@@ -73,12 +73,12 @@ impl PPU {
     }
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
-        let index = ((addr - 0xFE00) / 4) as usize;
+        let index = ((addr - 0xFE00) % 40) as usize;
         self.oam[index] = OamEntry::from_bytes([value]);
     }
 
     pub fn read_oam(&self, addr: u16) -> u8 {
-        let index = ((addr - 0xFE00) / 4) as usize;
+        let index = ((addr - 0xFE00) % 40) as usize;
         self.oam[index].into_bytes()[0]
     }
 
@@ -91,5 +91,4 @@ impl PPU {
     }
 
     pub fn tick() {}
-
 }
