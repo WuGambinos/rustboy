@@ -1,10 +1,10 @@
+mod constants;
 mod cpu;
 mod gameboy;
 mod interconnect;
 mod mmu;
 mod ppu;
 mod window;
-mod constants;
 
 pub use cpu::Cpu;
 use interconnect::Interconnect;
@@ -23,10 +23,10 @@ extern crate text_io;
 extern crate sdl2;
 */
 
-use sdl2::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
+use sdl2::*;
 
 fn main() {
     // Command Line Arguments
@@ -59,21 +59,13 @@ fn main() {
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x100;
 
-
     let sdl_context = sdl2::init().expect("Failed to start SDL");
     let mut canvas = window::init_window(&sdl_context);
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
-
-
     'running: loop {
         if !game_boy.cpu.halted {
-            game_boy.cpu.execute_instruction(&mut game_boy.interconnect);
-            if game_boy.interconnect.read_mem(0xFF02) == 0x81 {
-                let c: char = game_boy.interconnect.read_mem(0xFF01) as char;
-                print!("{}", c);
-                game_boy.interconnect.write_mem(0xff02, 0x0);
-            }
+            game_boy.cpu.run(&mut game_boy.interconnect);
         } else {
             game_boy.interconnect.emu_cycles(1);
 
@@ -103,4 +95,3 @@ fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector
     fs::read(path)
 }
-

@@ -175,6 +175,9 @@ impl Interconnect {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
+        // Used to get cycle count over in main loop
+        self.timer.internal_ticks = cyc as u64;
+
         // Increase Div
         self.timer.div = self
             .timer
