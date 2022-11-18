@@ -1,4 +1,4 @@
-use super::{Cpu, Flags, Interconnect};
+use super::{Cpu, Flags, Interconnect, RegisterPair};
 
 /************************************************************************
  * 8-bit Arithmetic instructions
@@ -32,7 +32,6 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     *register = value;
 }
 
-
 /// Decrement 8-bit register
 ///
 /// Flags:
@@ -41,7 +40,7 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
 ///
 /// Sub: Set
 ///
-/// Half Carry: Dependent 
+/// Half Carry: Dependent
 pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     let mut value = *register;
 
@@ -245,10 +244,9 @@ pub fn sub_a_r(cpu: &mut Cpu, operand: u8) {
     // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
 
-    // Store new value in accumulator  
+    // Store new value in accumulator
     cpu.registers.a = a;
 }
-
 
 /// Subtracts another register and carry from the accumulator, storing the result in the accumulator
 ///
@@ -302,7 +300,7 @@ pub fn sbc_a_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.a = c as u8;
 }
 
-/// Stores the logical "and" of accumulator and register in accumluator 
+/// Stores the logical "and" of accumulator and register in accumluator
 ///
 /// a = a & r
 ///
@@ -481,7 +479,7 @@ pub fn daa(cpu: &mut Cpu) {
 
 /// Rotate Left Circular Accumulator
 ///
-/// 7th bit of Accumulator is copied into carry 
+/// 7th bit of Accumulator is copied into carry
 /// and into the 0th bit of A
 ///
 /// Flags:
@@ -494,7 +492,6 @@ pub fn daa(cpu: &mut Cpu) {
 ///
 /// Carry: Dependent
 pub fn rlca(cpu: &mut Cpu) {
-
     // 7th bit
     let lmb: u8 = (cpu.registers.a & 0x80) >> 7;
 
@@ -605,7 +602,7 @@ pub fn rla(cpu: &mut Cpu) {
 ///
 /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
 ///
-/// Flags: 
+/// Flags:
 ///
 /// Zero: Clear
 ///
@@ -615,7 +612,6 @@ pub fn rla(cpu: &mut Cpu) {
 ///
 /// Carry: Dependent
 pub fn rra(cpu: &mut Cpu) {
-
     // 0th bit
     let rmb: u8 = cpu.registers.a & 0x01;
 
@@ -918,7 +914,7 @@ pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     // Rotate Left
     value <<= 1;
- 
+
     // Copy carry to 0th bit
     value |= (1 << 0) & f.carry_flag();
 
@@ -963,7 +959,7 @@ pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 /// Carry: Dependent
 pub fn rr(f: &mut Flags, r: &mut u8) {
     let mut value: u8 = *r;
-    
+
     // 0th bit
     let rmb: u8 = value & 0x01;
 
@@ -1014,7 +1010,7 @@ pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     // Increase Timer
     interconnect.emu_cycles(1);
-    
+
     // 0th bit
     let rmb: u8 = value & 0x01;
 
@@ -1206,7 +1202,7 @@ pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     // put 7th bit back in
     value |= (1 << 7) & (lmb);
 
-    // Update Carry 
+    // Update Carry
     if rmb == 0 {
         f.clear_carry_flag();
     } else {
@@ -1221,7 +1217,6 @@ pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 
     // Clear Half Carry
     f.clear_half_carry_flag();
-
 
     // Store new value in memory
     interconnect.write_mem(addr, value);
@@ -1301,13 +1296,13 @@ pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     // Update Zero Flag
     f.update_zero_flag(value);
 
-    // Clear Carry Flag 
+    // Clear Carry Flag
     f.clear_carry_flag();
 
-    // Clear Sub Flag 
+    // Clear Sub Flag
     f.clear_sub_flag();
 
-    // Clear Half Carry Flag 
+    // Clear Half Carry Flag
     f.clear_half_carry_flag();
 
     // Write new value into memory
@@ -1425,45 +1420,45 @@ pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 /// Increment register pair
 ///
 /// Flags: None
-pub fn inc_16bit(cpu: &mut Cpu, register: &str) {
-    match register {
-        "BC" => {
+pub fn inc_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
+    match register_pair {
+        RegisterPair::BC => {
             cpu.registers.set_bc(cpu.registers.bc().wrapping_add(1));
         }
 
-        "DE" => {
+        RegisterPair::DE => {
             cpu.registers.set_de(cpu.registers.de().wrapping_add(1));
         }
 
-        "HL" => {
+        RegisterPair::HL => {
             cpu.registers.set_hl(cpu.registers.hl().wrapping_add(1));
         }
 
-        "SP" => {
+        RegisterPair::SP => {
             cpu.sp = cpu.sp.wrapping_add(1);
         }
-        _ => println!("{}, Not a register PAIR", register),
+        _ => println!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
 /// Decrement Register Pair
 ///
 /// Flags: None
-pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
-    match register {
-        "BC" => {
+pub fn dec_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
+    match register_pair {
+        RegisterPair::BC => {
             cpu.registers.set_bc(cpu.registers.bc().wrapping_sub(1));
         }
-        "DE" => {
+        RegisterPair::DE => {
             cpu.registers.set_de(cpu.registers.de().wrapping_sub(1));
         }
-        "HL" => {
+        RegisterPair::HL => {
             cpu.registers.set_hl(cpu.registers.hl().wrapping_sub(1));
         }
-        "SP" => {
+        RegisterPair::SP => {
             cpu.sp = cpu.sp.wrapping_sub(1);
         }
-        _ => println!("{}, Not a register PAIR", register),
+        _ => println!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
@@ -1476,9 +1471,9 @@ pub fn dec_16bit(cpu: &mut Cpu, register: &str) {
 /// Half Carry: Dependent
 ///
 /// Carry: Dependent
-pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
-    match register {
-        "BC" => {
+pub fn add_rr_hl(cpu: &mut Cpu, register_pair: RegisterPair) {
+    match register_pair {
+        RegisterPair::BC => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.bc() as u32;
 
@@ -1498,7 +1493,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 
             cpu.registers.set_hl(c as u16);
         }
-        "DE" => {
+        RegisterPair::DE => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.de() as u32;
 
@@ -1518,7 +1513,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 
             cpu.registers.set_hl(c as u16);
         }
-        "HL" => {
+        RegisterPair::HL => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.hl() as u32;
 
@@ -1539,7 +1534,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
             cpu.registers.set_hl(c as u16);
         }
 
-        "SP" => {
+        RegisterPair::SP => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.sp as u32;
 
@@ -1559,7 +1554,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register: &str) {
 
             cpu.registers.set_hl(c as u16);
         }
-        _ => println!("{}, Not a register PAIR", register),
+        _ => println!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
@@ -1591,7 +1586,6 @@ pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-
 /// Relative Jump if Zero flag is clear
 ///
 /// Flags: None
@@ -1604,7 +1598,6 @@ pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
         interconnect.emu_cycles(2);
     }
 }
-
 
 /// Relative Jump if Carry flag is Set
 ///
@@ -1619,7 +1612,6 @@ pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-
 /// Relative Jump if Carry flag is clear
 ///
 /// Flags: None
@@ -1633,14 +1625,12 @@ pub fn jr_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-
 /// Jump to nn
 ///
 /// Flags: None
 pub fn jp(cpu: &mut Cpu, nn: u16) {
     cpu.pc = nn;
 }
-
 
 /// Jump to nn if zero flag is set
 ///
@@ -1897,7 +1887,7 @@ pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
 pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
     let addr: u16 = 0xFF00 + (n as u16);
 
-    // Write accumlulator value to io port 'n' 
+    // Write accumlulator value to io port 'n'
     interconnect.write_mem(addr, cpu.registers.a);
 }
 
@@ -1931,7 +1921,7 @@ pub fn ld_io_c_from_a(cpu: &Cpu, interconnect: &mut Interconnect) {
 ///
 /// Unless it if POP AF then
 ///
-/// Flags: 
+/// Flags:
 ///
 /// Zero: Dependent
 ///
@@ -1981,7 +1971,7 @@ pub fn push_rr(interconnect: &mut Interconnect, upper: u8, lower: u8, sp: &mut u
 
 /// Checks the nth bit of r and stores the inverse in the zero flag.
 ///
-/// Flags: 
+/// Flags:
 ///
 /// Zero: Dependent
 ///
@@ -2068,7 +2058,6 @@ pub fn set_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
     // Increase Timer
     interconnect.emu_cycles(1);
 }
-
 
 /// Clears the nth bit of r
 ///

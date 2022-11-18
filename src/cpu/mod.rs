@@ -263,6 +263,15 @@ impl Default for Registers {
     }
 }
 
+#[derive(Debug)]
+pub enum RegisterPair {
+    BC,
+    DE,
+    HL,
+    AF,
+    SP,
+}
+
 /// Struct that represents the gameboy cpu
 #[derive(Debug)]
 pub struct Cpu {
@@ -528,7 +537,7 @@ impl Cpu {
 
             // ADD HL, BC
             0x09 => {
-                add_rr_hl(self, "BC");
+                add_rr_hl(self, RegisterPair::BC);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -717,7 +726,7 @@ impl Cpu {
 
             // ADD HL, DE
             0x19 => {
-                add_rr_hl(self, "DE");
+                add_rr_hl(self, RegisterPair::DE);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -741,7 +750,7 @@ impl Cpu {
             // DEC DE
             0x1B => {
                 // DE--
-                dec_16bit(self, "DE");
+                dec_16bit(self, RegisterPair::DE);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -835,7 +844,7 @@ impl Cpu {
             // INC HL
             0x23 => {
                 // HL++
-                inc_16bit(self, "HL");
+                inc_16bit(self, RegisterPair::HL);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -902,7 +911,7 @@ impl Cpu {
             // ADD HL, HL
             0x29 => {
                 // HL = HL + HL
-                add_rr_hl(self, "HL");
+                add_rr_hl(self, RegisterPair::HL);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -929,7 +938,7 @@ impl Cpu {
             // DEC HL
             0x2B => {
                 // HL--
-                dec_16bit(self, "HL");
+                dec_16bit(self, RegisterPair::HL);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -1026,7 +1035,7 @@ impl Cpu {
             // INC SP
             0x33 => {
                 // SP++
-                inc_16bit(self, "SP");
+                inc_16bit(self, RegisterPair::SP);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -1098,7 +1107,7 @@ impl Cpu {
             // ADD HL, SP
             0x39 => {
                 // HL = HL + SP
-                add_rr_hl(self, "SP");
+                add_rr_hl(self, RegisterPair::SP);
 
                 // Increase Program Counter
                 self.pc += 1;
@@ -1128,7 +1137,7 @@ impl Cpu {
             // DEC SP
             0x3B => {
                 // SP--
-                dec_16bit(self, "SP");
+                dec_16bit(self, RegisterPair::SP);
 
                 // Increase Program Counter
                 self.pc += 1;

@@ -1,4 +1,5 @@
 use crate::interconnect::Interconnect;
+use crate::constants::*;
 
 use sdl2::*;
 use sdl2::event::Event;
@@ -6,9 +7,6 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 
-const SCALE: i32 = 4;
-const SCREEN_WIDTH: u32 = 16 * 8 * (SCALE as u32); 
-const SCREEN_HEIGHT: u32 = 32 * 8 * (SCALE as u32);
 
 static TILE_COLORS: [Color; 4] = [
     Color::RGB(255, 255, 255),
