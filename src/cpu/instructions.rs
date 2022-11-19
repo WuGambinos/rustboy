@@ -181,7 +181,7 @@ pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
 /// Carry: Dependent
 pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     // Accumulator
-    let mut a: u8 = cpu.registers.a;
+    let  a: u8 = cpu.registers.a;
 
     // Result
     let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);

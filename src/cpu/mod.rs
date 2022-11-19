@@ -1,11 +1,9 @@
 mod instructions;
 pub mod interrupts;
 
-use std::i8::MAX;
 
 use crate::constants::MAX_CYCLES_PER_FRAME;
 use crate::cpu::instructions::*;
-use crate::gameboy;
 use crate::interconnect::Interconnect;
 
 ///Struct that represents flags of the Gameboy CPU
@@ -84,7 +82,7 @@ impl Flags {
     ///
     /// Carry flag is set when operation results in overflow
     pub fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
-        let mut res: u16 = (register as u16) + (operand as u16);
+        let res: u16 = (register as u16) + (operand as u16);
 
         if res > 0xFF {
             self.set_carry_flag();
