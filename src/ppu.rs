@@ -52,7 +52,7 @@ impl Dma {
 ///
 /// Used to display graphics
 #[derive(Debug)]
-pub struct PPU {
+pub struct Ppu {
     //Video RAM
     vram: [u8; 0x2000],
 
@@ -62,7 +62,7 @@ pub struct PPU {
     pub dma: Dma,
 }
 
-impl PPU {
+impl Ppu {
     /// Constructor
     pub fn new() -> Self {
         Self {
@@ -91,8 +91,14 @@ impl PPU {
     }
 
     pub fn dma_transferring(&self) -> bool {
-        return self.dma.active;
+        self.dma.active
     }
 
     pub fn tick() {}
+}
+
+impl Default for Ppu {
+    fn default() -> Self {
+        Self::new()
+    }
 }

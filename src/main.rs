@@ -7,26 +7,17 @@ mod ppu;
 mod window;
 
 pub use cpu::Cpu;
-use interconnect::Interconnect;
 pub use mmu::Mmu;
 
 use cpu::timer::Timer;
 use gameboy::GameBoy;
-use sdl2::render::WindowCanvas;
 
 use std::env;
 use std::fs;
 use std::path::Path;
 
-/*#[macro_use]
-extern crate text_io;
-extern crate sdl2;
-*/
-
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
-use sdl2::*;
 
 fn main() {
     // Command Line Arguments

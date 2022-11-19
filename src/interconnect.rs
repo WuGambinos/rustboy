@@ -2,7 +2,7 @@ use core::time;
 
 use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
-use crate::ppu::PPU;
+use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
 static mut ly: u8 = 0;
@@ -14,7 +14,7 @@ static mut ly: u8 = 0;
 pub struct Interconnect {
     pub mmu: Mmu,
     pub timer: Timer,
-    pub ppu: PPU,
+    pub ppu: Ppu,
 }
 
 impl Interconnect {
@@ -23,13 +23,13 @@ impl Interconnect {
         Self {
             mmu: Mmu::new(),
             timer: Timer::new(),
-            ppu: PPU::new(),
+            ppu: Ppu::new(),
         }
     }
 
     pub fn get_ly() -> u8 {
         unsafe {
-            return ly;
+            ly
         }
     }
 

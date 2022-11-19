@@ -12,7 +12,7 @@ impl Clock {
     pub fn next(&mut self, cycles: u32) -> u32 {
         self.n += cycles;
         let res = self.n / self.period;
-        self.n = self.n % self.period;
+        self.n %=  self.period;
         res
     }
 }
