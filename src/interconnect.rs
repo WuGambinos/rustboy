@@ -75,6 +75,9 @@ impl Interconnect {
         }
         // OAM
         else if (0xFE00..0xFEA0).contains(&addr) {
+            if self.ppu.dma_transferring() {
+                return;
+            }
             self.ppu.write_oam(addr, value);
         }
         // Timer
@@ -85,7 +88,6 @@ impl Interconnect {
         else if addr == 0xFF46 {
             self.dma_start(value);
             println!("DMA START");
-            //std::process::exit(0);
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -100,7 +102,6 @@ impl Interconnect {
             self.mmu.interrupt_enable = value;
         } else {
             //println!("UNREACHABLE Addr: {:#X}", addr);
-            
         }
     }
 
@@ -124,14 +125,16 @@ impl Interconnect {
         }
         // OAM
         else if (0xFE00..0xFEA0).contains(&addr) {
-            self.ppu.read_oam(addr)
+            if self.ppu.dma_transferring() {
+                0xFF
+            } else {
+                self.ppu.read_oam(addr)
+            }
         }
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
-        }
-
-        else if addr == 0xFF44 {
+        } else if addr == 0xFF44 {
             unsafe {
                 let old_ly = ly;
                 let new_ly = ly.wrapping_add(1);
@@ -198,7 +201,7 @@ impl Interconnect {
             }
         }
 
-        for _ in 0..(cyc / 4) {
+        for _ in 0..(cyc/3) {
             self.dma_tick();
         }
     }
@@ -231,9 +234,8 @@ impl Interconnect {
 
         if !self.ppu.dma.active {
             println!("DMA DONE!");
-            let secs = time::Duration::from_secs(2);
+            let secs = time::Duration::from_secs(1);
             std::thread::sleep(secs);
-            std::process::exit(0);
         }
     }
 }

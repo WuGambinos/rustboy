@@ -90,5 +90,9 @@ impl PPU {
         self.vram[(addr - 0x8000) as usize]
     }
 
+    pub fn dma_transferring(&self) -> bool {
+        return self.dma.active;
+    }
+
     pub fn tick() {}
 }
