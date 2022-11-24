@@ -21,9 +21,9 @@ use sdl2::keyboard::Keycode;
 
 fn main() {
     // Command Line Arguments
-    let args: Vec<String> = env::args().collect();
-    let test_rom = args[1].as_str();
-    //let test_rom = "roms/blaargs/cpu_instrs/individual/01-special.gb";
+    //let args: Vec<String> = env::args().collect();
+    //let test_rom = args[1].as_str();
+    let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
     let boot_rom = "roms/blaargs/boot-rom.gb";
 
     // Path to rom
@@ -55,17 +55,7 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
     'running: loop {
-        if !game_boy.cpu.halted {
-            game_boy.cpu.run(&mut game_boy.interconnect);
-        } else {
-            game_boy.interconnect.emu_cycles(1);
-
-            let IF = game_boy.interconnect.read_mem(0xFF0F);
-
-            if IF != 0 {
-                game_boy.cpu.halted = false;
-            }
-        }
+        game_boy.cpu.run(&mut game_boy.interconnect);
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
