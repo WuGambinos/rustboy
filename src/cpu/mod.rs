@@ -1,7 +1,6 @@
 mod instructions;
 pub mod interrupts;
 
-
 use crate::constants::MAX_CYCLES_PER_FRAME;
 use crate::cpu::instructions::*;
 use crate::interconnect::Interconnect;
@@ -323,18 +322,30 @@ impl Cpu {
         }
     }
 
-    pub fn run(&mut self, interconnect: &mut Interconnect)  {
+    pub fn run(&mut self, interconnect: &mut Interconnect) {
         let mut cycles_this_update = 0;
-        
+
         while cycles_this_update < MAX_CYCLES_PER_FRAME {
             let cycles = self.last_cycle as usize;
             cycles_this_update += cycles;
-            self.execute_instruction(interconnect);
 
-            if interconnect.read_mem(0xFF02) == 0x81 {
-                let c: char = interconnect.read_mem(0xFF01) as char;
-                print!("{}", c);
-                interconnect.write_mem(0xFF02, 0x00);
+            if !self.halted {
+                self.execute_instruction(interconnect);
+
+                if interconnect.read_mem(0xFF02) == 0x81 {
+                    let c: char = interconnect.read_mem(0xFF01) as char;
+                    print!("{}", c);
+                    interconnect.write_mem(0xFF02, 0x00);
+                }
+            } else {
+                interconnect.emu_cycles(1);
+
+                let IF = interconnect.read_mem(0xFF0F);
+
+                //Iterrupt has been requested
+                if IF != 0 {
+                    self.halted = false;
+                }
             }
         }
     }
@@ -403,7 +414,7 @@ impl Cpu {
 
         // Fetch opcode
         self.fetch(interconnect);
-        
+
         /*println!(
             "PC: {:#X} OPCODE: {:#X} F: {:#X} MEM[PC+1]: {:#X}",
             self.pc,
@@ -417,7 +428,7 @@ impl Cpu {
             interconnect.read_mem(0xFF0F),
             interconnect.read_mem(0xFFFF)
         );
-        
+
 
         println!(
             "LY: {} A: {:#X} B: {:#X} C: {:#X} D: {:#X} E: {:#X} H: {:#X} L: {:#X}",
