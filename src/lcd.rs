@@ -130,7 +130,7 @@ impl Lcd {
         inital_state
     }
 
-    pub fn read(self, addr: u16) -> u8 {
+    pub fn read(&self, addr: u16) -> u8 {
         let index: u8 = (addr - 0xFF40) as u8;
 
         match index {
@@ -182,7 +182,7 @@ impl Lcd {
         match pal {
             1 => pal_colors = self.sp1_colors, 
             2 => pal_colors = self.sp2_colors,
-            _  => panic!("NOT VALID PAL")
+            _  =>println!("NOT VALID PAL")
         }
 
 
@@ -198,16 +198,16 @@ impl Lcd {
      * **********************************************************/
 
     /// Check if background and window should be enabled
-    fn lcdc_bgw_enabled(self) -> bool {
+    fn lcdc_bgw_enabled(&self) -> bool {
         (self.lcdc >> 0) & 1 == 1
     }
 
     /// Check if sprites need to be displayed or not
-    fn lcdc_obj_enabled(self) -> bool {
+    fn lcdc_obj_enabled(&self) -> bool {
         (self.lcdc >> 1) & 1 == 1
     }
 
-    fn lcdc_obj_height(self) -> u8 {
+    fn lcdc_obj_height(&self) -> u8 {
         let bit = (self.lcdc >> 2) & 1;
 
         if bit == 0 {
@@ -217,7 +217,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_bg_tile_map_addr(self) -> u16 {
+    fn lcdc_bg_tile_map_addr(&self) -> u16 {
         let bit = (self.lcdc >> 3) & 1;
 
         if bit == 0 {
@@ -227,7 +227,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_bgw_data_area(self) -> u16 {
+    fn lcdc_bgw_data_area(&self) -> u16 {
         let bit = (self.lcdc >> 4) & 1;
 
         if bit == 0 {
@@ -237,11 +237,11 @@ impl Lcd {
         }
     }
 
-    fn lcdc_window_enable(self) -> bool {
+    fn lcdc_window_enable(&self) -> bool {
         (self.lcdc >> 5) & 1 == 1
     }
 
-    fn lcdc_window_map_area(self) -> u16 {
+    fn lcdc_window_map_area(&self) -> u16 {
         let bit = (self.lcdc >> 6) & 1;
 
         if bit == 0 {
@@ -251,7 +251,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_lcd_enable(self) -> bool {
+    fn lcdc_lcd_enable(&self) -> bool {
         (self.lcdc >> 7) & 1 == 1
     }
 
@@ -259,7 +259,7 @@ impl Lcd {
      * STAT Functions
      * **********************************************************/
 
-    fn lcd_stat_mode(self) -> LcdMode {
+    fn lcd_stat_mode(&self) -> LcdMode {
         let bits = (self.lcd_stat & 0b11);
 
         match bits {

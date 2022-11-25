@@ -85,12 +85,12 @@ impl Interconnect {
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_write(addr, value);
         }
-        // Trigger DMA
-        else if addr == 0xFF46 {
-            //self.dma_start(value);
-            //println!("DMA START");
-            self.lcd.write(&mut self.ppu, 0xFF46, value);
+
+        // LCD Control 
+        else if (0xFF40..0xFF4C).contains(&addr) {
+            self.lcd.write(&mut self.ppu, addr, value);
         }
+
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
             self.mmu.io[(addr - 0xFF00) as usize] = value;
@@ -136,13 +136,18 @@ impl Interconnect {
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
-        } else if addr == 0xFF44 {
+        } /*else if addr == 0xFF44 {
             unsafe {
                 let old_ly = ly;
                 let new_ly = ly.wrapping_add(1);
                 ly = new_ly;
                 old_ly
             }
+        }*/
+
+        // LCD Control 
+        else if (0xFF40..0xFF4C).contains(&addr) {
+            self.lcd.read(addr)
         }
         // IO Regsiters
         else if (0xFF00..0xFF80).contains(&addr) {
