@@ -1,8 +1,10 @@
 use core::time;
 
+use crate::constants::*;
 use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
 use crate::lcd::Lcd;
+use crate::lcd::LcdMode;
 use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
@@ -30,8 +32,30 @@ impl Interconnect {
         }
     }
 
+    pub fn ppu_init(&mut self) {
+       self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8); 
+
+
+
+    }
+
     pub fn get_ly() -> u8 {
         unsafe { ly }
+    }
+
+    pub fn increment_ly(&mut self) {
+        self.lcd.ly = self.lcd.ly.wrapping_add(1);
+
+        if self.lcd.ly == self.lcd.lyc {
+            self.lcd.set_lyc_ly_flag(1);
+
+            if self.lcd.lcd_stat_interrupt(SI_LYC) {
+                // Trigger Interrupt
+                interrupt_request(self, InterruptType::LcdStat);
+            }
+        } else {
+            self.lcd.set_lyc_ly_flag(0);
+        }
     }
 
     /// Prints the state of the Timer
@@ -244,6 +268,48 @@ impl Interconnect {
             let secs = time::Duration::from_secs(1);
             std::thread::sleep(secs);
         }
+    }
+
+    pub fn ppu_tick(&mut self) {
+        self.ppu.increase_line_ticks();
+
+
+        match self.lcd.lcd_stat_mode() {
+            LcdMode::OAM => self.ppu_mode_oam(),
+            LcdMode::Transfer =>  self.ppu_mode_transfer(),
+            LcdMode::VBlank => self.ppu_mode_vlank(),
+            LcdMode::HBlank =>self.ppu_mode_hblank(),
+        }
+
+
+    }
+
+    pub fn ppu_mode_oam(&mut self) {
+        if self.ppu.line_ticks >= 180 {
+            self.lcd.set_lcd_stat_mode(LcdMode::Transfer as u8);
+        } 
+    }
+
+    pub fn ppu_mode_transfer(&mut self) {
+        if self.ppu.line_ticks >= 80 + 172 {
+            self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
+        }
+    }
+
+    pub fn ppu_mode_vlank(&mut self) {
+        if self.ppu.line_ticks >= TICKS_PER_LINE as u32 {
+            self.increment_ly();
+
+            if self.lcd.ly >= LINES_PER_FRAME{
+                self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
+                self.lcd.ly = 0;
+            }
+
+            self.ppu.line_ticks = 0;
+        }
+    }
+
+    pub fn ppu_mode_hblank(&mut self) {
     }
 }
 

@@ -1,4 +1,5 @@
 use modular_bitfield::prelude::*;
+use crate::constants::*;
 
 /// Single Entry in OAM (Object Atribute Memory)
 #[bitfield]
@@ -60,6 +61,10 @@ pub struct Ppu {
     oam: [OamEntry; 40],
 
     pub dma: Dma,
+
+    pub current_frame: u32,
+    pub line_ticks: u32,
+    pub video_buffer: [u8; BUFFER_SIZE],
 }
 
 impl Ppu {
@@ -69,7 +74,15 @@ impl Ppu {
             vram: [0; 0x2000],
             oam: [OamEntry::new(); 40],
             dma: Dma::new(),
+            line_ticks: 0,
+            current_frame: 0,
+            video_buffer: [0; BUFFER_SIZE],
         }
+    }
+
+
+    pub fn increase_line_ticks(&mut self) {
+        self.line_ticks = self.line_ticks.wrapping_add(1);
     }
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
@@ -94,7 +107,6 @@ impl Ppu {
         self.dma.active
     }
 
-    pub fn tick() {}
 }
 
 impl Default for Ppu {

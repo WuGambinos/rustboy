@@ -1,19 +1,16 @@
 use modular_bitfield::prelude::*;
+use crate::constants::*;
 use sdl2::pixels::Color;
 
 use crate::ppu::Ppu;
 
 pub enum LcdMode {
-    HBlank,
-    VBlank,
-    OAM,
-    Transfer,
+    HBlank = 1,
+    VBlank = 2,
+    OAM = 3,
+    Transfer = 4,
 }
 
-const SI_HBLANK: u8 = (1 << 3);
-const SI_VBLANK: u8 = (1 << 4);
-const SI_OAM: u8 = (1 << 5);
-const SI_LYC: u8 = (1 << 6);
 
 const DEFUALT_COLORS: [Color; 4] = [
     Color::RGB(255, 255, 255),
@@ -60,39 +57,39 @@ pub struct Lcd {
     ///     2: Searching OAM
     ///
     ///     3: Transferring Data to LCD Controller
-    lcd_stat: u8,
+    pub lcd_stat: u8,
 
     /// Specity the top left y coordinate of the visiable 16x144 pixel area
     /// within the 256x256 pixels BG map
-    scy: u8,
+    pub scy: u8,
 
     /// Specity the top left x coordinate of the visiable 16x144 pixel area
     /// within the 256x256 pixels BG map
-    scx: u8,
+    pub scx: u8,
 
     /// Indicates currently horizontal line, which might be about to be drawn
     /// ,or just drawn. values between 144 and 153 indicate VBlank period
-    ly: u8,
+    pub ly: u8,
 
     /// When LYC=LY, the "LYC=LY" flag in the STAT register is set and (if enabled)
     /// a STAT interrupt is requested
-    lyc: u8,
+    pub lyc: u8,
 
     /// Specify upper left y coordinate of window
-    wy: u8,
+    pub wy: u8,
 
     /// Specicy upper left (x+7) coordinate of window
-    wx: u8,
+    pub wx: u8,
 
     /// OAM DMA source address & start
-    dma: u8,
+    pub dma: u8,
 
     /// Background Palette(Non-CGB Mode only)
-    bg_palette: u8,
+    pub bg_palette: u8,
 
     /// Object Palette 0, 1 - These registesr assign gray shades to the color indexes
     /// of the OBJs that use the coressponding palette
-    obj_palette: [u8; 2],
+    pub obj_palette: [u8; 2],
 
     bg_colors: [Color; 4],
     sp1_colors: [Color; 4],
@@ -193,21 +190,22 @@ impl Lcd {
 
 
     }
+
     /************************************************************
      * LCDC Functions
      * **********************************************************/
 
     /// Check if background and window should be enabled
-    fn lcdc_bgw_enabled(&self) -> bool {
+    pub fn lcdc_bgw_enabled(&self) -> bool {
         (self.lcdc >> 0) & 1 == 1
     }
 
     /// Check if sprites need to be displayed or not
-    fn lcdc_obj_enabled(&self) -> bool {
+    pub fn lcdc_obj_enabled(&self) -> bool {
         (self.lcdc >> 1) & 1 == 1
     }
 
-    fn lcdc_obj_height(&self) -> u8 {
+    pub fn lcdc_obj_height(&self) -> u8 {
         let bit = (self.lcdc >> 2) & 1;
 
         if bit == 0 {
@@ -217,7 +215,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_bg_tile_map_addr(&self) -> u16 {
+    pub fn lcdc_bg_tile_map_addr(&self) -> u16 {
         let bit = (self.lcdc >> 3) & 1;
 
         if bit == 0 {
@@ -227,7 +225,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_bgw_data_area(&self) -> u16 {
+    pub fn lcdc_bgw_data_area(&self) -> u16 {
         let bit = (self.lcdc >> 4) & 1;
 
         if bit == 0 {
@@ -237,11 +235,11 @@ impl Lcd {
         }
     }
 
-    fn lcdc_window_enable(&self) -> bool {
+    pub fn lcdc_window_enable(&self) -> bool {
         (self.lcdc >> 5) & 1 == 1
     }
 
-    fn lcdc_window_map_area(&self) -> u16 {
+    pub fn lcdc_window_map_area(&self) -> u16 {
         let bit = (self.lcdc >> 6) & 1;
 
         if bit == 0 {
@@ -251,7 +249,7 @@ impl Lcd {
         }
     }
 
-    fn lcdc_lcd_enable(&self) -> bool {
+    pub fn lcdc_lcd_enable(&self) -> bool {
         (self.lcdc >> 7) & 1 == 1
     }
 
@@ -259,7 +257,7 @@ impl Lcd {
      * STAT Functions
      * **********************************************************/
 
-    fn lcd_stat_mode(&self) -> LcdMode {
+    pub fn lcd_stat_mode(&self) -> LcdMode {
         let bits = (self.lcd_stat & 0b11);
 
         match bits {
@@ -271,16 +269,28 @@ impl Lcd {
         };
     }
 
-    fn set_lcd_stat_mode(&mut self, mode: u8) {
+    pub fn set_lcd_stat_mode(&mut self, mode: u8) {
         self.lcd_stat &= !0b11;
         self.lcd_stat |= mode
     }
 
-    fn lyc_ly_flag(&mut self) -> u8 {
-        0
+    pub fn lyc_ly_flag(&self) -> bool {
+        (self.lcd_stat >> 2) & 1 == 1
     }
 
-    fn lcd_stat_interrupt(&mut self, stat_interrupt: u8) -> u8 {
-        self.lcd_stat & stat_interrupt
+    pub fn set_lyc_ly_flag(&mut self, on: u8) {
+
+        if on == 1 {
+            self.lcd_stat |= (1 << 2);
+
+        } else {
+            self.lcd_stat &= !(1 << 2);
+        }
+
+    }
+
+
+    pub fn lcd_stat_interrupt(&mut self, stat_interrupt: u8) -> bool {
+        self.lcd_stat & stat_interrupt != 0
     }
 }
