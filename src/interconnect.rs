@@ -2,6 +2,7 @@ use core::time;
 
 use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::InterruptType;
+use crate::lcd::Lcd;
 use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
@@ -15,6 +16,7 @@ pub struct Interconnect {
     pub mmu: Mmu,
     pub timer: Timer,
     pub ppu: Ppu,
+    pub lcd: Lcd,
 }
 
 impl Interconnect {
@@ -24,13 +26,12 @@ impl Interconnect {
             mmu: Mmu::new(),
             timer: Timer::new(),
             ppu: Ppu::new(),
+            lcd: Lcd::new(),
         }
     }
 
     pub fn get_ly() -> u8 {
-        unsafe {
-            ly
-        }
+        unsafe { ly }
     }
 
     /// Prints the state of the Timer
@@ -86,8 +87,9 @@ impl Interconnect {
         }
         // Trigger DMA
         else if addr == 0xFF46 {
-            self.dma_start(value);
-            println!("DMA START");
+            //self.dma_start(value);
+            //println!("DMA START");
+            self.lcd.write(&mut self.ppu, 0xFF46, value);
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -201,7 +203,7 @@ impl Interconnect {
             }
         }
 
-        for _ in 0..(cyc/3) {
+        for _ in 0..(cyc / 3) {
             self.dma_tick();
         }
     }
