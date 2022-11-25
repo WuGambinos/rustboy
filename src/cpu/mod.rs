@@ -1,8 +1,9 @@
 mod instructions;
 pub mod interrupts;
 
-use crate::constants::MAX_CYCLES_PER_FRAME;
+use crate::constants::{MAX_CYCLES_PER_FRAME, INTERRUPTS};
 use crate::cpu::instructions::*;
+use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
 
 ///Struct that represents flags of the Gameboy CPU
@@ -361,9 +362,9 @@ impl Cpu {
         }
 
         // Check if some interrupt have been triggered
-        let triggered = interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
+        let triggered = get_interrupt(interconnect);//interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
 
-        if triggered == 0 {
+        if triggered == None {
             return;
         }
 
@@ -376,10 +377,12 @@ impl Cpu {
         self.ime = false;
 
         // Valid Interrupt
-        let n = triggered.trailing_zeros();
+        /*let n = triggered.trailing_zeros();
         if n >= 5 {
             panic!("Invalid Interrupt Triggered");
-        }
+        }*/
+        let n = INTERRUPTS.iter().position(|&i| i == triggered.unwrap()).unwrap();
+
 
         // Push Current PC onto stack
         let lower_pc = self.pc as u8;
@@ -387,7 +390,13 @@ impl Cpu {
         push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
 
         // Set PC equal to address of handler
-        self.pc = 0x40;
+        self.pc = match triggered.unwrap() {
+            InterruptType::VBlank => 0x40,
+            InterruptType::LcdStat => 0x48,
+            InterruptType::Timer => 0x50,
+            InterruptType::Serial => 0x58,
+            _ => panic!("NOT AN ENUM")
+        };
 
         // Clean up the interrupt
         let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
