@@ -50,8 +50,10 @@ fn main() {
 
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x100;
+    game_boy.interconnect.ppu_init();
 
     let sdl_context = sdl2::init().expect("Failed to start SDL");
+    let timer = sdl_context.timer().unwrap();
     let mut canvas = window::init_window(&sdl_context);
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 

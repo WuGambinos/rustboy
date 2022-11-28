@@ -28,3 +28,6 @@ pub const INTERRUPTS: [InterruptType; 5] = [
 
 pub const INTERRUPT_ENABLE: u16 = 0xFFFF;
 pub const INTERRUPT_FLAG: u16 = 0xFF0F;
+
+
+pub const TARGET_FRAME_TIME: u32 = 1000 / 60;

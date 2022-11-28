@@ -4,11 +4,12 @@ use sdl2::pixels::Color;
 
 use crate::ppu::Ppu;
 
+#[derive(Debug)]
 pub enum LcdMode {
-    HBlank = 1,
-    VBlank = 2,
-    OAM = 3,
-    Transfer = 4,
+    HBlank = 0,
+    VBlank = 1,
+    OAM = 2,
+    Transfer = 3,
 }
 
 
@@ -271,7 +272,7 @@ impl Lcd {
 
     pub fn set_lcd_stat_mode(&mut self, mode: u8) {
         self.lcd_stat &= !0b11;
-        self.lcd_stat |= mode
+        self.lcd_stat |= mode;
     }
 
     pub fn lyc_ly_flag(&self) -> bool {
