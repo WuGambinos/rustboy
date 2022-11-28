@@ -250,7 +250,7 @@ impl Interconnect {
         self.ppu.dma.active = self.ppu.dma.byte < 0xA0;
 
         if !self.ppu.dma.active {
-            println!("DMA DONE!");
+            //println!("DMA DONE!");
             let secs = time::Duration::from_secs(1);
             std::thread::sleep(secs);
         }

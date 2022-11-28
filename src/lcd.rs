@@ -156,7 +156,7 @@ impl Lcd {
             0x4 => self.ly = value,
             0x5 => self.lyc = value,
             0x6 => { 
-                println!("DMA START");
+                //println!("DMA START");
                 self.dma_start(ppu, value);
             },
             0x7 => self.update_palette(value, 0),
