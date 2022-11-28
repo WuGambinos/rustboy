@@ -2,6 +2,7 @@ use core::time;
 
 use crate::constants::*;
 use crate::cpu::interrupts::interrupt_request;
+use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::lcd::Lcd;
 use crate::lcd::LcdMode;
@@ -33,29 +34,11 @@ impl Interconnect {
     }
 
     pub fn ppu_init(&mut self) {
-       self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8); 
-
-
-
+        self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
     }
 
     pub fn get_ly() -> u8 {
         unsafe { ly }
-    }
-
-    pub fn increment_ly(&mut self) {
-        self.lcd.ly = self.lcd.ly.wrapping_add(1);
-
-        if self.lcd.ly == self.lcd.lyc {
-            self.lcd.set_lyc_ly_flag(1);
-
-            if self.lcd.lcd_stat_interrupt(SI_LYC) {
-                // Trigger Interrupt
-                interrupt_request(self, InterruptType::LcdStat);
-            }
-        } else {
-            self.lcd.set_lyc_ly_flag(0);
-        }
     }
 
     /// Prints the state of the Timer
@@ -109,12 +92,10 @@ impl Interconnect {
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_write(addr, value);
         }
-
-        // LCD Control 
+        // LCD Control
         else if (0xFF40..0xFF4C).contains(&addr) {
             self.lcd.write(&mut self.ppu, addr, value);
         }
-
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
             self.mmu.io[(addr - 0xFF00) as usize] = value;
@@ -160,7 +141,9 @@ impl Interconnect {
         // Timer
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
-        } /*else if addr == 0xFF44 {
+        }
+        /*
+        else if addr == 0xFF44 {
             unsafe {
                 let old_ly = ly;
                 let new_ly = ly.wrapping_add(1);
@@ -168,8 +151,7 @@ impl Interconnect {
                 old_ly
             }
         }*/
-
-        // LCD Control 
+        // LCD Control
         else if (0xFF40..0xFF4C).contains(&addr) {
             self.lcd.read(addr)
         }
@@ -185,7 +167,7 @@ impl Interconnect {
         else if addr == 0xFFFF {
             self.mmu.interrupt_enable
         } else {
-            //println!("NOT REACHABLE ADDR: {:#X}", addr);
+            println!("NOT REACHABLE ADDR: {:#X}", addr);
             0
         }
     }
@@ -209,6 +191,10 @@ impl Interconnect {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
+        for i in 0..4 {
+            self.ppu_tick();
+        }
+
         // Used to get cycle count over in main loop
         self.timer.internal_ticks = cyc as u64;
 
@@ -227,12 +213,12 @@ impl Interconnect {
                     self.timer.tima = self.timer.tma;
 
                     // Trigger Interrupt
-                    interrupt_request(self, InterruptType::Timer);
+                    request_interrupt(self, InterruptType::Timer);
                 }
             }
         }
 
-        for _ in 0..(cyc / 3) {
+        for _ in 0..(cyc / 4) {
             self.dma_tick();
         }
     }
@@ -273,21 +259,35 @@ impl Interconnect {
     pub fn ppu_tick(&mut self) {
         self.ppu.increase_line_ticks();
 
+        //println!("TICKS: {} LY: {} MODE: {:?}", self.ppu.line_ticks,self.lcd.ly,self.lcd.lcd_stat_mode());
+        //println!();
 
         match self.lcd.lcd_stat_mode() {
             LcdMode::OAM => self.ppu_mode_oam(),
-            LcdMode::Transfer =>  self.ppu_mode_transfer(),
-            LcdMode::VBlank => self.ppu_mode_vlank(),
-            LcdMode::HBlank =>self.ppu_mode_hblank(),
+            LcdMode::Transfer => self.ppu_mode_transfer(),
+            LcdMode::VBlank => self.ppu_mode_vblank(),
+            LcdMode::HBlank => self.ppu_mode_hblank(),
         }
+    }
 
+    pub fn increment_ly(&mut self) {
+        self.lcd.ly = self.lcd.ly.wrapping_add(1);
 
+        if self.lcd.ly == self.lcd.lyc {
+            self.lcd.set_lyc_ly_flag(1);
+
+            if self.lcd.lcd_stat_interrupt(SI_LYC) {
+                request_interrupt(self, InterruptType::LcdStat);
+            }
+        } else {
+            self.lcd.set_lyc_ly_flag(0);
+        }
     }
 
     pub fn ppu_mode_oam(&mut self) {
-        if self.ppu.line_ticks >= 180 {
+        if self.ppu.line_ticks >= 80 {
             self.lcd.set_lcd_stat_mode(LcdMode::Transfer as u8);
-        } 
+        }
     }
 
     pub fn ppu_mode_transfer(&mut self) {
@@ -296,11 +296,11 @@ impl Interconnect {
         }
     }
 
-    pub fn ppu_mode_vlank(&mut self) {
+    pub fn ppu_mode_vblank(&mut self) {
         if self.ppu.line_ticks >= TICKS_PER_LINE as u32 {
             self.increment_ly();
 
-            if self.lcd.ly >= LINES_PER_FRAME{
+            if self.lcd.ly >= LINES_PER_FRAME {
                 self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
                 self.lcd.ly = 0;
             }
@@ -310,6 +310,27 @@ impl Interconnect {
     }
 
     pub fn ppu_mode_hblank(&mut self) {
+        if self.ppu.line_ticks >= TICKS_PER_LINE as u32 {
+            self.increment_ly();
+
+            if self.lcd.ly >= Y_RES {
+                self.lcd.set_lcd_stat_mode(LcdMode::VBlank as u8);
+                request_interrupt(self, InterruptType::VBlank);
+
+                if (self.lcd.lcd_stat_interrupt(SI_VBLANK)) {
+                    request_interrupt(self, InterruptType::LcdStat);
+                }
+
+                self.ppu.current_frame = self.ppu.current_frame.wrapping_add(1);
+
+                // Calculate FPS
+                //let end = self.get_ticks();
+            } else {
+                self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
+            }
+
+            self.ppu.line_ticks = 0;
+        }
     }
 }
 

@@ -65,6 +65,9 @@ pub struct Ppu {
     pub current_frame: u32,
     pub line_ticks: u32,
     pub video_buffer: [u8; BUFFER_SIZE],
+    pub prev_frame_time: u32,
+    pub start_timer: u32,
+    pub frame_count: u32,
 }
 
 impl Ppu {
@@ -77,6 +80,9 @@ impl Ppu {
             line_ticks: 0,
             current_frame: 0,
             video_buffer: [0; BUFFER_SIZE],
+            prev_frame_time: 0,
+            start_timer: 0,
+            frame_count: 0,
         }
     }
 

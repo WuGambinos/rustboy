@@ -1,7 +1,7 @@
 mod instructions;
 pub mod interrupts;
 
-use crate::constants::{MAX_CYCLES_PER_FRAME, INTERRUPTS};
+use crate::constants::{INTERRUPTS, MAX_CYCLES_PER_FRAME};
 use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
@@ -362,7 +362,7 @@ impl Cpu {
         }
 
         // Check if some interrupt have been triggered
-        let triggered = get_interrupt(interconnect);//interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
+        let triggered = get_interrupt(interconnect); //interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
 
         if triggered == None {
             return;
@@ -381,8 +381,10 @@ impl Cpu {
         if n >= 5 {
             panic!("Invalid Interrupt Triggered");
         }*/
-        let n = INTERRUPTS.iter().position(|&i| i == triggered.unwrap()).unwrap();
-
+        let n = INTERRUPTS
+            .iter()
+            .position(|&i| i == triggered.unwrap())
+            .unwrap();
 
         // Push Current PC onto stack
         let lower_pc = self.pc as u8;
@@ -395,7 +397,7 @@ impl Cpu {
             InterruptType::LcdStat => 0x48,
             InterruptType::Timer => 0x50,
             InterruptType::Serial => 0x58,
-            _ => panic!("NOT AN ENUM")
+            _ => panic!("NOT AN ENUM"),
         };
 
         // Clean up the interrupt
@@ -423,7 +425,6 @@ impl Cpu {
 
         // Fetch opcode
         self.fetch(interconnect);
-
         /*println!(
             "PC: {:#X} OPCODE: {:#X} F: {:#X} MEM[PC+1]: {:#X}",
             self.pc,
@@ -433,15 +434,7 @@ impl Cpu {
         );
 
         println!(
-            "MEM[FF0F]: {:#X} MEM[FFFF]: {:#X}",
-            interconnect.read_mem(0xFF0F),
-            interconnect.read_mem(0xFFFF)
-        );
-
-
-        println!(
-            "LY: {} A: {:#X} B: {:#X} C: {:#X} D: {:#X} E: {:#X} H: {:#X} L: {:#X}",
-            Interconnect::get_ly(),
+            "A: {:#X} B: {:#X} C: {:#X} D: {:#X} E: {:#X} H: {:#X} L: {:#X}",
             self.registers.a,
             self.registers.b,
             self.registers.c,
@@ -450,7 +443,6 @@ impl Cpu {
             self.registers.h,
             self.registers.l,
         );
-        println!();
         */
 
         match self.opcode {
