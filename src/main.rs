@@ -20,7 +20,10 @@ use std::path::Path;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-fn main() {
+use anyhow::Result;
+use anyhow::Error;
+
+fn main()  -> Result<(), Error> {
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
     let test_rom = args[1].as_str();
@@ -34,10 +37,10 @@ fn main() {
     let boot_path: &Path = Path::new(boot_rom);
 
     // Contents of rom
-    let rom: Vec<u8> = read_file(rom_path).unwrap();
+    let rom: Vec<u8> = read_file(rom_path)?;
 
     // Contents of boot rom
-    let boot: Vec<u8> = read_file(boot_path).unwrap();
+    let boot: Vec<u8> = read_file(boot_path)?;
 
     // GameBoy
     let mut game_boy: GameBoy = GameBoy::new();
@@ -71,6 +74,8 @@ fn main() {
         }
         window::debug_window(&mut canvas, &game_boy.interconnect);
     }
+
+    Ok(())
 }
 
 fn update() {}

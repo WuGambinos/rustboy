@@ -4,7 +4,7 @@ use crate::constants::*;
 /// Single Entry in OAM (Object Atribute Memory)
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
-pub struct OamEntry {
+pub struct OamAttr {
     // BG and Window over OBJ
     // (0=No, 1=BG and Windows colors 1-3 over the OBJ)
     bg_window: B1,
@@ -30,7 +30,27 @@ pub struct OamEntry {
     cbg_pn: B3,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
+pub struct OamEntry {
+    y: u8,
+    x: u8,
+    tile: u8,
+    oam_attr: OamAttr,
+}
+
+impl OamEntry {
+    fn new() -> Self {
+        Self {
+            y: 0,
+            x: 0,
+            tile: 0,
+            oam_attr: OamAttr::new(),
+        }
+    }
+}
+
+
+#[derive(Debug, Copy, Clone)]
 pub struct Dma {
     pub active: bool,
     pub byte: u8,
@@ -65,9 +85,6 @@ pub struct Ppu {
     pub current_frame: u32,
     pub line_ticks: u32,
     pub video_buffer: [u8; BUFFER_SIZE],
-    pub prev_frame_time: u32,
-    pub start_timer: u32,
-    pub frame_count: u32,
 }
 
 impl Ppu {
@@ -80,9 +97,6 @@ impl Ppu {
             line_ticks: 0,
             current_frame: 0,
             video_buffer: [0; BUFFER_SIZE],
-            prev_frame_time: 0,
-            start_timer: 0,
-            frame_count: 0,
         }
     }
 
@@ -93,12 +107,27 @@ impl Ppu {
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
         let index = ((addr - 0xFE00) % 40) as usize;
-        self.oam[index] = OamEntry::from_bytes([value]);
+        let inner_index = ((addr - 0xFE00) % 4) as usize;
+
+        match inner_index {
+            0 => self.oam[index].y = value ,
+            1 =>self.oam[index].x = value,
+            2 => self.oam[index].tile = value,
+            3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
+            _ => panic!("NOT AN INDEX"),
+        }
     }
 
     pub fn read_oam(&self, addr: u16) -> u8 {
         let index = ((addr - 0xFE00) % 40) as usize;
-        self.oam[index].into_bytes()[0]
+        let inner_index = ((addr - 0xFE00) % 4) as usize;
+        match inner_index {
+            0 => self.oam[index].y  ,
+            1 =>self.oam[index].x ,
+            2 => self.oam[index].tile,
+            3 => self.oam[index].oam_attr.into_bytes()[0],
+            _ => panic!("NOT AN INDEX"),
+        }
     }
 
     pub fn write_vram(&mut self, addr: u16, value: u8) {
