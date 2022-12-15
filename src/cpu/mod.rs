@@ -18,6 +18,10 @@ impl Flags {
         Flags { data: 0xB0 }
     }
 
+    pub fn clear_flags(&mut self) {
+        self.data = 0;
+    }
+
     /// Retrieves Zero Flag
     pub fn zero_flag(&self) -> u8 {
         (self.data >> 7) & 1
@@ -425,25 +429,6 @@ impl Cpu {
 
         // Fetch opcode
         self.fetch(interconnect);
-        /*println!(
-            "PC: {:#X} OPCODE: {:#X} F: {:#X} MEM[PC+1]: {:#X}",
-            self.pc,
-            self.opcode,
-            self.registers.f.data,
-            interconnect.read_mem(self.pc + 1),
-        );
-
-        println!(
-            "A: {:#X} B: {:#X} C: {:#X} D: {:#X} E: {:#X} H: {:#X} L: {:#X}",
-            self.registers.a,
-            self.registers.b,
-            self.registers.c,
-            self.registers.d,
-            self.registers.e,
-            self.registers.h,
-            self.registers.l,
-        );
-        */
 
         match self.opcode {
             // NOP
