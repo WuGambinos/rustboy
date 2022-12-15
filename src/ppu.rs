@@ -101,6 +101,56 @@ impl Ppu {
     }
 
 
+    pub fn dma_transferring(&self) -> bool {
+        self.dma.active
+    }
+
+    pub fn set_dma_active(&mut self, value: bool) {
+        self.dma.active = value
+    }
+
+    pub fn dma_active(&self) -> bool {
+        self.dma.active
+    }
+
+
+    pub fn set_dma_byte(&mut self, value: u8) {
+        self.dma.byte = value
+    }
+
+    pub fn dma_byte(&self) -> u8 {
+        self.dma.byte
+    }
+
+    
+    pub fn set_dma_start_delay(&mut self, value: u8) {
+        self.dma.start_delay = value
+    }
+
+    pub fn dma_start_delay(&self) -> u8 {
+        self.dma.start_delay
+    }
+
+    pub fn set_dma_value(&mut self, value: u8) {
+        self.dma.value = value;
+    }
+
+    pub fn dma_value(&self) -> u8 {
+        self.dma.value
+    }
+
+    pub fn set_line_ticks(&mut self, value: u32) {
+        self.line_ticks = value;
+    }
+
+    pub fn line_ticks(&self) -> u32 {
+        self.line_ticks
+    }
+
+    pub fn current_frame(&self) -> u32 {
+        self.current_frame
+    }
+
     pub fn increase_line_ticks(&mut self) {
         self.line_ticks = self.line_ticks.wrapping_add(1);
     }
@@ -136,10 +186,6 @@ impl Ppu {
 
     pub fn read_vram(&self, addr: u16) -> u8 {
         self.vram[(addr - 0x8000) as usize]
-    }
-
-    pub fn dma_transferring(&self) -> bool {
-        self.dma.active
     }
 
 }

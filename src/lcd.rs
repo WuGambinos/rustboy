@@ -1,5 +1,5 @@
+use crate::{constants::*, cpu::interrupts::request_interrupt};
 use modular_bitfield::prelude::*;
-use crate::constants::*;
 use sdl2::pixels::Color;
 
 use crate::ppu::Ppu;
@@ -11,7 +11,6 @@ pub enum LcdMode {
     OAM = 2,
     Transfer = 3,
 }
-
 
 const DEFUALT_COLORS: [Color; 4] = [
     Color::RGB(255, 255, 255),
@@ -155,10 +154,10 @@ impl Lcd {
             0x3 => self.scx = value,
             0x4 => self.ly = value,
             0x5 => self.lyc = value,
-            0x6 => { 
+            0x6 => {
                 //println!("DMA START");
                 self.dma_start(ppu, value);
-            },
+            }
             0x7 => self.update_palette(value, 0),
             0x8 => self.update_palette(value & 0b11111100, 1),
             0x9 => self.update_palette(value & 0b11111100, 1),
@@ -167,6 +166,8 @@ impl Lcd {
             _ => panic!("Not an index"),
         }
     }
+
+
 
     pub fn dma_start(&mut self, ppu: &mut Ppu, value: u8) {
         ppu.dma.active = true;
@@ -178,18 +179,31 @@ impl Lcd {
     pub fn update_palette(&mut self, pal_data: u8, pal: u8) {
         let mut pal_colors = self.bg_colors;
         match pal {
-            1 => pal_colors = self.sp1_colors, 
+            1 => pal_colors = self.sp1_colors,
             2 => pal_colors = self.sp2_colors,
-            _  =>println!("NOT VALID PAL")
+            _ => println!("NOT VALID PAL"),
         }
-
 
         pal_colors[0] = DEFUALT_COLORS[(pal_data & 0b11) as usize];
         pal_colors[1] = DEFUALT_COLORS[((pal_data >> 2) & 0b11) as usize];
         pal_colors[2] = DEFUALT_COLORS[((pal_data >> 4) & 0b11) as usize];
         pal_colors[3] = DEFUALT_COLORS[((pal_data >> 6) & 0b11) as usize];
+    }
 
+    pub fn ly(&self) -> u8 {
+        self.ly
+    }
 
+    pub fn set_ly(&mut self, value: u8)  {
+        self.ly = value;
+    }
+
+    pub fn lyc(&self) -> u8 {
+        self.lyc
+    }
+
+    pub fn set_lyc(&mut self, value: u8) {
+        self.lyc = value;
     }
 
     /************************************************************
@@ -280,16 +294,12 @@ impl Lcd {
     }
 
     pub fn set_lyc_ly_flag(&mut self, on: u8) {
-
         if on == 1 {
             self.lcd_stat |= (1 << 2);
-
         } else {
             self.lcd_stat &= !(1 << 2);
         }
-
     }
-
 
     pub fn lcd_stat_interrupt(&mut self, stat_interrupt: u8) -> bool {
         self.lcd_stat & stat_interrupt != 0

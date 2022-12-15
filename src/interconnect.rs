@@ -191,7 +191,7 @@ impl Interconnect {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
-        for i in 0..4 {
+        for _ in 0..4 {
             self.ppu_tick();
         }
 
@@ -199,10 +199,9 @@ impl Interconnect {
         self.timer.internal_ticks = cyc as u64;
 
         // Increase Div
-        self.timer.div = self
-            .timer
-            .div
-            .wrapping_add(self.timer.div_clock.next(cycles) as u8);
+        let div_value = self.timer.div_clock.next(cycles) as u8;
+        self.timer.set_div(div_value);
+
         if (self.timer.tac & 0x04) != 0x00 {
             let n = self.timer.tma_clock.next(cycles);
 
@@ -224,32 +223,36 @@ impl Interconnect {
     }
 
     pub fn dma_start(&mut self, value: u8) {
-        self.ppu.dma.active = true;
-        self.ppu.dma.byte = 0;
-        self.ppu.dma.start_delay = 2;
-        self.ppu.dma.value = value;
+        self.ppu.set_dma_active(true);
+        self.ppu.set_dma_byte(0);
+        self.ppu.set_dma_start_delay(2);
+        self.ppu.set_dma_value(value);
     }
 
     pub fn dma_tick(&mut self) {
-        if !self.ppu.dma.active {
+        if !self.ppu.dma_active() {
             return;
         }
 
-        if self.ppu.dma.start_delay > 0 {
-            self.ppu.dma.start_delay = self.ppu.dma.start_delay.wrapping_sub(1);
+        if self.ppu.dma_start_delay() > 0 {
+            let delay_value = self.ppu.dma_start_delay().wrapping_add(1);
+            self.ppu.set_dma_start_delay(delay_value);
             return;
         }
 
-        let addr: u16 = (((self.ppu.dma.value as u16) * 0x100) as u16) + (self.ppu.dma.byte as u16);
+        let addr: u16 = (((self.ppu.dma_value() as u16) * 0x100) as u16) + (self.ppu.dma_byte() as u16);
 
         self.ppu
-            .write_oam(self.ppu.dma.byte as u16, self.read_mem(addr));
+            .write_oam(self.ppu.dma_byte() as u16, self.read_mem(addr));
 
-        self.ppu.dma.byte = self.ppu.dma.byte.wrapping_add(1);
+        let byte_value = self.ppu.dma_byte().wrapping_add(1);
 
-        self.ppu.dma.active = self.ppu.dma.byte < 0xA0;
+        //self.ppu.dma.byte = self.ppu.dma.byte.wrapping_add(1);
+        self.ppu.set_dma_byte(byte_value);
 
-        if !self.ppu.dma.active {
+        self.ppu.set_dma_active(self.ppu.dma_byte() < 0xA0);
+
+        if !self.ppu.dma_active() {
             //println!("DMA DONE!");
             let secs = time::Duration::from_secs(1);
             std::thread::sleep(secs);
@@ -258,9 +261,6 @@ impl Interconnect {
 
     pub fn ppu_tick(&mut self) {
         self.ppu.increase_line_ticks();
-
-        //println!("TICKS: {} LY: {} MODE: {:?}", self.ppu.line_ticks,self.lcd.ly,self.lcd.lcd_stat_mode());
-        //println!();
 
         match self.lcd.lcd_stat_mode() {
             LcdMode::OAM => self.ppu_mode_oam(),
@@ -271,9 +271,10 @@ impl Interconnect {
     }
 
     pub fn increment_ly(&mut self) {
-        self.lcd.ly = self.lcd.ly.wrapping_add(1);
+        let value = self.lcd.ly().wrapping_add(1);
+        self.lcd.set_ly(value);
 
-        if self.lcd.ly == self.lcd.lyc {
+        if self.lcd.ly() == self.lcd.lyc() {
             self.lcd.set_lyc_ly_flag(1);
 
             if self.lcd.lcd_stat_interrupt(SI_LYC) {
@@ -285,51 +286,45 @@ impl Interconnect {
     }
 
     pub fn ppu_mode_oam(&mut self) {
-        if self.ppu.line_ticks >= 80 {
+        if self.ppu.line_ticks() >= 80 {
             self.lcd.set_lcd_stat_mode(LcdMode::Transfer as u8);
         }
     }
 
     pub fn ppu_mode_transfer(&mut self) {
-        if self.ppu.line_ticks >= 80 + 172 {
+        if self.ppu.line_ticks() >= 80 + 172 {
             self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
         }
     }
 
     pub fn ppu_mode_vblank(&mut self) {
-        if self.ppu.line_ticks >= TICKS_PER_LINE as u32 {
+        if self.ppu.line_ticks() >= TICKS_PER_LINE as u32 {
             self.increment_ly();
 
-            if self.lcd.ly >= LINES_PER_FRAME {
+            if self.lcd.ly() >= LINES_PER_FRAME {
                 self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
-                self.lcd.ly = 0;
+                self.lcd.set_ly(0);
             }
-
-            self.ppu.line_ticks = 0;
+            self.ppu.set_line_ticks(0);
         }
     }
 
     pub fn ppu_mode_hblank(&mut self) {
-        if self.ppu.line_ticks >= TICKS_PER_LINE as u32 {
+        if self.ppu.line_ticks() >= TICKS_PER_LINE as u32 {
             self.increment_ly();
 
             if self.lcd.ly >= Y_RES {
                 self.lcd.set_lcd_stat_mode(LcdMode::VBlank as u8);
                 request_interrupt(self, InterruptType::VBlank);
 
-                if (self.lcd.lcd_stat_interrupt(SI_VBLANK)) {
+                if self.lcd.lcd_stat_interrupt(SI_VBLANK) {
                     request_interrupt(self, InterruptType::LcdStat);
                 }
-
-                self.ppu.current_frame = self.ppu.current_frame.wrapping_add(1);
-
-                // Calculate FPS
-                //let end = self.get_ticks();
             } else {
                 self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
             }
 
-            self.ppu.line_ticks = 0;
+            self.ppu.set_line_ticks(0);
         }
     }
 }
