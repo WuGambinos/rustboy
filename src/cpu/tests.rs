@@ -17,9 +17,6 @@ fn ld_bc_u16() {
     interconnect.write_mem(1, 0xFA);
     interconnect.write_mem(2, 0xDC);
 
-    /*cpu.memory[0] = 0x01;
-    cpu.memory[1] = 0xFA;
-    cpu.memory[2] = 0xDC;*/
 
     //FADC
 
@@ -35,6 +32,7 @@ fn ld_bc_u16() {
 #[test]
 fn inc_b() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.b = 0x01;
 
@@ -49,6 +47,7 @@ fn inc_b() {
 #[test]
 fn inc_c() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.c = 0x01;
 
@@ -63,6 +62,7 @@ fn inc_c() {
 #[test]
 fn inc_d() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.d = 0x05;
     instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
@@ -76,6 +76,7 @@ fn inc_d() {
 #[test]
 fn inc_e() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.e = 0x05;
     instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
@@ -89,6 +90,7 @@ fn inc_e() {
 #[test]
 fn inc_h() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.h = 0x05;
     instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
@@ -102,6 +104,7 @@ fn inc_h() {
 #[test]
 fn inc_l() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.l = 0x05;
     instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
@@ -109,12 +112,13 @@ fn inc_l() {
     //Check resulting register value and flags
     let check = vec![cpu.registers.l, cpu.registers.f.data];
 
-    assert_eq!(cpu.registers.l, 0x06);
+    assert_eq!(check, [0x06, 0x00]);
 }
 
 #[test]
 fn inc_8bit_overflow() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.b = 0xFF;
     instructions::inc_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
@@ -128,6 +132,7 @@ fn inc_8bit_overflow() {
 #[test]
 fn dec_b() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.b = 0x02;
     instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
@@ -141,6 +146,7 @@ fn dec_b() {
 #[test]
 fn dec_c() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.c = 0x05;
 
@@ -156,6 +162,7 @@ fn dec_c() {
 #[test]
 fn dec_d() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.d = 0x03;
     instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
@@ -169,6 +176,7 @@ fn dec_d() {
 #[test]
 fn dec_e() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.e = 0x01;
     instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
@@ -182,6 +190,7 @@ fn dec_e() {
 #[test]
 fn dec_h() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.h = 0x00;
     instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
@@ -195,6 +204,7 @@ fn dec_h() {
 #[test]
 fn dec_l() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.l = 0x05;
     instructions::dec_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
@@ -358,7 +368,7 @@ fn and_a_hl_test() {
 fn inc_bc() {
     let mut cpu = Cpu::new();
     cpu.registers.set_bc(0x00FF);
-    instructions::inc_16bit(&mut cpu, "BC");
+    instructions::inc_16bit(&mut cpu, RegisterPair::BC);
     assert_eq!(cpu.registers.bc(), 256);
 }
 
@@ -366,7 +376,7 @@ fn inc_bc() {
 fn inc_de() {
     let mut cpu = Cpu::new();
     cpu.registers.set_de(0xFFFF);
-    instructions::inc_16bit(&mut cpu, "DE");
+    instructions::inc_16bit(&mut cpu, RegisterPair::DE);
     assert_eq!(cpu.registers.de(), 0);
 }
 
@@ -374,7 +384,7 @@ fn inc_de() {
 fn inc_hl() {
     let mut cpu = Cpu::new();
     cpu.registers.set_hl(0x0008);
-    instructions::inc_16bit(&mut cpu, "HL");
+    instructions::inc_16bit(&mut cpu, RegisterPair::HL);
     assert_eq!(cpu.registers.hl(), 0x09);
 }
 
@@ -386,7 +396,7 @@ fn add_bc_hl() {
 
     cpu.registers.set_bc(0xFF);
 
-    instructions::add_rr_hl(&mut cpu, "BC");
+    instructions::add_rr_hl(&mut cpu, RegisterPair::BC);
 
     assert_eq!(cpu.registers.hl(), 0x01EF);
 }
@@ -398,7 +408,7 @@ fn add_de_hl() {
     cpu.registers.set_hl(0x0002);
     cpu.registers.set_de(0x0005);
 
-    instructions::add_rr_hl(&mut cpu, "DE");
+    instructions::add_rr_hl(&mut cpu, RegisterPair::DE);
     assert_eq!(cpu.registers.hl(), 0x0007);
 }
 
@@ -408,7 +418,7 @@ fn add_hl_hl() {
 
     cpu.registers.set_hl(0xFF);
 
-    instructions::add_rr_hl(&mut cpu, "HL");
+    instructions::add_rr_hl(&mut cpu, RegisterPair::HL);
     assert_eq!(cpu.registers.hl(), 0x01FE);
 }
 
@@ -622,7 +632,7 @@ fn call_test() {
     let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
     instructions::call(&mut cpu, &mut mmu, nn);
 
-    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
+    let check: Vec<u16> = vec![0x001A, 0x004A, 0x3000, 0x2135];
 
     assert_eq!(
         check,
@@ -652,7 +662,7 @@ fn call_z_test() {
     let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
     instructions::call_z(&mut cpu, &mut mmu, nn);
 
-    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
+    let check: Vec<u16> = vec![0x001A, 0x004A, 0x3000, 0x2135];
 
     assert_eq!(
         check,
@@ -682,7 +692,7 @@ fn call_nz_test() {
     let nn: u16 = u16::from_be_bytes([mmu.read_mem(cpu.pc + 2), mmu.read_mem(cpu.pc + 1)]);
     instructions::call_nz(&mut cpu, &mut mmu, nn);
 
-    let check: Vec<u16> = vec![0x001A, 0x0047, 0x3000, 0x2135];
+    let check: Vec<u16> = vec![0x001A, 0x004A, 0x3000, 0x2135];
 
     assert_eq!(
         check,
@@ -888,6 +898,7 @@ fn rrc_hl_test() {
 #[test]
 fn rl_test() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.d = 0x8F;
 
@@ -901,6 +912,7 @@ fn rl_test() {
 #[test]
 fn rl_hl_test() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
     let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
@@ -918,6 +930,7 @@ fn rl_hl_test() {
 #[test]
 fn rr_test() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
 
     cpu.registers.b = 0xDD;
 
@@ -931,6 +944,7 @@ fn rr_test() {
 #[test]
 fn rr_hl_test() {
     let mut cpu = Cpu::new();
+    cpu.registers.f.clear_flags();
     let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
@@ -1158,7 +1172,7 @@ fn ld_a_from_io_c_test() {
     let mut mmu = Interconnect::new();
 
     let value = 0xAB;
-
+    cpu.registers.c = 0xC;
     mmu.write_mem(0xFF0C, value);
 
     ld_a_from_io_c(&mut cpu, &mmu);
@@ -1186,6 +1200,7 @@ fn ld_io_c_from_a_test() {
     let mut mmu = Interconnect::new();
 
     cpu.registers.a = 0x81;
+    cpu.registers.c = 0x0C;
 
     ld_io_c_from_a(&cpu, &mut mmu);
 
