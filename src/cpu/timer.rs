@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Clock {
     pub period: u32,
     pub n: u32,
@@ -55,6 +55,45 @@ impl Timer {
             tma_clock: Clock::power_up(1024),
         }
     }
+
+
+    pub fn set_div(&mut self, value: u8) {
+        self.div = value;
+    }
+    pub fn div(&self) -> u8 {
+        self.div
+    }
+
+
+    pub fn set_tima(&mut self, value: u8) {
+        self.tima = value;
+    }
+
+    pub fn tima(&self) -> u8 {
+        self.tima
+    }
+
+    pub fn set_tma(&mut self, value: u8) {
+        self.tima = value;
+    }
+
+    pub fn tma(&self) -> u8 {
+        self.tima
+    }
+
+    pub fn set_internal_ticks(&mut self, value: u64) {
+        self.internal_ticks = value;
+    }
+
+    pub fn div_clock(&self) -> Clock {
+        self.div_clock
+    }
+
+    pub fn tma_clock(&self) -> Clock {
+        self.tma_clock 
+    }
+
+
     pub fn print_timer(&self) {
         println!(
             "Ticks: {:#X} DIV: {} TIMA: {} TMA: {} TAC: {}",
