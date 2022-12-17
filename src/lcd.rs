@@ -19,6 +19,7 @@ const DEFUALT_COLORS: [Color; 4] = [
     Color::RGB(0, 0, 0),
 ];
 
+
 #[derive(Debug)]
 pub struct Lcd {
     ///Bit 7 LCD and PPU enable	0=Off, 1=On
@@ -91,14 +92,14 @@ pub struct Lcd {
     /// of the OBJs that use the coressponding palette
     pub obj_palette: [u8; 2],
 
-    bg_colors: [Color; 4],
-    sp1_colors: [Color; 4],
-    sp2_colors: [Color; 4],
+    pub bg_colors: [Color; 4],
+    pub sp1_colors: [Color; 4],
+    pub sp2_colors: [Color; 4],
 }
 
 impl Lcd {
     pub fn new() -> Self {
-        let mut inital_state = Self {
+        let mut initial_state = Self {
             lcdc: 0,
             lcd_stat: 0,
             scy: 0,
@@ -119,12 +120,11 @@ impl Lcd {
         };
 
         for i in 0..4 {
-            inital_state.bg_colors[i] = DEFUALT_COLORS[i];
-            inital_state.sp1_colors[i] = DEFUALT_COLORS[i];
-            inital_state.sp2_colors[i] = DEFUALT_COLORS[i];
+            initial_state.bg_colors[i] = DEFUALT_COLORS[i];
+            initial_state.sp1_colors[i] = DEFUALT_COLORS[i];
+            initial_state.sp2_colors[i] = DEFUALT_COLORS[i];
         }
-
-        inital_state
+        initial_state
     }
 
     pub fn read(&self, addr: u16) -> u8 {
@@ -167,8 +167,6 @@ impl Lcd {
         }
     }
 
-
-
     pub fn dma_start(&mut self, ppu: &mut Ppu, value: u8) {
         ppu.dma.active = true;
         ppu.dma.byte = 0;
@@ -190,20 +188,36 @@ impl Lcd {
         pal_colors[3] = DEFUALT_COLORS[((pal_data >> 6) & 0b11) as usize];
     }
 
+    pub fn set_ly(&mut self, value: u8) {
+        self.ly = value;
+    }
+
     pub fn ly(&self) -> u8 {
         self.ly
     }
 
-    pub fn set_ly(&mut self, value: u8)  {
-        self.ly = value;
+    pub fn set_lyc(&mut self, value: u8) {
+        self.lyc = value;
     }
 
     pub fn lyc(&self) -> u8 {
         self.lyc
     }
 
-    pub fn set_lyc(&mut self, value: u8) {
-        self.lyc = value;
+    pub fn set_scx(&mut self, value: u8) {
+        self.scx = value
+    }
+
+    pub fn scx(&self) -> u8 {
+        self.scx
+    }
+
+    pub fn set_scy(&mut self, value: u8) {
+        self.scy = value;
+    }
+
+    pub fn scy(&self) -> u8 {
+        self.scy
     }
 
     /************************************************************

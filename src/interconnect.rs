@@ -1,11 +1,14 @@
 use core::time;
 
+use modular_bitfield::private::PushBuffer;
+use sdl2::pixels::Color;
+
 use crate::constants::*;
-use crate::cpu::interrupts::interrupt_request;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::lcd::Lcd;
 use crate::lcd::LcdMode;
+use crate::ppu::FetchState;
 use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
@@ -45,7 +48,10 @@ impl Interconnect {
     pub fn print_timer(&self) {
         println!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
-            self.timer.div, self.timer.tima, self.timer.tma, self.timer.tac
+            self.timer.div(),
+            self.timer.tima(),
+            self.timer.tma(),
+            self.timer.tac()
         );
     }
 
@@ -53,6 +59,19 @@ impl Interconnect {
         for i in (0x8000..0x9FFF).rev() {
             println!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
         }
+    }
+    
+    pub fn print_ppu(&self) {
+        println!("FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {}",
+            self.ppu.fetch_state(),
+            self.ppu.line_x(),
+            self.ppu.pushed_x(),
+            self.ppu.fetch_x());
+        println!("map_y: {} map_x: {} tile_y: {} fifo_x: {}",
+            self.ppu.map_y(),
+            self.ppu.map_x(),
+            self.ppu.tile_y(),
+            self.ppu.fifo_x());
     }
 
     pub fn dma_transfer(&mut self, value: u8) {
@@ -142,15 +161,6 @@ impl Interconnect {
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
         }
-        /*
-        else if addr == 0xFF44 {
-            unsafe {
-                let old_ly = ly;
-                let new_ly = ly.wrapping_add(1);
-                ly = new_ly;
-                old_ly
-            }
-        }*/
         // LCD Control
         else if (0xFF40..0xFF4C).contains(&addr) {
             self.lcd.read(addr)
@@ -196,20 +206,21 @@ impl Interconnect {
         }
 
         // Used to get cycle count over in main loop
-        self.timer.internal_ticks = cyc as u64;
+        self.timer.set_internal_ticks(cyc as u64);
 
         // Increase Div
         let div_value = self.timer.div_clock.next(cycles) as u8;
         self.timer.set_div(div_value);
 
-        if (self.timer.tac & 0x04) != 0x00 {
+        if (self.timer.tac() & 0x04) != 0x00 {
             let n = self.timer.tma_clock.next(cycles);
 
             for _ in 0..n {
-                self.timer.tima = self.timer.tima.wrapping_add(1);
+                let tima_value = self.timer.tima().wrapping_add(1);
+                self.timer.set_tima(tima_value);
 
-                if self.timer.tima == 0x00 {
-                    self.timer.tima = self.timer.tma;
+                if self.timer.tima() == 0x00 {
+                    self.timer.set_tima(self.timer.tma());
 
                     // Trigger Interrupt
                     request_interrupt(self, InterruptType::Timer);
@@ -240,7 +251,8 @@ impl Interconnect {
             return;
         }
 
-        let addr: u16 = (((self.ppu.dma_value() as u16) * 0x100) as u16) + (self.ppu.dma_byte() as u16);
+        let addr: u16 =
+            (((self.ppu.dma_value() as u16) * 0x100) as u16) + (self.ppu.dma_byte() as u16);
 
         self.ppu
             .write_oam(self.ppu.dma_byte() as u16, self.read_mem(addr));
@@ -260,6 +272,8 @@ impl Interconnect {
     }
 
     pub fn ppu_tick(&mut self) {
+
+        self.print_ppu();
         self.ppu.increase_line_ticks();
 
         match self.lcd.lcd_stat_mode() {
@@ -288,12 +302,24 @@ impl Interconnect {
     pub fn ppu_mode_oam(&mut self) {
         if self.ppu.line_ticks() >= 80 {
             self.lcd.set_lcd_stat_mode(LcdMode::Transfer as u8);
+
+            self.ppu.set_fetch_state(FetchState::Tile);
+            self.ppu.set_line_x(0);
+            self.ppu.set_fetch_x(0);
+            self.ppu.set_pushed_x(0);
+            self.ppu.set_fifo_x(0);
         }
     }
 
     pub fn ppu_mode_transfer(&mut self) {
-        if self.ppu.line_ticks() >= 80 + 172 {
+        self.pipeline_process();
+        if self.ppu.line_ticks() >= X_RES as u32 {
+            self.pipeline_fifo_reset();
             self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
+
+            if self.lcd.lcd_stat_interrupt(SI_HBLANK) {
+                request_interrupt(self, InterruptType::LcdStat)
+            }
         }
     }
 
@@ -326,6 +352,130 @@ impl Interconnect {
 
             self.ppu.set_line_ticks(0);
         }
+    }
+
+    fn pipline_fifo_add(&mut self)  -> bool{
+        if self.ppu.pixel_fifo().len() > 8 {
+            // fifo is full
+            return false;
+        }
+
+        let x: i16= (self.ppu.fetch_x() - (8 - (self.lcd.scx() % 8))) as i16 ;
+
+        let second_byte: u8 = self.ppu.bgw_fetch_data()[0];
+        let first_byte: u8 = self.ppu.bgw_fetch_data()[1];
+
+        let mut color: u8 = 0;
+
+        for bit in (0..8).rev() {
+            let first_bit = (first_byte >> bit) & 1;
+            let second_bit = (second_byte >> bit) & 1;
+
+            if first_bit == 0 && second_bit == 0 {
+                color = 0;
+            } else if first_bit == 0 && second_bit == 1 {
+                color = 1;
+            }
+
+            else if first_bit == 1 && second_bit == 0 {
+                color = 2;
+            }
+
+            else {
+                color = 3;
+            }
+
+            let new_color = self.lcd.bg_colors[color as usize];
+
+            if x >= 0 {
+                self.ppu.pixel_fifo_push(new_color);
+                self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
+            }
+        }
+
+        return true;
+
+    }
+
+     fn pipeline_fetch(&mut self) {
+        match self.ppu.fetch_state() {
+            FetchState::Tile => {
+                if self.lcd.lcdc_bgw_enabled() {
+                    let addr: u16 = self.lcd.lcdc_bg_tile_map_addr()
+                        + ((self.ppu.map_x() / 8) as u16)
+                        + ((self.ppu.map_y() / 8) * 32) as u16;
+                    let value: u8 = self.read_mem(addr);
+                    self.ppu.set_bgw_fetch_data(0, value);
+
+                    if self.lcd.lcdc_bgw_data_area() == 0x8800 {
+                        let value: u8 = self.ppu.bgw_fetch_data()[0].wrapping_add(128);
+                        self.ppu.set_bgw_fetch_data(0, value);
+                    }
+                }
+                self.ppu.set_fetch_state(FetchState::Data0);
+                self.ppu.set_fetch_x(self.ppu.fetch_x().wrapping_add(8));
+            }
+            FetchState::Data0 => {
+                let addr: u16 = self.lcd.lcdc_bgw_data_area() +
+                    (self.ppu.bgw_fetch_data()[0] * 16) as u16 + 
+                    self.ppu.tile_y() as u16;
+                self.ppu.set_bgw_fetch_data(1, self.read_mem(addr));
+
+                self.ppu.set_fetch_state(FetchState::Data1);
+            }
+            FetchState::Data1 => {
+                let addr: u16 = self.lcd.lcdc_bgw_data_area() +
+                    ((self.ppu.bgw_fetch_data()[0] * 16) as u16 + 
+                     (self.ppu.tile_y() as u16 + 1));
+                self.ppu.set_bgw_fetch_data(2, self.read_mem(addr));
+
+                self.ppu.set_fetch_state(FetchState::Idle);
+
+            }
+            FetchState::Idle => {
+                self.ppu.set_fetch_state(FetchState::Push);
+            }
+            FetchState::Push => {
+                if self.pipline_fifo_add() {
+                    self.ppu.set_fetch_state(FetchState::Tile);
+                }
+            }
+        }
+    }
+
+    fn pipline_push_pixel(&mut self) {
+        if self.ppu.pixel_fifo().len() > 8 {
+            let pixel_data: Color = self.ppu.pixel_fifo_pop();
+
+            if self.ppu.line_x() >= (self.lcd.scx() % 8) {
+                let index = (self.ppu.pushed_x() + (self.lcd.ly() * X_RES)) as usize;
+                self.ppu.video_buffer[index] = pixel_data;
+
+                self.ppu.set_pushed_x(self.ppu.pushed_x().wrapping_add(1));
+            }
+            self.ppu.set_line_x(self.ppu.line_x().wrapping_add(1));
+        }
+    }
+
+    fn pipeline_process(&mut self) {
+        self.ppu.set_map_y(self.lcd.ly() + self.lcd.scy());
+        self.ppu.set_map_x(self.ppu.fetch_x() + self.lcd.scx());
+        self.ppu
+            .set_tile_y(((self.lcd.ly() + self.lcd.scy()) % 8) * 2);
+
+        if !(self.ppu.line_ticks() & 1 == 1) {
+            self.pipeline_fetch();
+        }
+
+       self.pipline_push_pixel();
+    }
+
+    fn pipeline_fifo_reset(&mut self) {
+        while self.ppu.pixel_fifo().len() > 0 {
+            self.ppu.pixel_fifo_pop();
+        }
+
+        self.ppu.pixel_fifo_push(Color::RGB(0,0,0));
     }
 }
 

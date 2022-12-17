@@ -7,6 +7,11 @@ mod ppu;
 mod window;
 mod lcd;
 
+use constants::SCREEN_HEIGHT;
+use constants::SCREEN_WIDTH;
+use sdl2::pixels::Color;
+use sdl2::*;
+
 pub use cpu::Cpu;
 pub use mmu::Mmu;
 
@@ -56,9 +61,11 @@ fn main()  -> Result<(), Error> {
     game_boy.interconnect.ppu_init();
 
     let sdl_context = sdl2::init().expect("Failed to start SDL");
-    let timer = sdl_context.timer().unwrap();
-    let mut canvas = window::init_window(&sdl_context);
+    let mut debug = window::init_window(&sdl_context);
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
+
+    let mut main_window = window::init_window(&sdl_context);
+    
 
     'running: loop {
         game_boy.cpu.run(&mut game_boy.interconnect);
@@ -72,13 +79,13 @@ fn main()  -> Result<(), Error> {
                 _ => {}
             }
         }
-        window::debug_window(&mut canvas, &game_boy.interconnect);
+        window::debug_window(&mut debug, &game_boy.interconnect);
+        window::main_window(&mut main_window, &game_boy.interconnect);
     }
 
     Ok(())
 }
 
-fn update() {}
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector

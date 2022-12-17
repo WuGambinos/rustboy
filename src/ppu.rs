@@ -1,5 +1,50 @@
-use modular_bitfield::prelude::*;
 use crate::constants::*;
+use modular_bitfield::prelude::*;
+use raylib::consts::PixelFormat;
+use sdl2::pixels::Color;
+use std::collections::LinkedList;
+
+#[derive(Debug, Clone)]
+pub enum FetchState {
+    Tile,
+    Data0,
+    Data1,
+    Idle,
+    Push,
+}
+
+#[derive(Debug, Clone)]
+pub struct PixelFifoContext {
+    fetch_state: FetchState,
+    pixel_fifo: LinkedList<Color>,
+    line_x: u8,
+    pushed_x: u8,
+    fetch_x: u8,
+    bgw_fetch_data: [u8; 3],
+    fetch_entry_data: [u8; 6],
+    map_y: u8,
+    map_x: u8,
+    tile_y: u8,
+    fifo_x: u8,
+}
+
+impl PixelFifoContext {
+    fn new() -> Self {
+        PixelFifoContext {
+            fetch_state: FetchState::Tile,
+            pixel_fifo: LinkedList::new(),
+            line_x: 0,
+            pushed_x: 0,
+            fetch_x: 0,
+            bgw_fetch_data: [0; 3],
+            fetch_entry_data: [0; 6],
+            map_y: 0,
+            map_x: 0,
+            tile_y: 0,
+            fifo_x: 0,
+        }
+    }
+}
 
 /// Single Entry in OAM (Object Atribute Memory)
 #[bitfield]
@@ -49,7 +94,6 @@ impl OamEntry {
     }
 }
 
-
 #[derive(Debug, Copy, Clone)]
 pub struct Dma {
     pub active: bool,
@@ -84,7 +128,8 @@ pub struct Ppu {
 
     pub current_frame: u32,
     pub line_ticks: u32,
-    pub video_buffer: [u8; BUFFER_SIZE],
+    pub video_buffer: [Color; BUFFER_SIZE],
+    pfc: PixelFifoContext,
 }
 
 impl Ppu {
@@ -96,10 +141,10 @@ impl Ppu {
             dma: Dma::new(),
             line_ticks: 0,
             current_frame: 0,
-            video_buffer: [0; BUFFER_SIZE],
+            video_buffer: [Color::RGB(0,0,0); BUFFER_SIZE],
+            pfc: PixelFifoContext::new(),
         }
     }
-
 
     pub fn dma_transferring(&self) -> bool {
         self.dma.active
@@ -113,7 +158,6 @@ impl Ppu {
         self.dma.active
     }
 
-
     pub fn set_dma_byte(&mut self, value: u8) {
         self.dma.byte = value
     }
@@ -122,7 +166,6 @@ impl Ppu {
         self.dma.byte
     }
 
-    
     pub fn set_dma_start_delay(&mut self, value: u8) {
         self.dma.start_delay = value
     }
@@ -147,21 +190,121 @@ impl Ppu {
         self.line_ticks
     }
 
+    pub fn increase_line_ticks(&mut self) {
+        self.line_ticks = self.line_ticks.wrapping_add(1);
+    }
+
     pub fn current_frame(&self) -> u32 {
         self.current_frame
     }
 
-    pub fn increase_line_ticks(&mut self) {
-        self.line_ticks = self.line_ticks.wrapping_add(1);
+    pub fn set_fetch_state(&mut self, state: FetchState) {
+        self.pfc.fetch_state = state;
     }
+
+    pub fn fetch_state(&self) -> &FetchState {
+        let state = &self.pfc.fetch_state;
+        state
+    }
+
+    pub fn set_line_x(&mut self, value: u8) {
+        self.pfc.line_x = value;
+    }
+
+    pub fn line_x(&self) -> u8 {
+        self.pfc.line_x
+    }
+
+    pub fn set_pushed_x(&mut self, value: u8) {
+        self.pfc.pushed_x = value;
+    }
+
+    pub fn pushed_x(&self) -> u8 {
+        self.pfc.pushed_x
+    }
+
+    pub fn set_fetch_x(&mut self, value: u8) {
+        self.pfc.fetch_x = value;
+    }
+
+    pub fn fetch_x(&self) -> u8 {
+        self.pfc.fetch_x
+    }
+
+
+    pub fn set_map_y(&mut self, value: u8) {
+        self.pfc.map_y = value;
+    }
+
+    pub fn map_y(&self) -> u8 {
+        self.pfc.map_y
+    }
+
+    pub fn set_map_x(&mut self, value: u8) {
+        self.pfc.map_x = value;
+    }
+
+    pub fn map_x(&self) -> u8 {
+        self.pfc.map_x
+    }
+
+    pub fn set_tile_y(&mut self, value: u8) {
+        self.pfc.tile_y = value;
+    }
+
+    pub fn tile_y(&self) -> u8 {
+        self.pfc.tile_y 
+    }
+
+    pub fn set_fifo_x(&mut self, value: u8) {
+        self.pfc.fifo_x = value;
+    }
+
+    pub fn fifo_x(&self) -> u8 {
+        self.pfc.fifo_x
+    }
+
+    pub fn pixel_fifo(&self) -> LinkedList<Color> {
+        self.pfc.pixel_fifo.clone()
+    }
+
+
+
+    pub fn pixel_fifo_push(&mut self, color: Color) {
+        self.pfc.pixel_fifo.push_back(color);
+    }
+
+    pub fn pixel_fifo_pop(&mut self)  -> Color{
+
+        match self.pfc.pixel_fifo.pop_front() {
+            Some(color) => {
+                return color;
+            },
+            None => panic!("NO VALUE TO POP"),
+        }
+    }
+
+
+    pub fn set_bgw_fetch_data(&mut self, index: usize, value: u8) {
+        self.pfc.bgw_fetch_data[index] = value;
+    }
+
+    pub fn bgw_fetch_data(&self) -> [u8; 3]{
+        self.pfc.bgw_fetch_data
+    }
+
+
+
+
+
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
         let index = ((addr - 0xFE00) % 40) as usize;
         let inner_index = ((addr - 0xFE00) % 4) as usize;
 
         match inner_index {
-            0 => self.oam[index].y = value ,
-            1 =>self.oam[index].x = value,
+            0 => self.oam[index].y = value,
+            1 => self.oam[index].x = value,
             2 => self.oam[index].tile = value,
             3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
             _ => panic!("NOT AN INDEX"),
@@ -172,8 +315,8 @@ impl Ppu {
         let index = ((addr - 0xFE00) % 40) as usize;
         let inner_index = ((addr - 0xFE00) % 4) as usize;
         match inner_index {
-            0 => self.oam[index].y  ,
-            1 =>self.oam[index].x ,
+            0 => self.oam[index].y,
+            1 => self.oam[index].x,
             2 => self.oam[index].tile,
             3 => self.oam[index].oam_attr.into_bytes()[0],
             _ => panic!("NOT AN INDEX"),
@@ -187,7 +330,6 @@ impl Ppu {
     pub fn read_vram(&self, addr: u16) -> u8 {
         self.vram[(addr - 0x8000) as usize]
     }
-
 }
 
 impl Default for Ppu {
