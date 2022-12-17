@@ -3,6 +3,7 @@ use crate::constants::*;
 
 use sdl2::*;
 use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 
@@ -27,6 +28,30 @@ pub fn init_window(sdl_context: &Sdl) -> WindowCanvas {
         .expect("failed to get sdl canvas");
     
     canvas
+}
+
+pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
+    let rc = Rect::new(0, 0, 1080, 1080);
+
+    let video_buffer = interconnect.ppu.video_buffer;
+
+    for line_num in 0..Y_RES {
+        for x in 0..X_RES {
+            let new_x = (x  * (SCALE as u8)) as i32;
+            let new_y = (line_num * (SCALE as u8)) as i32;
+            let w = SCALE as u32;
+            let h = SCALE as u32;
+
+            let index = x + ( line_num * X_RES);
+            let color = video_buffer[index as usize];
+            //canvas.set_draw_color(TILE_COLORS[color as usize]);
+            canvas.set_draw_color(color);
+            canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h));
+        }
+    }
+
+    canvas.present();
+
 }
 
 pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {

@@ -12,31 +12,31 @@ impl Clock {
     pub fn next(&mut self, cycles: u32) -> u32 {
         self.n += cycles;
         let res = self.n / self.period;
-        self.n %=  self.period;
+        self.n %= self.period;
         res
     }
 }
 
-/// Gameboy Timer 
+/// Gameboy Timer
 #[derive(Debug)]
 pub struct Timer {
     /// Divider Register - Incremented at rate of 16384Hz, Writing any vlaue to this register
     /// resets it to 0x00
-    pub div: u8,
+    div: u8,
 
     /// Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
     /// When the value overflows then it will be reset to value specified in TMA and interrupt
     /// will be request
-    pub tima: u8,
+    tima: u8,
 
     /// Timer Modulo (R/W)
-    pub tma: u8,
+    tma: u8,
 
     /// Timer Control (R/W)
-    pub tac: u8,
+    tac: u8,
 
     /// Internal Ticks
-    pub internal_ticks: u64,
+    internal_ticks: u64,
 
     pub div_clock: Clock,
 
@@ -56,14 +56,12 @@ impl Timer {
         }
     }
 
-
     pub fn set_div(&mut self, value: u8) {
         self.div = value;
     }
     pub fn div(&self) -> u8 {
         self.div
     }
-
 
     pub fn set_tima(&mut self, value: u8) {
         self.tima = value;
@@ -81,8 +79,20 @@ impl Timer {
         self.tima
     }
 
+    pub fn set_tac(&mut self, value: u8) {
+        self.tac = value
+    }
+
+    pub fn tac(&self) -> u8 {
+        self.tac
+    }
+
     pub fn set_internal_ticks(&mut self, value: u64) {
         self.internal_ticks = value;
+    }
+
+    pub fn internal_ticks(&self) -> u64 {
+        self.internal_ticks
     }
 
     pub fn div_clock(&self) -> Clock {
@@ -90,9 +100,8 @@ impl Timer {
     }
 
     pub fn tma_clock(&self) -> Clock {
-        self.tma_clock 
+        self.tma_clock
     }
-
 
     pub fn print_timer(&self) {
         println!(
@@ -132,7 +141,6 @@ impl Timer {
 
             // TAC
             0xFF07 => {
-
                 // If Clock is enabled
                 if (self.tac & 0x03) != (value & 0x03) {
                     self.tma_clock.n = 0x00;

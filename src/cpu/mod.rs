@@ -425,7 +425,7 @@ impl Cpu {
         self.handle_interrupt(interconnect);
 
         // Get last cycle
-        self.last_cycle = interconnect.timer.internal_ticks;
+        self.last_cycle = interconnect.timer.internal_ticks();
 
         // Fetch opcode
         self.fetch(interconnect);
@@ -6251,10 +6251,10 @@ impl Cpu {
 
         println!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
-            interconnect.timer.div,
-            interconnect.timer.tima,
-            interconnect.timer.tma,
-            interconnect.timer.tac
+            interconnect.timer.div(),
+            interconnect.timer.tima(),
+            interconnect.timer.tma(),
+            interconnect.timer.tac()
         );
 
         println!("FLAG: {:#X}", self.registers.f.data);
