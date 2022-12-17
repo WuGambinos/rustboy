@@ -2,10 +2,10 @@ mod constants;
 mod cpu;
 mod gameboy;
 mod interconnect;
+mod lcd;
 mod mmu;
 mod ppu;
 mod window;
-mod lcd;
 
 use constants::SCREEN_HEIGHT;
 use constants::SCREEN_WIDTH;
@@ -25,14 +25,14 @@ use std::path::Path;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-use anyhow::Result;
 use anyhow::Error;
+use anyhow::Result;
 
-fn main()  -> Result<(), Error> {
+fn main() -> Result<(), Error> {
     // Command Line Arguments
-    let args: Vec<String> = env::args().collect();
-    let test_rom = args[1].as_str();
-    //let test_rom = "roms/blaargs/cpu_instrs/individual/02-interrupts.gb";
+    //let args: Vec<String> = env::args().collect();
+    //let test_rom = args[1].as_str();
+    let test_rom = "roms/dmg-acid2.gb";
     let boot_rom = "roms/blaargs/boot-rom.gb";
 
     // Path to rom
@@ -65,7 +65,6 @@ fn main()  -> Result<(), Error> {
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
     let mut main_window = window::init_window(&sdl_context);
-    
 
     'running: loop {
         game_boy.cpu.run(&mut game_boy.interconnect);
@@ -85,7 +84,6 @@ fn main()  -> Result<(), Error> {
 
     Ok(())
 }
-
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
     //Reads file contents into vector

@@ -100,7 +100,7 @@ pub struct Lcd {
 impl Lcd {
     pub fn new() -> Self {
         let mut initial_state = Self {
-            lcdc: 0,
+            lcdc: 0x91,
             lcd_stat: 0,
             scy: 0,
             scx: 0,
@@ -287,7 +287,7 @@ impl Lcd {
      * **********************************************************/
 
     pub fn lcd_stat_mode(&self) -> LcdMode {
-        let bits = (self.lcd_stat & 0b11);
+        let bits = self.lcd_stat & 0b11;
 
         match bits {
             0 => return LcdMode::HBlank,
@@ -309,7 +309,7 @@ impl Lcd {
 
     pub fn set_lyc_ly_flag(&mut self, on: u8) {
         if on == 1 {
-            self.lcd_stat |= (1 << 2);
+            self.lcd_stat |= 1 << 2;
         } else {
             self.lcd_stat &= !(1 << 2);
         }
