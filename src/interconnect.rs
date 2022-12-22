@@ -12,7 +12,6 @@ use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
 static mut ly: u8 = 0;
-static mut track: u32 = 0;
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
@@ -62,12 +61,13 @@ impl Interconnect {
 
     pub fn print_ppu(&self) {
         println!(
-            "TICKS: {} FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {} bgw_enable: {}",
+            "TICKS: {} FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {} LY: {} bgw_enable: {}",
             self.ppu.line_ticks(),
             self.ppu.fetch_state(),
             self.ppu.line_x(),
             self.ppu.pushed_x(),
             self.ppu.fetch_x(),
+            self.lcd.ly(),
             self.lcd.lcdc_bgw_enabled() as u8
         );
         println!(
@@ -209,7 +209,7 @@ impl Interconnect {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
-        for _ in 0..4 {
+        for _ in 0..cyc {
             self.ppu_tick();
         }
 
@@ -266,8 +266,6 @@ impl Interconnect {
             .write_oam(self.ppu.dma_byte() as u16, self.read_mem(addr));
 
         let byte_value = self.ppu.dma_byte().wrapping_add(1);
-
-        //self.ppu.dma.byte = self.ppu.dma.byte.wrapping_add(1);
         self.ppu.set_dma_byte(byte_value);
 
         self.ppu.set_dma_active(self.ppu.dma_byte() < 0xA0);
@@ -280,14 +278,6 @@ impl Interconnect {
     }
 
     pub fn ppu_tick(&mut self) {
-        //self.print_ppu();
-        unsafe {
-            track += 2;
-            if track == 185848 {
-                let x = 0;
-            }
-        }
-
         self.ppu.increase_line_ticks();
 
         match self.lcd.lcd_stat_mode() {
@@ -329,7 +319,6 @@ impl Interconnect {
         self.pipeline_process();
         if self.ppu.pushed_x() as u32 >= X_RES as u32 {
             self.pipeline_fifo_reset();
-            println!("REACHED");
             self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
 
             if self.lcd.lcd_stat_interrupt(SI_HBLANK) {
@@ -377,8 +366,10 @@ impl Interconnect {
 
         let x: i16 = (self.ppu.fetch_x() - (8 - (self.lcd.scx() % 8))) as i16;
 
-        let second_byte: u8 = self.ppu.bgw_fetch_data()[0];
-        let first_byte: u8 = self.ppu.bgw_fetch_data()[1];
+        let second_byte: u8 = self.ppu.bgw_fetch_data()[1];
+        let first_byte: u8 = self.ppu.bgw_fetch_data()[2];
+        
+
 
         let mut color: u8 = 0;
 
@@ -387,23 +378,23 @@ impl Interconnect {
             let second_bit = (second_byte >> bit) & 1;
 
             if first_bit == 0 && second_bit == 0 {
-                color = 0;
-            } else if first_bit == 0 && second_bit == 1 {
                 color = 1;
+            } else if first_bit == 0 && second_bit == 1 {
+                color = 0;
             } else if first_bit == 1 && second_bit == 0 {
                 color = 2;
             } else {
                 color = 3;
             }
 
-            let new_color = self.lcd.bg_colors[color as usize];
+            //let new_color = self.lcd.bg_colors[color as usize];
+            let new_color = TILE_COLORS[color as usize];
 
             if x >= 0 {
                 self.ppu.pixel_fifo_push(new_color);
                 self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
             }
         }
-
         return true;
     }
 
@@ -427,7 +418,7 @@ impl Interconnect {
             }
             FetchState::Data0 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + (self.ppu.bgw_fetch_data()[0] * 16) as u16
+                    + (self.ppu.bgw_fetch_data()[0] as u16 * 16) as u16
                     + self.ppu.tile_y() as u16;
                 self.ppu.set_bgw_fetch_data(1, self.read_mem(addr));
 
@@ -435,7 +426,8 @@ impl Interconnect {
             }
             FetchState::Data1 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + ((self.ppu.bgw_fetch_data()[0] * 16) as u16 + (self.ppu.tile_y() as u16 + 1));
+                    + ((self.ppu.bgw_fetch_data()[0] as u16 * 16) as u16
+                        + (self.ppu.tile_y() as u16 + 1));
                 self.ppu.set_bgw_fetch_data(2, self.read_mem(addr));
 
                 self.ppu.set_fetch_state(FetchState::Idle);
@@ -452,11 +444,8 @@ impl Interconnect {
     }
 
     fn pipline_push_pixel(&mut self) {
-        println!("FIFO LENGTH: {}", self.ppu.pixel_fifo().len());
         if self.ppu.pixel_fifo().len() > 8 {
             let pixel_data: Color = self.ppu.pixel_fifo_pop();
-
-            println!("LINE_X: {} SCX: {}", self.ppu.line_x(), self.lcd.scx());
 
             if self.ppu.line_x() >= (self.lcd.scx() % 8) {
                 let index =
@@ -470,10 +459,11 @@ impl Interconnect {
     }
 
     fn pipeline_process(&mut self) {
-        self.ppu.set_map_y(self.lcd.ly() + self.lcd.scy());
-        self.ppu.set_map_x(self.ppu.fetch_x() + self.lcd.scx());
+        self.ppu.set_map_y(self.lcd.ly().wrapping_add(self.lcd.scy()));
         self.ppu
-            .set_tile_y(((self.lcd.ly() + self.lcd.scy()) % 8) * 2);
+            .set_map_x(self.ppu.fetch_x().wrapping_add(self.lcd.scx()));
+        self.ppu
+            .set_tile_y(((self.lcd.ly().wrapping_add(self.lcd.scy())) % 8) * 2);
 
         if !(self.ppu.line_ticks() & 1 == 1) {
             self.pipeline_fetch();

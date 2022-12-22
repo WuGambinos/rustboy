@@ -30,9 +30,9 @@ use anyhow::Result;
 
 fn main() -> Result<(), Error> {
     // Command Line Arguments
-    //let args: Vec<String> = env::args().collect();
-    //let test_rom = args[1].as_str();
-    let test_rom = "roms/dmg-acid2.gb";
+    let args: Vec<String> = env::args().collect();
+    let test_rom = args[1].as_str();
+    //let test_rom = "roms/dmg-acid2.gb";
     let boot_rom = "roms/blaargs/boot-rom.gb";
 
     // Path to rom
@@ -64,7 +64,7 @@ fn main() -> Result<(), Error> {
     let mut debug = window::init_window(&sdl_context);
     let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
-    let mut main_window = window::init_window(&sdl_context);
+    let mut main_window = window::init_main_window(&sdl_context);
 
     'running: loop {
         game_boy.cpu.run(&mut game_boy.interconnect);
