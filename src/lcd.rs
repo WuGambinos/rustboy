@@ -19,7 +19,6 @@ const DEFUALT_COLORS: [Color; 4] = [
     Color::RGB(0, 0, 0),
 ];
 
-
 #[derive(Debug)]
 pub struct Lcd {
     ///Bit 7 LCD and PPU enable	0=Off, 1=On
@@ -98,6 +97,20 @@ pub struct Lcd {
 }
 
 impl Lcd {
+    pub fn print_lcd(&self) {
+        println!("LCDC: {:X} MODE: {:?} STAT: {:#X} SCY: {:#X} SCX: {:#X} LY: {:#X} LYC: {:#X} WY: {:#X} WX: {:#X} DMA: {:#X}",
+        self.lcdc,
+        self.lcd_stat_mode(),
+        self.lcd_stat,
+        self.scy,
+        self.scx,
+        self.ly,
+        self.lyc,
+        self.wy,
+        self.wx,
+        self.dma,
+    )
+    }
     pub fn new() -> Self {
         let mut initial_state = Self {
             lcdc: 0x91,
@@ -186,6 +199,14 @@ impl Lcd {
         pal_colors[1] = DEFUALT_COLORS[((pal_data >> 2) & 0b11) as usize];
         pal_colors[2] = DEFUALT_COLORS[((pal_data >> 4) & 0b11) as usize];
         pal_colors[3] = DEFUALT_COLORS[((pal_data >> 6) & 0b11) as usize];
+    }
+
+    pub fn set_lcdc(&mut self, value: u8) {
+        self.lcdc = value;
+    }
+
+    pub fn lcdc(&self) -> u8 {
+        self.lcdc
     }
 
     pub fn set_ly(&mut self, value: u8) {

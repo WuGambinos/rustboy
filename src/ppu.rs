@@ -141,7 +141,7 @@ impl Ppu {
             dma: Dma::new(),
             line_ticks: 0,
             current_frame: 0,
-            video_buffer: [Color::RGB(0,0,0); BUFFER_SIZE],
+            video_buffer: [Color::RGB(0, 0, 0); BUFFER_SIZE],
             pfc: PixelFifoContext::new(),
         }
     }
@@ -231,7 +231,6 @@ impl Ppu {
         self.pfc.fetch_x
     }
 
-
     pub fn set_map_y(&mut self, value: u8) {
         self.pfc.map_y = value;
     }
@@ -253,7 +252,7 @@ impl Ppu {
     }
 
     pub fn tile_y(&self) -> u8 {
-        self.pfc.tile_y 
+        self.pfc.tile_y
     }
 
     pub fn set_fifo_x(&mut self, value: u8) {
@@ -268,46 +267,48 @@ impl Ppu {
         self.pfc.pixel_fifo.clone()
     }
 
-
-
     pub fn pixel_fifo_push(&mut self, color: Color) {
         self.pfc.pixel_fifo.push_back(color);
     }
 
-    pub fn pixel_fifo_pop(&mut self)  -> Color{
-
+    pub fn pixel_fifo_pop(&mut self) -> Color {
         match self.pfc.pixel_fifo.pop_front() {
             Some(color) => {
                 return color;
-            },
+            }
             None => panic!("NO VALUE TO POP"),
         }
     }
-
 
     pub fn set_bgw_fetch_data(&mut self, index: usize, value: u8) {
         self.pfc.bgw_fetch_data[index] = value;
     }
 
-    pub fn bgw_fetch_data(&self) -> [u8; 3]{
+    pub fn bgw_fetch_data(&self) -> [u8; 3] {
         self.pfc.bgw_fetch_data
     }
 
-
-
-
-
-
     pub fn write_oam(&mut self, addr: u16, value: u8) {
-        let index = ((addr - 0xFE00) % 40) as usize;
-        let inner_index = ((addr - 0xFE00) % 4) as usize;
-
-        match inner_index {
-            0 => self.oam[index].y = value,
-            1 => self.oam[index].x = value,
-            2 => self.oam[index].tile = value,
-            3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
-            _ => panic!("NOT AN INDEX"),
+        if addr >= 0xFE00 {
+            let index = ((addr - 0xFE00) % 40) as usize;
+            let inner_index = ((addr - 0xFE00) % 4) as usize;
+            match inner_index {
+                0 => self.oam[index].y = value,
+                1 => self.oam[index].x = value,
+                2 => self.oam[index].tile = value,
+                3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
+                _ => panic!("NOT AN INDEX"),
+            }
+        } else {
+            let index = (addr % 40) as usize;
+            let inner_index = (addr % 4) as usize;
+            match inner_index {
+                0 => self.oam[index].y = value,
+                1 => self.oam[index].x = value,
+                2 => self.oam[index].tile = value,
+                3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
+                _ => panic!("NOT AN INDEX"),
+            }
         }
     }
 

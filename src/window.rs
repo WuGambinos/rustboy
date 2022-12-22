@@ -1,18 +1,10 @@
-use crate::interconnect::Interconnect;
 use crate::constants::*;
+use crate::interconnect::Interconnect;
 
-use sdl2::*;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
-
-
-static TILE_COLORS: [Color; 4] = [
-    Color::RGB(255, 255, 255),
-    Color::RGB(169, 169, 169),
-    Color::RGB(84, 84, 84),
-    Color::RGB(0, 0, 0),
-];
+use sdl2::*;
 
 pub fn init_window(sdl_context: &Sdl) -> WindowCanvas {
     let video_subsystem = sdl_context.video().expect("failed to access subsystem");
@@ -26,7 +18,23 @@ pub fn init_window(sdl_context: &Sdl) -> WindowCanvas {
         .into_canvas()
         .build()
         .expect("failed to get sdl canvas");
-    
+
+    canvas
+}
+
+pub fn init_main_window(sdl_context: &Sdl) -> WindowCanvas {
+    let video_subsystem = sdl_context.video().expect("failed to access subsystem");
+    let window = video_subsystem
+        .window("rust-sdl2 demo", MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT)
+        .position_centered()
+        .build()
+        .expect("failed to create window");
+
+    let canvas: WindowCanvas = window
+        .into_canvas()
+        .build()
+        .expect("failed to get sdl canvas");
+
     canvas
 }
 
@@ -37,13 +45,13 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
 
     for line_num in 0..Y_RES {
         for x in 0..X_RES {
-            let new_x = (x  * (SCALE as u8)) as i32;
-            let new_y = (line_num * (SCALE as u8)) as i32;
+            let new_x = (x as u16 * (SCALE as u16)) as i32;
+            let new_y = (line_num as u16 * (SCALE as u16)) as i32;
             let w = SCALE as u32;
             let h = SCALE as u32;
 
-            let index = x + ( line_num * X_RES);
-            let color = video_buffer[index as usize];
+            let index = (x as u32 + (line_num as u32 * X_RES as u32)) as usize;
+            let color = video_buffer[index];
             //canvas.set_draw_color(TILE_COLORS[color as usize]);
             canvas.set_draw_color(color);
             canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h));
@@ -51,7 +59,6 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
     }
 
     canvas.present();
-
 }
 
 pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
@@ -151,10 +158,8 @@ fn display_tile(
             let w = SCALE as u32;
             let h = SCALE as u32;
 
-            
             canvas.set_draw_color(TILE_COLORS[color as usize]);
             canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h));
-            
         }
     }
 }
