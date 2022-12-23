@@ -17,10 +17,10 @@ pub const Y_RES: u8 = 144;
 pub const X_RES: u8 = 160;
 pub const BUFFER_SIZE: usize = (144 * 160) as usize;
 
-pub const SI_HBLANK: u8 = (1 << 3);
-pub const SI_VBLANK: u8 = (1 << 4);
-pub const SI_OAM: u8 = (1 << 5);
-pub const SI_LYC: u8 = (1 << 6);
+pub const SI_HBLANK: u8 = 1 << 3;
+pub const SI_VBLANK: u8 = 1 << 4;
+pub const SI_OAM: u8 = 1 << 5;
+pub const SI_LYC: u8 = 1 << 6;
 
 pub const INTERRUPTS: [InterruptType; 5] = [
     InterruptType::VBlank,
