@@ -9,7 +9,8 @@ use crate::lcd::Lcd;
 use crate::lcd::LcdMode;
 use crate::ppu::FetchState;
 use crate::ppu::Ppu;
-use crate::{Mmu, Timer};
+use crate::mmu::Mmu;
+use crate::cpu::timer::Timer;
 
 /// Struct used to link CPU to other components of system
 ///
