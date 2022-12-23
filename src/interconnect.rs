@@ -77,7 +77,7 @@ impl Interconnect {
             self.ppu.tile_y(),
             self.ppu.fifo_x(),
             self.ppu.pixel_fifo().len(),
-            self.lcd.lcd_stat
+            self.lcd.lcd_stat(),
         );
     }
 
@@ -343,7 +343,7 @@ impl Interconnect {
         if self.ppu.line_ticks() >= TICKS_PER_LINE as u32 {
             self.increment_ly();
 
-            if self.lcd.ly >= Y_RES {
+            if self.lcd.ly() >= Y_RES {
                 self.lcd.set_lcd_stat_mode(LcdMode::VBlank as u8);
                 request_interrupt(self, InterruptType::VBlank);
 
