@@ -1,6 +1,5 @@
 use crate::constants::*;
 use modular_bitfield::prelude::*;
-use raylib::consts::PixelFormat;
 use sdl2::pixels::Color;
 use std::collections::LinkedList;
 
@@ -203,8 +202,7 @@ impl Ppu {
     }
 
     pub fn fetch_state(&self) -> &FetchState {
-        let state = &self.pfc.fetch_state;
-        state
+         &self.pfc.fetch_state
     }
 
     pub fn set_line_x(&mut self, value: u8) {
@@ -274,7 +272,7 @@ impl Ppu {
     pub fn pixel_fifo_pop(&mut self) -> Color {
         match self.pfc.pixel_fifo.pop_front() {
             Some(color) => {
-                return color;
+                 color
             }
             None => panic!("NO VALUE TO POP"),
         }

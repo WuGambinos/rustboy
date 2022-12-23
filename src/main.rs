@@ -7,10 +7,6 @@ mod mmu;
 mod ppu;
 mod window;
 
-use constants::SCREEN_HEIGHT;
-use constants::SCREEN_WIDTH;
-use sdl2::pixels::Color;
-use sdl2::*;
 
 pub use cpu::Cpu;
 pub use mmu::Mmu;

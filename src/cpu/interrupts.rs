@@ -12,74 +12,31 @@ pub enum InterruptType {
 }
 
 pub fn is_interrupt_enabled(interconnect: &mut Interconnect, index: usize) -> bool {
-    let IE = interconnect.read_mem(INTERRUPT_ENABLE);
+    let int_enable = interconnect.read_mem(INTERRUPT_ENABLE);
 
-    (IE & (1 << index)) > 0
+    (int_enable & (1 << index)) > 0
 }
 
 pub fn is_interrupt_requested(interconnect: &mut Interconnect, index: usize) -> bool {
-    let IF = interconnect.read_mem(INTERRUPT_FLAG);
-    (IF & (1 << index)) > 0
+    let int_flag = interconnect.read_mem(INTERRUPT_FLAG);
+    (int_flag & (1 << index)) > 0
 }
 
 pub fn request_interrupt(interconnect: &mut Interconnect, interrupt: InterruptType) {
-
-    let mut IR = interconnect.read_mem(INTERRUPT_FLAG);
+    let mut int_request = interconnect.read_mem(INTERRUPT_FLAG);
 
     let bit = INTERRUPTS.iter().position(|&i| i == interrupt).unwrap();
 
-    IR |= (1 << bit);
+    int_request |= 1 << bit;
 
-    interconnect.write_mem(INTERRUPT_FLAG, IR);
+    interconnect.write_mem(INTERRUPT_FLAG, int_request);
 }
 
 pub fn get_interrupt(interconnect: &mut Interconnect) -> Option<InterruptType> {
-    for i in 0..INTERRUPTS.len() {
+    for (i, interrupt) in INTERRUPTS.iter().enumerate() {
         if is_interrupt_enabled(interconnect, i) && is_interrupt_requested(interconnect, i) {
-            return Some(INTERRUPTS[i]);
+            return Some(*interrupt);
         }
     }
-
     None
-}
-
-/// Trigger interrupt depending on type passed
-pub fn interrupt_request(interconnect: &mut Interconnect, interrput_type: InterruptType) -> u8 {
-    match interrput_type {
-        InterruptType::VBlank => {
-            //Interrupt Flag
-            let mut value = interconnect.read_mem(0xFF0F);
-            value |= 1 << 0;
-            interconnect.write_mem(0xFF0F, value);
-            0
-        }
-        InterruptType::LcdStat => {
-            //Interrupt Flag
-            let mut value = interconnect.read_mem(0xFF0F);
-            value |= 1 << 1;
-            interconnect.write_mem(0xFF0F, value);
-            1
-        }
-        InterruptType::Timer => {
-            //Interrupt Flag
-            let mut value = interconnect.read_mem(0xFF0F);
-            value |= 1 << 2;
-            interconnect.write_mem(0xFF0F, value);
-            2
-        }
-        InterruptType::Serial => {
-            //Interrupt Flag
-            let mut value = interconnect.read_mem(0xFF0F);
-            value |= 1 << 3;
-            interconnect.write_mem(0xFF0F, value);
-            3
-        }
-        InterruptType::Joypad => {
-            //Interrupt Flag
-            let mut value = interconnect.read_mem(0xFF0F);
-            value |= 1 << 4;
-            interconnect.write_mem(0xFF0F, value);
-            4
-        }
-    }
 }

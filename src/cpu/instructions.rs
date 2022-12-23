@@ -4,7 +4,7 @@ use super::{Cpu, Flags, Interconnect, RegisterPair};
  * 8-bit Arithmetic instructions
  * *********************************************************************/
 
-/// Increment 8-bit register
+/// Increments 8-bit register
 ///
 /// Flags:
 ///
@@ -32,7 +32,7 @@ pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     *register = value;
 }
 
-/// Decrement 8-bit register
+/// Decrements 8-bit register
 ///
 /// Flags:
 ///
@@ -60,7 +60,7 @@ pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     *register = value;
 }
 
-/// Increment value in memory using HL pointer
+/// Increments value in memory using HL pointer
 ///
 /// Flags:
 ///
@@ -81,7 +81,7 @@ pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(value, 1);
 
-    // Increment value
+    // Increments value
     value = value.wrapping_add(1);
 
     // Write new incremented value back into memory
@@ -97,7 +97,7 @@ pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     cpu.registers.f.clear_sub_flag();
 }
 
-/// Decrement value in memory using HL pointer
+/// Decrements value in memory using HL pointer
 ///
 /// Flags:
 ///
@@ -116,7 +116,7 @@ pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(value, 1);
 
-    // Decrement Value
+    // Decrements Value
     value = value.wrapping_sub(1);
 
     // Write new decremented value back into memory
@@ -213,7 +213,7 @@ pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     cpu.registers.a = c as u8;
 }
 
-/// Subtracts another register from the accumulator, storing the result in the accumulator
+/// Subtracts register from the accumulator, storing the result in the accumulator
 ///
 /// a = a - r
 ///
@@ -477,7 +477,7 @@ pub fn daa(cpu: &mut Cpu) {
  * 8-bit Rotate instructions
  * *********************************************************************/
 
-/// Rotate Left Circular Accumulator
+/// Rotates accumulator to the left(Circular)
 ///
 /// 7th bit of Accumulator is copied into carry
 /// and into the 0th bit of A
@@ -495,7 +495,7 @@ pub fn rlca(cpu: &mut Cpu) {
     // 7th bit
     let lmb: u8 = (cpu.registers.a & 0x80) >> 7;
 
-    // Rotate Accumulator to left
+    // Rotate accumulator to left
     cpu.registers.a <<= 1;
 
     // Store previous 7th bit in 0th position
@@ -518,7 +518,7 @@ pub fn rlca(cpu: &mut Cpu) {
     cpu.registers.f.clear_half_carry_flag();
 }
 
-/// Rotate Right Circular Accumulator
+/// Rotates accumulator to the right(Circular)
 ///
 /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
 ///
@@ -535,7 +535,7 @@ pub fn rrca(cpu: &mut Cpu) {
     // 0th bit
     let rmb: u8 = cpu.registers.a & 0x01;
 
-    // Rotate Accumulator to right
+    // Rotate accumulator to right
     cpu.registers.a >>= 1;
 
     // Store previous 0th bit in 7th bit of A
@@ -558,7 +558,7 @@ pub fn rrca(cpu: &mut Cpu) {
     cpu.registers.f.clear_half_carry_flag();
 }
 
-/// Rotate Left Accumulator
+/// Rotates accumulator to the left
 ///
 /// 7th bit is moved into carry, and the carry is moved into the 0th bit
 ///
@@ -598,7 +598,7 @@ pub fn rla(cpu: &mut Cpu) {
     cpu.registers.f.clear_half_carry_flag();
 }
 
-/// Rotate Right Accumulator
+/// Rotates accumluator to the right
 ///
 /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
 ///
@@ -638,7 +638,7 @@ pub fn rra(cpu: &mut Cpu) {
     cpu.registers.f.clear_half_carry_flag();
 }
 
-/// Rotate Left Register
+/// Rotates register to the left(Circular)
 ///
 /// Contents of registert R are rotated to left 1 bit position.
 ///
@@ -686,7 +686,7 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
-/// Rotate Left Regsiter (mem[HL])
+/// Rotates (mem[HL]) to the left(Circular)
 ///
 /// Contents of mem[HL] are rotated to left 1 bit position.
 ///
@@ -740,7 +740,7 @@ pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Rotate Register Right
+/// Rotates register to the right (Circular)
 ///
 /// Register is rotated to the right 1 bit position.
 ///
@@ -787,7 +787,7 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
-/// Rotate Register Right (mem[HL])
+/// Rotates (mem[HL]) to the right(Circular)
 ///
 /// mem[HL] is rotated to the right 1 bit position.
 ///
@@ -840,9 +840,9 @@ pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Rotate Left
+/// Rotates register to the left
 ///
-/// Contents of operand are roateted left 1 bit position
+/// Contents of operand are rotated left 1 bit position
 ///
 /// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
 ///
@@ -888,7 +888,7 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
-/// Rotate Left
+/// Rotates mem[HL] to the left 
 ///
 /// Contents of mem[HL] are roateted left 1 bit position
 ///
@@ -941,7 +941,7 @@ pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Rotate Right
+/// Rotates register to the right
 ///
 /// Contents of operand are rotated right 1 bit position through Carry Flag
 ///
@@ -989,7 +989,7 @@ pub fn rr(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-/// Rotate Right
+/// Rotates mem[HL] to the right
 ///
 /// Contents of mem[HL] are rotated right 1 bit position through Carry Flag
 ///
@@ -1043,11 +1043,11 @@ pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Shift Left Arithmetic
+/// Shifts register to the left arithmetically
 ///
 /// An arithmetic shift left 1 bit position is performed on contents of register
 ///
-/// Contents of bit 7 are copied ot carry flag
+/// Contents of bit 7 are copied to carry flag
 ///
 /// Flags:
 ///
@@ -1087,8 +1087,8 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-/// Shift Left Arithmetic
-///
+/// Shifts mem[HL] to the left arithmetically
+/// 
 /// An arithmetic shift left 1 bit position is performed on contents of mem[HL]
 ///
 /// Contents of bit 7 are copied to carry flag
@@ -1137,7 +1137,7 @@ pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Shift Right Arithmetic
+/// Shifts register to the right arithmetically 
 ///    
 /// Flags:
 ///
@@ -1183,7 +1183,7 @@ pub fn sra(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-/// Shift Right Arithmetic mem[HL]
+/// Shift mem[HL] to the right arithmetically
 pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
 
@@ -1225,7 +1225,7 @@ pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Swap r
+/// Swaps r
 ///
 /// Exchange lower and higher nibbles
 ///
@@ -1265,7 +1265,7 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-/// Swap mem[HL]
+/// Swaps mem[HL]
 ///
 /// Exchange lower and higher nibbles
 ///
@@ -1312,7 +1312,7 @@ pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Shift Right Logical
+/// Shifts register to the right logically 
 ///
 /// Performs right shift on operand. 0th bit is copied to carry
 ///
@@ -1360,7 +1360,7 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-///  Shift Right Logical
+///  Shifts mem[HL] to the right logically 
 ///
 /// Performs right shift on operand. 0th bit is copied to carry
 ///
@@ -1417,7 +1417,7 @@ pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
  * 16-bit Arithmetic instructions
  * *********************************************************************/
 
-/// Increment register pair
+/// Increments register pair
 ///
 /// Flags: None
 pub fn inc_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
@@ -1441,7 +1441,7 @@ pub fn inc_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
     }
 }
 
-/// Decrement Register Pair
+/// Decrements Register Pair
 ///
 /// Flags: None
 pub fn dec_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
@@ -1562,7 +1562,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register_pair: RegisterPair) {
  * Jump Instructions
  * *********************************************************************/
 
-/// Relative Jump
+/// Relative Jumps
 ///
 /// PC = PC + 8bit signed
 ///
@@ -1573,7 +1573,7 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
     cpu.pc = cpu.pc.wrapping_add(offset as u16).wrapping_add(2);
 }
 
-/// Relative Jump if Zero flag is set
+/// Relative Jumps if Zero flag is set
 ///
 /// Flags: None
 pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
@@ -1586,7 +1586,7 @@ pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-/// Relative Jump if Zero flag is clear
+/// Relative Jumps if Zero flag is clear
 ///
 /// Flags: None
 pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
@@ -1599,7 +1599,7 @@ pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-/// Relative Jump if Carry flag is Set
+/// Relative Jumps if Carry flag is Set
 ///
 /// Flags: None
 pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
@@ -1612,7 +1612,7 @@ pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-/// Relative Jump if Carry flag is clear
+/// Relative Jumps if Carry flag is clear
 ///
 /// Flags: None
 pub fn jr_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
@@ -1625,14 +1625,14 @@ pub fn jr_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     }
 }
 
-/// Jump to nn
+/// Jumps to nn
 ///
 /// Flags: None
 pub fn jp(cpu: &mut Cpu, nn: u16) {
     cpu.pc = nn;
 }
 
-/// Jump to nn if zero flag is set
+/// Jumps to nn if zero flag is set
 ///
 /// Flags: None
 pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1645,7 +1645,7 @@ pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Jump to nn if zero flag is clear
+/// Jumps to nn if zero flag is clear
 ///
 /// Flags: None
 pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1658,7 +1658,7 @@ pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Jump to nn if carry flag is set
+/// Jumps to nn if carry flag is set
 ///
 /// Flags: None
 pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1671,7 +1671,7 @@ pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Jump to nn if carry flag is clear
+/// Jumps to nn if carry flag is clear
 ///
 /// Flags: None
 pub fn jp_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1684,7 +1684,7 @@ pub fn jp_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Call to nn
+/// Calls to nn
 ///
 /// Flags: None
 pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1693,7 +1693,7 @@ pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     // SP = SP - 2
     stack_pointer -= 2;
 
-    // Increment PC by 3 before push
+    // Increments PC by 3 before push
     cpu.pc += 3;
 
     // mem[sp] = pc
@@ -1707,7 +1707,7 @@ pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     cpu.sp = stack_pointer;
 }
 
-/// Call to nn if zero flag is set
+/// Calls to nn if zero flag is set
 ///
 /// Flags: None
 pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1720,7 +1720,7 @@ pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Call to nn if zero flag is clear
+/// Calls to nn if zero flag is clear
 ///
 /// Flags: None
 pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1733,7 +1733,7 @@ pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Call to nn if carry flag is set
+/// Calls to nn if carry flag is set
 ///
 /// Flags: None
 pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1746,7 +1746,7 @@ pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Call to nn if carry flag is clear
+/// Calls to nn if carry flag is clear
 ///
 /// Flags: None
 pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
@@ -1759,7 +1759,7 @@ pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     }
 }
 
-/// Call to 00, 08, 10, 18, 20, 28, 30, 38(hex)
+/// Calls to 00, 08, 10, 18, 20, 28, 30, 38(hex)
 ///
 /// Flags: None
 pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
@@ -1768,7 +1768,7 @@ pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
     // SP = SP - 2
     stack_pointer = stack_pointer.wrapping_sub(2);
 
-    // Increment PC before push
+    // Increments PC before push
     cpu.pc += 1;
 
     // mem[SP] = lower byte of program counter
@@ -1784,7 +1784,7 @@ pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
     cpu.sp = stack_pointer;
 }
 
-/// Return
+/// Returns
 ///
 /// Flags: None
 pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
@@ -1806,7 +1806,7 @@ pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
     cpu.sp = sp;
 }
 
-/// Return if zero flag is set
+/// Returns if zero flag is set
 ///
 /// Flags: None
 pub fn ret_z(cpu: &mut Cpu, interconnect: &mut Interconnect) {
@@ -1819,7 +1819,7 @@ pub fn ret_z(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     }
 }
 
-/// Return if zero flag is clear
+/// Returns if zero flag is clear
 ///
 /// Flags: None
 pub fn ret_nz(cpu: &mut Cpu, interconnect: &mut Interconnect) {
@@ -1832,7 +1832,7 @@ pub fn ret_nz(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     }
 }
 
-/// Return if carry flag is set
+/// Returns if carry flag is set
 ///
 /// Flags: None
 pub fn ret_c(cpu: &mut Cpu, interconnect: &mut Interconnect) {
@@ -1845,7 +1845,7 @@ pub fn ret_c(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     }
 }
 
-/// Return if carry flag is  clear
+/// Returns if carry flag is  clear
 ///
 /// Flags: None
 pub fn ret_nc(cpu: &mut Cpu, interconnect: &mut Interconnect) {
@@ -1863,7 +1863,7 @@ pub fn ret_nc(cpu: &mut Cpu, interconnect: &mut Interconnect) {
  * 8-bit LOAD instructions
  * *********************************************************************/
 
-/// Load 8 bit value into specific register
+/// Loads 8 bit value into specific register
 ///
 /// Flags: None
 pub fn ld_8bit(r: &mut u8, data: u8) {
@@ -1871,7 +1871,7 @@ pub fn ld_8bit(r: &mut u8, data: u8) {
     *r = data;
 }
 
-/// Load data from io-port 'n' into A register
+/// Loads data from io-port 'n' into A register
 ///
 /// Flags: None
 pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
@@ -1881,7 +1881,7 @@ pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
     cpu.registers.a = interconnect.read_mem(addr);
 }
 
-/// Load data from A register into io-port 'n'
+/// Loads data from A register into io-port 'n'
 ///
 /// Flags: None
 pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
@@ -1891,7 +1891,7 @@ pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
     interconnect.write_mem(addr, cpu.registers.a);
 }
 
-/// Load data from [$FF00 + register C] into A register
+/// Loads data from [$FF00 + register C] into A register
 ///
 /// Flags: None
 pub fn ld_a_from_io_c(cpu: &mut Cpu, interconnect: &Interconnect) {
@@ -1901,7 +1901,7 @@ pub fn ld_a_from_io_c(cpu: &mut Cpu, interconnect: &Interconnect) {
     cpu.registers.a = interconnect.read_mem(addr);
 }
 
-/// Load data from register A into mem[$FF00 + register C]
+/// Loads data from register A into mem[$FF00 + register C]
 ///
 /// Flags: None
 pub fn ld_io_c_from_a(cpu: &Cpu, interconnect: &mut Interconnect) {

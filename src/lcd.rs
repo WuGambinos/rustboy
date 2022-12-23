@@ -1,7 +1,4 @@
-use crate::{constants::*, cpu::interrupts::request_interrupt};
-use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
-
 use crate::ppu::Ppu;
 
 #[derive(Debug)]
@@ -21,21 +18,21 @@ const DEFUALT_COLORS: [Color; 4] = [
 
 #[derive(Debug)]
 pub struct Lcd {
-    ///Bit 7 LCD and PPU enable	0=Off, 1=On
+    ///Bit 7 LCD and PPU enable    0=Off, 1=On
     ///
-    ///Bit 6 Window tile map area	0=9800-9BFF, 1=9C00-9FFF
+    ///Bit 6 Window tile map area    0=9800-9BFF, 1=9C00-9FFF
     ///
-    ///Bit 5 Window enable	0=Off, 1=On
+    ///Bit 5 Window enable    0=Off, 1=On
     ///
-    ///Bit 4 BG and Window tile data area	0=8800-97FF, 1=8000-8FFF
+    ///Bit 4 BG and Window tile data area    0=8800-97FF, 1=8000-8FFF
     ///
-    ///Bit 3 BG tile map area	0=9800-9BFF, 1=9C00-9FFF
+    ///Bit 3 BG tile map area    0=9800-9BFF, 1=9C00-9FFF
     ///
-    ///Bit 2 OBJ size	0=8x8, 1=8x16
+    ///Bit 2 OBJ size    0=8x8, 1=8x16
     ///
-    ///Bit 1 OBJ enable	0=Off, 1=On
+    ///Bit 1 OBJ enable    0=Off, 1=On
     ///
-    ///Bit 0 BG and Window enable/priority	0=Off, 1=On
+    ///Bit 0 BG and Window enable/priority    0=Off, 1=On
     lcdc: u8,
 
     /// Bit 6 - LYC = LY STAT interrupt source
@@ -132,11 +129,12 @@ impl Lcd {
             sp2_colors: [Color::RGB(0, 0, 0); 4],
         };
 
-        for i in 0..4 {
-            initial_state.bg_colors[i] = DEFUALT_COLORS[i];
-            initial_state.sp1_colors[i] = DEFUALT_COLORS[i];
-            initial_state.sp2_colors[i] = DEFUALT_COLORS[i];
+        for (i, color) in DEFUALT_COLORS.iter().enumerate() {
+            initial_state.bg_colors[i] = *color;
+            initial_state.sp1_colors[i] = *color;
+            initial_state.sp2_colors[i] = *color;
         }
+
         initial_state
     }
 
@@ -247,7 +245,7 @@ impl Lcd {
 
     /// Check if background and window should be enabled
     pub fn lcdc_bgw_enabled(&self) -> bool {
-        (self.lcdc >> 0) & 1 == 1
+        self.lcdc & 1 == 1
     }
 
     /// Check if sprites need to be displayed or not
@@ -311,12 +309,12 @@ impl Lcd {
         let bits = self.lcd_stat & 0b11;
 
         match bits {
-            0 => return LcdMode::HBlank,
-            1 => return LcdMode::VBlank,
-            2 => return LcdMode::OAM,
-            3 => return LcdMode::Transfer,
+            0 =>  LcdMode::HBlank,
+            1 =>  LcdMode::VBlank,
+            2 =>  LcdMode::OAM,
+            3 =>  LcdMode::Transfer,
             _ => panic!("Not an LCD Mode"),
-        };
+        }
     }
 
     pub fn set_lcd_stat_mode(&mut self, mode: u8) {

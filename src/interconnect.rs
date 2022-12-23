@@ -11,7 +11,6 @@ use crate::ppu::FetchState;
 use crate::ppu::Ppu;
 use crate::{Mmu, Timer};
 
-static mut ly: u8 = 0;
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
@@ -36,10 +35,6 @@ impl Interconnect {
 
     pub fn ppu_init(&mut self) {
         self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
-    }
-
-    pub fn get_ly() -> u8 {
-        unsafe { ly }
     }
 
     /// Prints the state of the Timer
@@ -387,7 +382,6 @@ impl Interconnect {
                 color = 3;
             }
 
-            //let new_color = self.lcd.bg_colors[color as usize];
             let new_color = TILE_COLORS[color as usize];
 
             if x >= 0 {
@@ -395,7 +389,8 @@ impl Interconnect {
                 self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
             }
         }
-        return true;
+
+        true
     }
 
     fn pipeline_fetch(&mut self) {
@@ -465,7 +460,7 @@ impl Interconnect {
         self.ppu
             .set_tile_y(((self.lcd.ly().wrapping_add(self.lcd.scy())) % 8) * 2);
 
-        if !(self.ppu.line_ticks() & 1 == 1) {
+        if self.ppu.line_ticks() & 1 != 1 {
             self.pipeline_fetch();
         }
 
@@ -473,7 +468,7 @@ impl Interconnect {
     }
 
     fn pipeline_fifo_reset(&mut self) {
-        while self.ppu.pixel_fifo().len() > 0 {
+        while !self.ppu.pixel_fifo().is_empty() {
             self.ppu.pixel_fifo_pop();
         }
 

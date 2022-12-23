@@ -1,7 +1,7 @@
 mod instructions;
 pub mod interrupts;
 
-use crate::constants::{INTERRUPTS, MAX_CYCLES_PER_FRAME};
+use crate::constants::{INTERRUPTS, MAX_CYCLES_PER_FRAME, INTERRUPT_FLAG};
 use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
@@ -357,8 +357,6 @@ impl Cpu {
 
     /// Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
-        const INTERRUPT_IE: u16 = 0xFFFF;
-        const INTERRUPT_F: u16 = 0xFF0F;
 
         // Check if interrupts are enabled
         if !self.ime && !self.halted {
@@ -405,9 +403,9 @@ impl Cpu {
         };
 
         // Clean up the interrupt
-        let mut interrupt_flags = interconnect.read_mem(INTERRUPT_F);
+        let mut interrupt_flags = interconnect.read_mem(INTERRUPT_FLAG);
         interrupt_flags &= !(1 << n);
-        interconnect.write_mem(INTERRUPT_F, interrupt_flags);
+        interconnect.write_mem(INTERRUPT_FLAG, interrupt_flags);
 
         self.ime_to_be_enabled = false;
 
