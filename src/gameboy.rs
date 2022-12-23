@@ -1,11 +1,10 @@
 use crate::interconnect::Interconnect;
 use crate::window;
-use crate::Cpu;
+use crate::cpu::Cpu;
 
 use anyhow::Error;
 use anyhow::Result;
 
-use std::env;
 use std::fs;
 use std::path::Path;
 
