@@ -54,7 +54,6 @@ fn main() -> Result<(), Error> {
 
     // Put PC at beginning of ROM
     game_boy.cpu.pc = 0x100;
-    game_boy.interconnect.ppu_init();
 
     let sdl_context = sdl2::init().expect("Failed to start SDL");
     let mut debug = window::init_window(&sdl_context);

@@ -25,12 +25,14 @@ pub struct Interconnect {
 impl Interconnect {
     /// Constructor
     pub fn new() -> Self {
-        Self {
+        let mut interconnect = Self {
             mmu: Mmu::new(),
             timer: Timer::new(),
             ppu: Ppu::new(),
             lcd: Lcd::new(),
-        }
+        };
+        interconnect.ppu_init();
+        interconnect
     }
 
     pub fn ppu_init(&mut self) {
@@ -48,12 +50,14 @@ impl Interconnect {
         );
     }
 
+    /// Prints state of vram
     pub fn print_vram(&self) {
         for i in (0x8000..0x9FFF).rev() {
             println!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
         }
     }
 
+    /// Prints state of ppu
     pub fn print_ppu(&self) {
         println!(
             "TICKS: {} FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {} LY: {} bgw_enable: {}",
@@ -89,7 +93,7 @@ impl Interconnect {
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
-            self.mmu.rom_bank[addr as usize] = value;
+           self.mmu.write_rom_bank(addr, value);
         }
         // VRAM
         else if (0x8000..0xA000).contains(&addr) {
@@ -97,11 +101,11 @@ impl Interconnect {
         }
         // External RAM
         else if (0xA000..0xC000).contains(&addr) {
-            self.mmu.external_ram[(addr - 0xA000) as usize] = value;
+            self.mmu.write_external_ram(addr - 0xA000, value);
         }
         // Work RAM
         else if (0xC000..0xE000).contains(&addr) {
-            self.mmu.work_ram[(addr - 0xC000) as usize] = value;
+            self.mmu.write_work_ram(addr - 0xC000, value);
         }
         // OAM
         else if (0xFE00..0xFEA0).contains(&addr) {
@@ -120,15 +124,15 @@ impl Interconnect {
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
-            self.mmu.io[(addr - 0xFF00) as usize] = value;
+            self.mmu.write_io(addr - 0xFF00, value);
         }
         // High RAM (HRAM)
         else if (0xFF80..0xFFFF).contains(&addr) {
-            self.mmu.hram[(addr - 0xFF80) as usize] = value;
+            self.mmu.write_hram(addr - 0xFF80, value);
         }
         // Interrupt Enable
         else if addr == 0xFFFF {
-            self.mmu.interrupt_enable = value;
+            self.mmu.enable_interrupt(value);
         } else {
             //println!("UNREACHABLE Addr: {:#X}", addr);
         }
@@ -138,7 +142,7 @@ impl Interconnect {
     pub fn read_mem(&self, addr: u16) -> u8 {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
-            self.mmu.rom_bank[addr as usize]
+           self.mmu.read_rom_bank(addr)
         }
         // VRAM
         else if (0x8000..0xA000).contains(&addr) {
@@ -146,11 +150,11 @@ impl Interconnect {
         }
         // External RAM
         else if (0xA000..0xC000).contains(&addr) {
-            self.mmu.external_ram[(addr - 0xA000) as usize]
+           self.mmu.read_external_ram(addr - 0xA000)
         }
         // Work RAM
         else if (0xC000..0xE000).contains(&addr) {
-            self.mmu.work_ram[(addr - 0xC000) as usize]
+            self.mmu.read_work_ram(addr - 0xC000)
         }
         // OAM
         else if (0xFE00..0xFEA0).contains(&addr) {
@@ -170,15 +174,15 @@ impl Interconnect {
         }
         // IO Regsiters
         else if (0xFF00..0xFF80).contains(&addr) {
-            self.mmu.io[(addr - 0xFF00) as usize]
+            self.mmu.read_io(addr - 0xFF00)
         }
         // High RAM
         else if (0xFF80..0xFFFF).contains(&addr) {
-            self.mmu.hram[(addr - 0xFF80) as usize]
+            self.mmu.read_hram(addr - 0xFF80)
         }
         // Interrupt Enable
         else if addr == 0xFFFF {
-            self.mmu.interrupt_enable
+            self.mmu.read_interrupt_enable()
         } else {
             println!("NOT REACHABLE ADDR: {:#X}", addr);
             0
@@ -236,6 +240,7 @@ impl Interconnect {
         }
     }
 
+    /// Set initial dma state
     pub fn dma_start(&mut self, value: u8) {
         self.ppu.set_dma_active(true);
         self.ppu.set_dma_byte(0);

@@ -1,11 +1,9 @@
 /// Memory Mapped Unit
 #[derive(Debug)]
 pub struct Mmu {
-
-    //pub memory: [u8; 0x10000],
-
     /// BOOT ROM
     pub boot: [u8; 0x100],
+
     /// ROM Bank
     pub rom_bank: [u8; 0x8000],
 
@@ -21,28 +19,8 @@ pub struct Mmu {
     /// Work RAM
     pub work_ram: [u8; 0x2000],
 
+    // interrupt_enable
     pub interrupt_enable: u8,
-    /*
-    //Video Ram
-    video_ram: [u8; 8192],
-
-    //External RAM
-    external_ram: [u8; 8192],
-    //Work RAM
-    work_ram_b0: [u8; 4096],
-    work_ram_b1: [u8; 4096],
-
-    //ECHO RAM(Mirror of C000 - DDFF)
-    echo_ram: [u8; 7680],
-
-    //Sprite Attribute Table(OAM)
-    sprite_attribute_table: [u8; 160],
-
-    //I/O Registers
-    io: [u8; 128],
-
-    //High Ram
-    high_ram: [u8; 127],*/
 }
 
 impl Default for Mmu {
@@ -55,7 +33,6 @@ impl Mmu {
     /// Constructor
     pub fn new() -> Self {
         Mmu {
-            //memory: [0; 0x10000],
             boot: [0; 0x100],
             rom_bank: [0; 0x8000],
             io: [0; 0x80],
@@ -66,12 +43,60 @@ impl Mmu {
         }
     }
 
-    /*  pub fn write_mem(&mut self, addr: u16, value: u8) {
-        self.memory[addr as usize] = value;
+
+    pub fn write_boot(&mut self, addr: u16, value: u8) {
+        self.boot[addr as usize] = value;
     }
 
-    pub fn read_mem(&self, addr: u16) -> u8 {
-        self.memory[addr as usize]
+    pub fn write_rom_bank(&mut self, addr: u16, value: u8) {
+        self.rom_bank[addr as usize] = value;
     }
-    */
+
+    pub fn write_io(&mut self, addr: u16, value: u8) {
+        self.io[addr as usize] = value;
+    }
+
+    pub fn write_hram(&mut self, addr: u16, value: u8) {
+        self.hram[addr as usize] = value;
+    }
+
+    pub fn write_external_ram(&mut self, addr: u16, value: u8) {
+        self.external_ram[addr as usize] = value;
+    }
+
+    pub fn write_work_ram(&mut self, addr: u16, value: u8) {
+        self.work_ram[addr as usize] = value;
+    }
+
+    pub fn enable_interrupt(&mut self, value: u8) {
+        self.interrupt_enable = value;
+    }
+
+    pub fn read_boot(&self, addr: u16) -> u8 {
+        self.boot[addr as usize]
+    }
+
+    pub fn read_rom_bank(&self, addr: u16) -> u8 {
+        self.rom_bank[addr as usize]
+    }
+
+    pub fn read_io(&self, addr: u16) -> u8 {
+        self.io[addr as usize]
+    }
+
+    pub fn read_hram(&self, addr: u16) -> u8 {
+        self.hram[addr as usize]
+    }
+
+    pub fn read_external_ram(&self, addr: u16) -> u8 {
+        self.external_ram[addr as usize]
+    }
+
+    pub fn read_work_ram(&self, addr: u16) -> u8 {
+        self.work_ram[addr as usize]
+    }
+
+    pub fn read_interrupt_enable(&self) -> u8 {
+        self.interrupt_enable
+    }
 }
