@@ -1,5 +1,7 @@
-use sdl2::pixels::Color;
+use std::rc::Rc;
+
 use crate::ppu::Ppu;
+use sdl2::pixels::Color;
 
 #[derive(Debug)]
 pub enum LcdMode {
@@ -54,35 +56,35 @@ pub struct Lcd {
     ///     2: Searching OAM
     ///
     ///     3: Transferring Data to LCD Controller
-    pub lcd_stat: u8,
+    lcd_stat: u8,
 
     /// Specity the top left y coordinate of the visiable 16x144 pixel area
     /// within the 256x256 pixels BG map
-    pub scy: u8,
+    scy: u8,
 
     /// Specity the top left x coordinate of the visiable 16x144 pixel area
     /// within the 256x256 pixels BG map
-    pub scx: u8,
+    scx: u8,
 
     /// Indicates currently horizontal line, which might be about to be drawn
     /// ,or just drawn. values between 144 and 153 indicate VBlank period
-    pub ly: u8,
+    ly: u8,
 
     /// When LYC=LY, the "LYC=LY" flag in the STAT register is set and (if enabled)
     /// a STAT interrupt is requested
-    pub lyc: u8,
+    lyc: u8,
 
     /// Specify upper left y coordinate of window
-    pub wy: u8,
+    wy: u8,
 
     /// Specicy upper left (x+7) coordinate of window
-    pub wx: u8,
+    wx: u8,
 
     /// OAM DMA source address & start
-    pub dma: u8,
+    dma: u8,
 
     /// Background Palette(Non-CGB Mode only)
-    pub bg_palette: u8,
+    bg_palette: u8,
 
     /// Object Palette 0, 1 - These registesr assign gray shades to the color indexes
     /// of the OBJs that use the coressponding palette
@@ -199,6 +201,14 @@ impl Lcd {
         pal_colors[3] = DEFUALT_COLORS[((pal_data >> 6) & 0b11) as usize];
     }
 
+    pub fn set_lcd_stat(&mut self, value: u8) {
+        self.lcd_stat = value;
+    }
+
+    pub fn lcd_stat(&self) -> u8 {
+        self.lcd_stat
+    }
+
     pub fn set_lcdc(&mut self, value: u8) {
         self.lcdc = value;
     }
@@ -238,6 +248,31 @@ impl Lcd {
     pub fn scy(&self) -> u8 {
         self.scy
     }
+
+    pub fn set_wy(&mut self, value: u8) {
+        self.wy = value;
+    }
+
+    pub fn wy(&mut self) -> u8 {
+        self.wy
+    }
+
+    pub fn set_wx(&mut self, value: u8) {
+        self.wx = value;
+    }
+
+    pub fn wx(&mut self) -> u8 {
+        self.wx
+    }
+
+    pub fn set_dma(&mut self, value: u8) {
+        self.dma = value;
+    }
+
+    pub fn dma(&self) -> u8 {
+        self.dma
+    }
+
 
     /************************************************************
      * LCDC Functions
@@ -309,10 +344,10 @@ impl Lcd {
         let bits = self.lcd_stat & 0b11;
 
         match bits {
-            0 =>  LcdMode::HBlank,
-            1 =>  LcdMode::VBlank,
-            2 =>  LcdMode::OAM,
-            3 =>  LcdMode::Transfer,
+            0 => LcdMode::HBlank,
+            1 => LcdMode::VBlank,
+            2 => LcdMode::OAM,
+            3 => LcdMode::Transfer,
             _ => panic!("Not an LCD Mode"),
         }
     }
