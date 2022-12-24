@@ -2,6 +2,7 @@ use crate::constants::*;
 use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
 use std::collections::LinkedList;
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 pub enum FetchState {
@@ -15,7 +16,7 @@ pub enum FetchState {
 #[derive(Debug, Clone)]
 pub struct PixelFifoContext {
     fetch_state: FetchState,
-    pixel_fifo: LinkedList<Color>,
+    pixel_fifo: VecDeque<Color>,
     line_x: u8,
     pushed_x: u8,
     fetch_x: u8,
@@ -31,7 +32,7 @@ impl PixelFifoContext {
     fn new() -> Self {
         PixelFifoContext {
             fetch_state: FetchState::Tile,
-            pixel_fifo: LinkedList::new(),
+            pixel_fifo: VecDeque::new(),
             line_x: 0,
             pushed_x: 0,
             fetch_x: 0,
@@ -261,7 +262,7 @@ impl Ppu {
         self.pfc.fifo_x
     }
 
-    pub fn pixel_fifo(&self) -> LinkedList<Color> {
+    pub fn pixel_fifo(&self) -> VecDeque<Color> {
         self.pfc.pixel_fifo.clone()
     }
 
