@@ -5,7 +5,7 @@ pub mod interconnect;
 pub mod lcd;
 pub mod mmu;
 pub mod ppu;
-pub mod window;
+pub mod frontend;
 
 use gameboy::GameBoy;
 

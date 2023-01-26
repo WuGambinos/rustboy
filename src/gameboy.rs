@@ -1,5 +1,5 @@
 use crate::interconnect::Interconnect;
-use crate::window;
+use crate::frontend;
 use crate::cpu::Cpu;
 
 use anyhow::Error;
@@ -51,10 +51,10 @@ impl GameBoy {
         self.cpu.pc = 0x100;
 
         let sdl_context = sdl2::init().expect("Failed to start SDL");
-        let mut debug = window::init_window(&sdl_context);
+        let mut debug = frontend::init_window(&sdl_context);
         let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
-        let mut main_window = window::init_main_window(&sdl_context);
+        let mut main_window = frontend::init_main_window(&sdl_context);
 
         'running: loop {
             self.cpu.run(&mut self.interconnect);
@@ -68,8 +68,8 @@ impl GameBoy {
                     _ => {}
                 }
             }
-            window::debug_window(&mut debug, &self.interconnect);
-            window::main_window(&mut main_window, &self.interconnect);
+            frontend::debug_window(&mut debug, &self.interconnect);
+            frontend::main_window(&mut main_window, &self.interconnect);
         }
 
         Ok(())
