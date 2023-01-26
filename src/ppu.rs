@@ -1,7 +1,6 @@
 use crate::constants::*;
 use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
-use std::collections::LinkedList;
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
@@ -13,6 +12,7 @@ pub enum FetchState {
     Push,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct PixelFifoContext {
     fetch_state: FetchState,

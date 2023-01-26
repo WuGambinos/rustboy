@@ -21,5 +21,3 @@ fn main() -> Result<(), Error> {
     let mut gameboy = GameBoy::new();
     gameboy.start_up(game)
 }
-
-

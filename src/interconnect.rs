@@ -5,12 +5,12 @@ use sdl2::pixels::Color;
 use crate::constants::*;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
+use crate::cpu::timer::Timer;
 use crate::lcd::Lcd;
 use crate::lcd::LcdMode;
+use crate::mmu::Mmu;
 use crate::ppu::FetchState;
 use crate::ppu::Ppu;
-use crate::mmu::Mmu;
-use crate::cpu::timer::Timer;
 
 /// Struct used to link CPU to other components of system
 ///
@@ -94,7 +94,7 @@ impl Interconnect {
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
-           self.mmu.write_rom_bank(addr, value);
+            self.mmu.write_rom_bank(addr, value);
         }
         // VRAM
         else if (0x8000..0xA000).contains(&addr) {
@@ -143,7 +143,7 @@ impl Interconnect {
     pub fn read_mem(&self, addr: u16) -> u8 {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
-           self.mmu.read_rom_bank(addr)
+            self.mmu.read_rom_bank(addr)
         }
         // VRAM
         else if (0x8000..0xA000).contains(&addr) {
@@ -151,7 +151,7 @@ impl Interconnect {
         }
         // External RAM
         else if (0xA000..0xC000).contains(&addr) {
-           self.mmu.read_external_ram(addr - 0xA000)
+            self.mmu.read_external_ram(addr - 0xA000)
         }
         // Work RAM
         else if (0xC000..0xE000).contains(&addr) {
@@ -260,8 +260,7 @@ impl Interconnect {
             return;
         }
 
-        let addr: u16 =
-            (((self.ppu.dma_value() as u16) * 0x100) as u16) + (self.ppu.dma_byte() as u16);
+        let addr: u16 = ((self.ppu.dma_value() as u16) * 0x100) + (self.ppu.dma_byte() as u16);
 
         self.ppu
             .write_oam(self.ppu.dma_byte() as u16, self.read_mem(addr));
@@ -369,10 +368,8 @@ impl Interconnect {
 
         let second_byte: u8 = self.ppu.bgw_fetch_data()[1];
         let first_byte: u8 = self.ppu.bgw_fetch_data()[2];
-        
 
-
-        let mut color: u8 = 0;
+        let mut color: u8;
 
         for bit in (0..8).rev() {
             let first_bit = (first_byte >> bit) & 1;
@@ -419,7 +416,7 @@ impl Interconnect {
             }
             FetchState::Data0 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + (self.ppu.bgw_fetch_data()[0] as u16 * 16) as u16
+                    + (self.ppu.bgw_fetch_data()[0] as u16 * 16)
                     + self.ppu.tile_y() as u16;
                 self.ppu.set_bgw_fetch_data(1, self.read_mem(addr));
 
@@ -427,8 +424,7 @@ impl Interconnect {
             }
             FetchState::Data1 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + ((self.ppu.bgw_fetch_data()[0] as u16 * 16) as u16
-                        + (self.ppu.tile_y() as u16 + 1));
+                    + ((self.ppu.bgw_fetch_data()[0] as u16 * 16) + (self.ppu.tile_y() as u16 + 1));
                 self.ppu.set_bgw_fetch_data(2, self.read_mem(addr));
 
                 self.ppu.set_fetch_state(FetchState::Idle);
@@ -460,7 +456,8 @@ impl Interconnect {
     }
 
     fn pipeline_process(&mut self) {
-        self.ppu.set_map_y(self.lcd.ly().wrapping_add(self.lcd.scy()));
+        self.ppu
+            .set_map_y(self.lcd.ly().wrapping_add(self.lcd.scy()));
         self.ppu
             .set_map_x(self.ppu.fetch_x().wrapping_add(self.lcd.scx()));
         self.ppu

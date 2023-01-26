@@ -43,7 +43,7 @@ impl GameBoy {
         let rom: Vec<u8> = read_file(rom_path)?;
 
         // Contents of boot rom
-        let boot: Vec<u8> = read_file(boot_path)?;
+        let _boot: Vec<u8> = read_file(boot_path)?;
 
         self.interconnect.read_rom(&rom);
 
