@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 use core::time;
 
 use sdl2::pixels::Color;

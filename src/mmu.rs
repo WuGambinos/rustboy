@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 /// Memory Mapped Unit
 #[derive(Debug)]
 pub struct Mmu {

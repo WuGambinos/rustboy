@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 use crate::constants::*;
 use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
