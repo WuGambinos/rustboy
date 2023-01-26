@@ -87,7 +87,7 @@ impl Flags {
     ///
     /// Carry flag is set when operation results in overflow
     pub fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
-        let res: u16 = (register as u16) + (operand as u16);
+        let res: u16 = (u16::from(register)) + (u16::from(operand));
 
         if res > 0xFF {
             self.set_carry_flag();
@@ -97,7 +97,7 @@ impl Flags {
     }
 
     pub fn update_carry_flag_sum_16bit(&mut self, register: u16, operand: u16) {
-        let res: u32 = (register as u32) + (operand as u32);
+        let res: u32 = (u32::from(register)) + (u32::from(operand));
 
         if res > 0xFFFF {
             self.set_carry_flag();

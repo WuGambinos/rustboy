@@ -173,7 +173,7 @@ pub fn write(&mut self, ppu: &mut Ppu, addr: u16, value: u8) {
         }
         0x7 => self.update_palette(value, 0),
         0x8 => self.update_palette(value & 0b1111_1100, 1),
-        0x9 => self.update_palette(value & 0b1111_1100, 1),
+        0x9 => self.update_palette(value & 0b1111_1100, 2),
         0xA => self.wy = value,
         0xB => self.wx = value,
         _ => panic!("Not an index"),
@@ -234,7 +234,7 @@ pub fn update_palette(&mut self, pal_data: u8, pal: u8) {
     }
 
     pub fn set_scx(&mut self, value: u8) {
-        self.scx = value
+        self.scx = value;
     }
 
     pub fn scx(&self) -> u8 {

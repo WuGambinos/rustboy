@@ -69,7 +69,7 @@ impl Interconnect {
             self.ppu.pushed_x(),
             self.ppu.fetch_x(),
             self.lcd.ly(),
-            self.lcd.lcdc_bgw_enabled() as u8
+            u8::from(self.lcd.lcdc_bgw_enabled())
         );
         println!(
             "MODE: {:?} map_y: {} map_x: {} tile_y: {} fifo_x: {} fifo_length: {} stat: {:#X}",
@@ -84,7 +84,7 @@ impl Interconnect {
     }
 
     pub fn dma_transfer(&mut self, value: u8) {
-        let addr: u16 = (value as u16) << 8;
+        let addr: u16 = u16::from(value) << 8;
 
         for i in 0..0xA0 {
             self.write_mem(0xFE00 + i, self.read_mem(addr + i));
@@ -215,7 +215,7 @@ impl Interconnect {
         }
 
         // Used to get cycle count over in main loop
-        self.timer.set_internal_ticks(cyc as u64);
+        self.timer.set_internal_ticks(u64::from(cyc));
 
         // Increase Div
         let div_value = self.timer.div_clock.next(cycles) as u8;
@@ -261,10 +261,10 @@ impl Interconnect {
             return;
         }
 
-        let addr: u16 = ((self.ppu.dma_value() as u16) * 0x100) + (self.ppu.dma_byte() as u16);
+        let addr: u16 = (u16::from(self.ppu.dma_value()) * 0x100) + u16::from(self.ppu.dma_byte());
 
         self.ppu
-            .write_oam(self.ppu.dma_byte() as u16, self.read_mem(addr));
+            .write_oam(u16::from(self.ppu.dma_byte()), self.read_mem(addr));
 
         let byte_value = self.ppu.dma_byte().wrapping_add(1);
         self.ppu.set_dma_byte(byte_value);
@@ -318,18 +318,18 @@ impl Interconnect {
 
     pub fn ppu_mode_transfer(&mut self) {
         self.pipeline_process();
-        if self.ppu.pushed_x() as u32 >= X_RES as u32 {
+        if u32::from(self.ppu.pushed_x())  >= u32::from(X_RES) {
             self.pipeline_fifo_reset();
             self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
 
             if self.lcd.lcd_stat_interrupt(SI_HBLANK) {
-                request_interrupt(self, InterruptType::LcdStat)
+                request_interrupt(self, InterruptType::LcdStat);
             }
         }
     }
 
     pub fn ppu_mode_vblank(&mut self) {
-        if self.ppu.line_ticks() >= TICKS_PER_LINE as u32 {
+        if self.ppu.line_ticks() >= u32::from(TICKS_PER_LINE) {
             self.increment_ly();
 
             if self.lcd.ly() >= LINES_PER_FRAME {
@@ -341,7 +341,7 @@ impl Interconnect {
     }
 
     pub fn ppu_mode_hblank(&mut self) {
-        if self.ppu.line_ticks() >= TICKS_PER_LINE as u32 {
+        if self.ppu.line_ticks() >= u32::from(TICKS_PER_LINE) {
             self.increment_ly();
 
             if self.lcd.ly() >= Y_RES {
@@ -365,7 +365,7 @@ impl Interconnect {
             return false;
         }
 
-        let x: i16 = (self.ppu.fetch_x() - (8 - (self.lcd.scx() % 8))) as i16;
+        let x: i16 = (self.ppu.fetch_x() - (8 - (self.lcd.scx() % 8))).into();
 
         let second_byte: u8 = self.ppu.bgw_fetch_data()[1];
         let first_byte: u8 = self.ppu.bgw_fetch_data()[2];
@@ -402,8 +402,8 @@ impl Interconnect {
             FetchState::Tile => {
                 if self.lcd.lcdc_bgw_enabled() {
                     let addr: u16 = self.lcd.lcdc_bg_tile_map_addr()
-                        + ((self.ppu.map_x() / 8) as u16)
-                        + ((self.ppu.map_y() / 8) as u32 * 32) as u16;
+                        + (u16::from(self.ppu.map_x() / 8))
+                        + (u16::from(self.ppu.map_y() / 8) * 32);
                     let value: u8 = self.read_mem(addr);
                     self.ppu.set_bgw_fetch_data(0, value);
 
@@ -417,15 +417,16 @@ impl Interconnect {
             }
             FetchState::Data0 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + (self.ppu.bgw_fetch_data()[0] as u16 * 16)
-                    + self.ppu.tile_y() as u16;
+                    + (u16::from(self.ppu.bgw_fetch_data()[0]) * 16)
+                    + u16::from(self.ppu.tile_y());
                 self.ppu.set_bgw_fetch_data(1, self.read_mem(addr));
 
                 self.ppu.set_fetch_state(FetchState::Data1);
             }
             FetchState::Data1 => {
                 let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + ((self.ppu.bgw_fetch_data()[0] as u16 * 16) + (self.ppu.tile_y() as u16 + 1));
+                    + ((u16::from(self.ppu.bgw_fetch_data()[0]) * 16)
+                        + (u16::from(self.ppu.tile_y()) + 1));
                 self.ppu.set_bgw_fetch_data(2, self.read_mem(addr));
 
                 self.ppu.set_fetch_state(FetchState::Idle);
@@ -446,8 +447,9 @@ impl Interconnect {
             let pixel_data: Color = self.ppu.pixel_fifo_pop();
 
             if self.ppu.line_x() >= (self.lcd.scx() % 8) {
-                let index =
-                    (self.ppu.pushed_x() as u32 + (self.lcd.ly() as u32 * X_RES as u32)) as usize;
+                let index = (u32::from(self.ppu.pushed_x())
+                    + (u32::from(self.lcd.ly()) * u32::from(X_RES)))
+                    as usize;
                 self.ppu.video_buffer[index] = pixel_data;
 
                 self.ppu.set_pushed_x(self.ppu.pushed_x().wrapping_add(1));

@@ -152,7 +152,7 @@ impl Ppu {
     }
 
     pub fn set_dma_active(&mut self, value: bool) {
-        self.dma.active = value
+        self.dma.active = value;
     }
 
     pub fn dma_active(&self) -> bool {
@@ -160,7 +160,7 @@ impl Ppu {
     }
 
     pub fn set_dma_byte(&mut self, value: u8) {
-        self.dma.byte = value
+        self.dma.byte = value;
     }
 
     pub fn dma_byte(&self) -> u8 {
@@ -168,7 +168,7 @@ impl Ppu {
     }
 
     pub fn set_dma_start_delay(&mut self, value: u8) {
-        self.dma.start_delay = value
+        self.dma.start_delay = value;
     }
 
     pub fn dma_start_delay(&self) -> u8 {
