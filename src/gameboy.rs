@@ -31,7 +31,7 @@ impl GameBoy {
     }
 
     pub fn start_up(&mut self, game: &str) -> Result<(), Error> {
-        let boot_rom = "roms/blaargs/boot-rom.gb";
+        let boot_rom = "roms/boot-rom.gb";
 
         // Path to rom
         let rom_path: &Path = Path::new(game);

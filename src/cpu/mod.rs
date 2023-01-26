@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 mod instructions;
 pub mod interrupts;
 
@@ -69,7 +70,7 @@ impl Flags {
 
     /// Clear Half Carry Flag
     pub fn clear_half_carry_flag(&mut self) {
-        self.data &= !(1 << 5)
+        self.data &= !(1 << 5);
     }
 
     /// Set Carry Flag
@@ -428,11 +429,7 @@ impl Cpu {
         // Fetch opcode
         self.fetch(interconnect);
 
-        /*println!(
-            "PC: {:#X} OPCODE: {:#X} A: {}",
-            self.pc, self.opcode, self.registers.a
-        );
-        */
+        #[allow(clippy::match_same_arms)]
         match self.opcode {
             // NOP
             0x00 => {

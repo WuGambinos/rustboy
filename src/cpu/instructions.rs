@@ -1,3 +1,4 @@
+#![allow(clippy::must_use_candidate)]
 use super::{Cpu, Flags, Interconnect, RegisterPair};
 
 /************************************************************************
