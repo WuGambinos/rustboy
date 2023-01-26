@@ -63,9 +63,9 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
 }
 
 pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
-    let mut x_draw = 0;
-    let mut y_draw = 0;
-    let mut tile_num = 0;
+    let mut x_draw: i32 = 0;
+    let mut y_draw: i32 = 0;
+    let mut tile_num: u16 = 0;
 
     canvas.set_draw_color(Color::RGB(17, 17, 17));
     //canvas.clear();
@@ -82,8 +82,8 @@ pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
                 interconnect,
                 addr,
                 tile_num,
-                (x_draw + (x * SCALE)) as u32,
-                (y_draw + (y * SCALE)) as u32,
+                x_draw + (x * SCALE), //as u32,
+                y_draw + (y * SCALE), //as u32,
             );
             x_draw += 8 * SCALE;
             tile_num += 1;
@@ -99,8 +99,8 @@ fn display_tile(
     interconnect: &Interconnect,
     start_loc: u16,
     tile_num: u16,
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 ) {
     for tile_y in (0..16).step_by(2) {
         let addr: u16 = start_loc + (tile_num * 16) + tile_y;
@@ -128,8 +128,8 @@ fn display_tile(
                 color = 3;
             }
 
-            let new_x = (x as i32) + ((7 - bit) * SCALE);
-            let new_y = (y as i32) + ((tile_y as i32) / 2 * SCALE);
+            let new_x = x + ((7 - bit) * SCALE);
+            let new_y = y + ((i32::from(tile_y)) / 2 * SCALE);
 
             let w = SCALE as u32;
             let h = SCALE as u32;
