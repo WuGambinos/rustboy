@@ -39,10 +39,8 @@ pub fn init_main_window(sdl_context: &Sdl) -> WindowCanvas {
 }
 
 pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
-    let rc = Rect::new(0, 0, 1080, 1080);
 
     let video_buffer = interconnect.ppu.video_buffer;
-
     for line_num in 0..Y_RES {
         for x in 0..X_RES {
             let new_x = (x as u16 * (SCALE as u16)) as i32;
@@ -52,9 +50,9 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
 
             let index = (x as u32 + (line_num as u32 * X_RES as u32)) as usize;
             let color = video_buffer[index];
-            //canvas.set_draw_color(TILE_COLORS[color as usize]);
             canvas.set_draw_color(color);
-            canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h));
+            canvas.fill_rect(Rect::new(new_x, new_y, w, h))
+                .expect("Rectangle could not be filled");
         }
     }
 
@@ -71,7 +69,9 @@ pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
 
     canvas.set_draw_color(Color::RGB(17, 17, 17));
     //canvas.clear();
-    canvas.fill_rect(sdl2::rect::Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+    canvas.fill_rect(sdl2::rect::Rect::new(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+        .expect("Rectangle could not be filled");
+
     let addr: u16 = 0x8000;
 
     for y in 0..24 {
@@ -104,31 +104,6 @@ fn display_tile(
     for tile_y in (0..16).step_by(2) {
         let addr: u16 = start_loc + (tile_num * 16) + tile_y;
 
-        /*let b1: u8 = interconnect.read_mem(addr);
-            let b2: u8 = interconnect.read_mem(addr + 1);
-
-            for bit in (0..7).rev() {
-                let mut hi: u8 = b1 & (1 << bit) << 1;
-                let mut lo: u8 = b2 & (1 << bit);
-
-                hi = (hi == 0) as u8;
-                hi = (hi == 0) as u8;
-                hi = hi << 1;
-
-                lo = (lo == 0) as u8;
-                lo = (lo == 0) as u8;
-
-                let color: u8 = hi | lo;
-
-                let new_x = (x as i32) + ((7 - bit) * SCALE);
-                let new_y = (y as i32) + ((tile_y as i32) / 2 * SCALE);
-
-                let w = SCALE as i32;
-                let h = SCALE as i32;
-                //println!("ADDR_VALUE: {:#X} ADDR1_VALUE {:#X} ADDR: {:#X} ADDR+1: {:#X} HI: {:#X} LO: {:#X} COLOR: {}",b1, b2, addr, addr +1, hi, lo, color);
-            canvas.draw_rectangle(new_x, new_y, w, h, TILE_COLORS[color as usize]);
-            p
-        }*/
         // Get First BYTE
         let second_byte: u8 = interconnect.read_mem(addr);
 
@@ -136,7 +111,7 @@ fn display_tile(
         let first_byte: u8 = interconnect.read_mem(addr + 1);
 
         // Index for tile color
-        let mut color: u8 = 0;
+        let mut color: u8;
 
         // Iterate over bits of first and second byte
         for bit in (0..8).rev() {
@@ -159,7 +134,8 @@ fn display_tile(
             let h = SCALE as u32;
 
             canvas.set_draw_color(TILE_COLORS[color as usize]);
-            canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h));
+            canvas.fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h))
+                .expect("Rectangle could not be filled");
         }
     }
 }

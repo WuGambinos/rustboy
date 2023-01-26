@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::ppu::Ppu;
 use sdl2::pixels::Color;
 
@@ -18,6 +16,7 @@ const DEFUALT_COLORS: [Color; 4] = [
     Color::RGB(0, 0, 0),
 ];
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Lcd {
     ///Bit 7 LCD and PPU enable    0=Off, 1=On

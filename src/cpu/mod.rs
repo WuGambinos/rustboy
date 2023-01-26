@@ -345,10 +345,10 @@ impl Cpu {
             } else {
                 interconnect.emu_cycles(1);
 
-                let IF = interconnect.read_mem(0xFF0F);
+                let interrupt_flag = interconnect.read_mem(0xFF0F);
 
                 //Iterrupt has been requested
-                if IF != 0 {
+                if interrupt_flag != 0 {
                     self.halted = false;
                 }
             }
@@ -366,7 +366,7 @@ impl Cpu {
         // Check if some interrupt have been triggered
         let triggered = get_interrupt(interconnect); //interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
 
-        if triggered == None {
+        if triggered.is_none() {
             return;
         }
 
