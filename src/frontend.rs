@@ -45,12 +45,12 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
     let video_buffer = interconnect.ppu.video_buffer;
     for line_num in 0..Y_RES {
         for x in 0..X_RES {
-            let new_x = (x as u16 * (SCALE as u16)) as i32;
-            let new_y = (line_num as u16 * (SCALE as u16)) as i32;
-            let w = SCALE as u32;
-            let h = SCALE as u32;
+            let new_x = i32::from(u16::from(x) * (SCALE as u16));
+            let new_y = i32::from(u16::from(line_num) * (SCALE as u16));
+            let w: u32 = SCALE as u32;
+            let h: u32 = SCALE as u32;
 
-            let index = (x as u32 + (line_num as u32 * X_RES as u32)) as usize;
+            let index = (u32::from(x) + (u32::from(line_num) * u32::from(X_RES))) as usize;
             let color = video_buffer[index];
             canvas.set_draw_color(color);
             canvas
