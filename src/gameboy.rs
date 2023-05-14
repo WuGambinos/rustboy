@@ -1,6 +1,6 @@
-use crate::interconnect::Interconnect;
-use crate::frontend;
 use crate::cpu::Cpu;
+use crate::frontend;
+use crate::interconnect::Interconnect;
 
 use anyhow::Error;
 use anyhow::Result;
@@ -10,7 +10,6 @@ use std::path::Path;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-
 
 ///
 /// Struct that represents the gameboy system
