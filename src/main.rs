@@ -1,18 +1,8 @@
-pub mod constants;
-pub mod cpu;
-pub mod gameboy;
-pub mod interconnect;
-pub mod lcd;
-pub mod mmu;
-pub mod ppu;
-pub mod frontend;
-
-use gameboy::GameBoy;
-
-use std::env;
+use rustboy::gameboy::GameBoy;
 
 use anyhow::Error;
 use anyhow::Result;
+use std::env;
 
 fn main() -> Result<(), Error> {
     // Command Line Arguments
