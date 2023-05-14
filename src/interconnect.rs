@@ -13,6 +13,37 @@ use crate::mmu::Mmu;
 use crate::ppu::FetchState;
 use crate::ppu::Ppu;
 
+#[derive(Debug)]
+pub struct SerialOutput {
+    buffer: Vec<u8>,
+}
+
+impl SerialOutput {
+    fn new() -> SerialOutput {
+        SerialOutput { buffer: Vec::new() }
+    }
+
+    pub fn write_byte(&mut self, data: u8) {
+        self.buffer.push(data);
+    }
+
+    pub fn read_bytes(&self) -> Vec<u8> {
+        let output = self.buffer.clone();
+        output
+    }
+
+    pub fn output(&mut self) {
+        let result = String::from_utf8(self.buffer.clone());
+
+        match result {
+            Ok(s) => print!("{}", s),
+            Err(e) => println!("Error: {}", e),
+        }
+
+        self.buffer.clear();
+    }
+}
+
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
@@ -22,6 +53,7 @@ pub struct Interconnect {
     pub timer: Timer,
     pub ppu: Ppu,
     pub lcd: Lcd,
+    pub serial: SerialOutput,
 }
 
 impl Interconnect {
@@ -32,6 +64,7 @@ impl Interconnect {
             timer: Timer::new(),
             ppu: Ppu::new(),
             lcd: Lcd::new(),
+            serial: SerialOutput::new(),
         };
         interconnect.ppu_init();
         interconnect
@@ -318,7 +351,7 @@ impl Interconnect {
 
     pub fn ppu_mode_transfer(&mut self) {
         self.pipeline_process();
-        if u32::from(self.ppu.pushed_x())  >= u32::from(X_RES) {
+        if u32::from(self.ppu.pushed_x()) >= u32::from(X_RES) {
             self.pipeline_fifo_reset();
             self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
 

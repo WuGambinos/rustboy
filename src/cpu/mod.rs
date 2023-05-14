@@ -2,7 +2,7 @@
 mod instructions;
 pub mod interrupts;
 
-use crate::constants::{INTERRUPTS, MAX_CYCLES_PER_FRAME, INTERRUPT_FLAG};
+use crate::constants::{INTERRUPTS, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME};
 use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
@@ -340,7 +340,8 @@ impl Cpu {
 
                 if interconnect.read_mem(0xFF02) == 0x81 {
                     let c: char = interconnect.read_mem(0xFF01) as char;
-                    print!("{}", c);
+                    interconnect.serial.write_byte(c as u8);
+                    interconnect.serial.output();
                     interconnect.write_mem(0xFF02, 0x00);
                 }
             } else {
@@ -358,7 +359,6 @@ impl Cpu {
 
     /// Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
-
         // Check if interrupts are enabled
         if !self.ime && !self.halted {
             return;

@@ -12,9 +12,9 @@ sdl2 = {version="0.35.2", features=["gfx"]}
 anyhow = "1.0"
 
 [profile.release]
-lto="fat"
-codegen-units = 1
-panic = "abort"
+#lto="fat"
+#codegen-units = 1
+#panic = "abort"
 debug= true
 overflow-checks = true
 
