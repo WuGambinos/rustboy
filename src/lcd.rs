@@ -1,5 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 use crate::ppu::Ppu;
+use log::{debug, info, warn};
 use sdl2::pixels::Color;
 
 #[derive(Debug)]
@@ -96,20 +97,6 @@ pub struct Lcd {
 }
 
 impl Lcd {
-    pub fn print_lcd(&self) {
-        println!("LCDC: {:X} MODE: {:?} STAT: {:#X} SCY: {:#X} SCX: {:#X} LY: {:#X} LYC: {:#X} WY: {:#X} WX: {:#X} DMA: {:#X}",
-    self.lcdc,
-    self.lcd_stat_mode(),
-    self.lcd_stat,
-    self.scy,
-    self.scx,
-    self.ly,
-    self.lyc,
-    self.wy,
-    self.wx,
-    self.dma,
-);
-    }
     pub fn new() -> Self {
         let mut initial_state = Self {
             lcdc: 0x91,
@@ -168,7 +155,7 @@ impl Lcd {
             0x4 => self.ly = value,
             0x5 => self.lyc = value,
             0x6 => {
-                //println!("DMA START");
+                info!("DMA START");
                 self.dma_start(ppu, value);
             }
             0x7 => self.update_palette(value, 0),
@@ -192,7 +179,7 @@ impl Lcd {
         match pal {
             1 => pal_colors = self.sp1_colors,
             2 => pal_colors = self.sp2_colors,
-            _ => println!("NOT VALID PAL"),
+            _ => warn!("NOT A VALID PAL"),
         }
 
         pal_colors[0] = DEFUALT_COLORS[(pal_data & 0b11) as usize];
@@ -370,5 +357,20 @@ impl Lcd {
 
     pub fn lcd_stat_interrupt(&mut self, stat_interrupt: u8) -> bool {
         self.lcd_stat & stat_interrupt != 0
+    }
+
+    pub fn log_lcd(&self) {
+        debug!("LCDC: {:X} MODE: {:?} STAT: {:#X} SCY: {:#X} SCX: {:#X} LY: {:#X} LYC: {:#X} WY: {:#X} WX: {:#X} DMA: {:#X}",
+    self.lcdc,
+    self.lcd_stat_mode(),
+    self.lcd_stat,
+    self.scy,
+    self.scx,
+    self.ly,
+    self.lyc,
+    self.wy,
+    self.wx,
+    self.dma,
+);
     }
 }

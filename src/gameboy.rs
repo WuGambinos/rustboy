@@ -57,6 +57,10 @@ impl GameBoy {
 
         'running: loop {
             self.cpu.run(&mut self.interconnect);
+
+            // Logs
+            self.cpu.log_registers();
+
             for event in event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. }

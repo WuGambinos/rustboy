@@ -1,3 +1,5 @@
+use log::debug;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Clock {
     pub period: u32,
@@ -103,8 +105,8 @@ impl Timer {
         self.tma_clock
     }
 
-    pub fn print_timer(&self) {
-        println!(
+    pub fn log_timer(&self) {
+        debug!(
             "Ticks: {:#X} DIV: {} TIMA: {} TMA: {} TAC: {}",
             self.internal_ticks, self.div, self.tima, self.tma, self.tac
         );
