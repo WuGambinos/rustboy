@@ -2,6 +2,8 @@
 mod instructions;
 pub mod interrupts;
 
+use log::debug;
+
 use crate::constants::{INTERRUPTS, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME};
 use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
@@ -6179,7 +6181,7 @@ impl Cpu {
                 rst(self, interconnect, 0x38);
                 // Increase Timer
                 interconnect.emu_cycles(4);
-            } // _ => println!("NOT AN OPCODE"),
+            }
         }
     }
 
@@ -6196,9 +6198,9 @@ impl Cpu {
         ])
     }
 
-    /// Print State of registers
-    pub fn print_registers(&self) {
-        println!(
+    /// Log State of registers
+    pub fn log_registers(&self) {
+        debug!(
             "A: {} B: {} C: {} D: {} E: {} H: {} L: {}",
             self.registers.a,
             self.registers.b,
@@ -6210,30 +6212,30 @@ impl Cpu {
         );
     }
 
-    /// Print State of Emulator
-    pub fn print_state(&self, interconnect: &Interconnect) {
-        println!("PC: {:#X}", self.pc);
-        println!("SP: {:#X}", self.sp);
+    /// Log State of Emulator
+    pub fn log_state(&self, interconnect: &Interconnect) {
+        debug!("PC: {:#X}", self.pc);
+        debug!("SP: {:#X}", self.sp);
 
-        println!(
+        debug!(
             "MEM[SP+1]: {:#X}",
             interconnect.read_mem(self.sp.wrapping_add(1))
         );
-        println!("MEM[SP]: {:#X}", interconnect.read_mem(self.sp));
+        debug!("MEM[SP]: {:#X}", interconnect.read_mem(self.sp));
 
-        println!(
+        debug!(
             "MEM[{:#X}]: {:#X}",
             self.sp.wrapping_sub(1),
             interconnect.read_mem(self.sp.wrapping_sub(1))
         );
-        println!(
+        debug!(
             "MEM[{:#X}]: {:#X}",
             self.sp.wrapping_sub(2),
             interconnect.read_mem(self.sp.wrapping_sub(2))
         );
 
-        println!("MEM[0xDFEA]: {:#X}", interconnect.read_mem(0xDFEA));
-        println!("MEM[0xDFE9]: {:#X}", interconnect.read_mem(0xDFE9));
+        debug!("MEM[0xDFEA]: {:#X}", interconnect.read_mem(0xDFEA));
+        debug!("MEM[0xDFE9]: {:#X}", interconnect.read_mem(0xDFE9));
 
         let reg = format!(
             "AF: {:#X}, BC: {:#X}, DE:{:#X}, HL: {:#X}",
@@ -6243,13 +6245,13 @@ impl Cpu {
             self.registers.hl()
         );
 
-        println!("{}", reg);
+        debug!("{}", reg);
 
-        println!("IF: {:#X}", interconnect.read_mem(0xFF0F));
-        println!("IE: {:#X}", interconnect.read_mem(0xFFFF));
-        println!("mem[FF0F]: {:#X}", interconnect.read_mem(0xFF0F));
+        debug!("IF: {:#X}", interconnect.read_mem(0xFF0F));
+        debug!("IE: {:#X}", interconnect.read_mem(0xFFFF));
+        debug!("mem[FF0F]: {:#X}", interconnect.read_mem(0xFF0F));
 
-        println!(
+        debug!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
             interconnect.timer.div(),
             interconnect.timer.tima(),
@@ -6257,9 +6259,9 @@ impl Cpu {
             interconnect.timer.tac()
         );
 
-        println!("FLAG: {:#X}", self.registers.f.data);
+        debug!("FLAG: {:#X}", self.registers.f.data);
 
-        println!("OPCODE: {:#X}", self.opcode);
+        debug!("OPCODE: {:#X}", self.opcode);
     }
 }
 

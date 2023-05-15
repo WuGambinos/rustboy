@@ -1,6 +1,10 @@
 #![allow(clippy::must_use_candidate)]
 use core::time;
 
+use log::debug;
+use log::info;
+
+use log::warn;
 use sdl2::pixels::Color;
 
 use crate::constants::*;
@@ -74,9 +78,9 @@ impl Interconnect {
         self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
     }
 
-    /// Prints the state of the Timer
-    pub fn print_timer(&self) {
-        println!(
+    /// Logs the state of the Timer
+    pub fn log_timer(&self) {
+        debug!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
             self.timer.div(),
             self.timer.tima(),
@@ -85,16 +89,16 @@ impl Interconnect {
         );
     }
 
-    /// Prints state of vram
-    pub fn print_vram(&self) {
+    /// Logs state of vram
+    pub fn log_vram(&self) {
         for i in (0x8000..0x9FFF).rev() {
-            println!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
+            debug!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
         }
     }
 
-    /// Prints state of ppu
-    pub fn print_ppu(&self) {
-        println!(
+    /// Logs state of ppu
+    pub fn log_ppu(&self) {
+        debug!(
             "TICKS: {} FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {} LY: {} bgw_enable: {}",
             self.ppu.line_ticks(),
             self.ppu.fetch_state(),
@@ -104,7 +108,7 @@ impl Interconnect {
             self.lcd.ly(),
             u8::from(self.lcd.lcdc_bgw_enabled())
         );
-        println!(
+        debug!(
             "MODE: {:?} map_y: {} map_x: {} tile_y: {} fifo_x: {} fifo_length: {} stat: {:#X}",
             self.lcd.lcd_stat_mode(),
             self.ppu.map_y(),
@@ -169,7 +173,7 @@ impl Interconnect {
         else if addr == 0xFFFF {
             self.mmu.enable_interrupt(value);
         } else {
-            //println!("UNREACHABLE Addr: {:#X}", addr);
+            warn!("UNREACHABLE Addr: {:#X}", addr);
         }
     }
 
@@ -219,7 +223,7 @@ impl Interconnect {
         else if addr == 0xFFFF {
             self.mmu.read_interrupt_enable()
         } else {
-            println!("NOT REACHABLE ADDR: {:#X}", addr);
+            warn!("NOT REACHABLE ADDR: {:#X}", addr);
             0
         }
     }
@@ -305,7 +309,7 @@ impl Interconnect {
         self.ppu.set_dma_active(self.ppu.dma_byte() < 0xA0);
 
         if !self.ppu.dma_active() {
-            //println!("DMA DONE!");
+            info!("DMA DONE!");
             let secs = time::Duration::from_secs(1);
             std::thread::sleep(secs);
         }

@@ -1,4 +1,6 @@
 #![allow(clippy::must_use_candidate)]
+use log::warn;
+
 use super::{Cpu, Flags, Interconnect, RegisterPair};
 
 /************************************************************************
@@ -182,7 +184,7 @@ pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
 /// Carry: Dependent
 pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
     // Accumulator
-    let  a: u8 = cpu.registers.a;
+    let a: u8 = cpu.registers.a;
 
     // Result
     let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
@@ -889,7 +891,7 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
     *r = reg;
 }
 
-/// Rotates mem[HL] to the left 
+/// Rotates mem[HL] to the left
 ///
 /// Contents of mem[HL] are roateted left 1 bit position
 ///
@@ -1089,7 +1091,7 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
 }
 
 /// Shifts mem[HL] to the left arithmetically
-/// 
+///
 /// An arithmetic shift left 1 bit position is performed on contents of mem[HL]
 ///
 /// Contents of bit 7 are copied to carry flag
@@ -1138,7 +1140,7 @@ pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Shifts register to the right arithmetically 
+/// Shifts register to the right arithmetically
 ///    
 /// Flags:
 ///
@@ -1313,7 +1315,7 @@ pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     interconnect.emu_cycles(1);
 }
 
-/// Shifts register to the right logically 
+/// Shifts register to the right logically
 ///
 /// Performs right shift on operand. 0th bit is copied to carry
 ///
@@ -1361,7 +1363,7 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
     *r = value;
 }
 
-///  Shifts mem[HL] to the right logically 
+///  Shifts mem[HL] to the right logically
 ///
 /// Performs right shift on operand. 0th bit is copied to carry
 ///
@@ -1438,7 +1440,7 @@ pub fn inc_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
         RegisterPair::SP => {
             cpu.sp = cpu.sp.wrapping_add(1);
         }
-        _ => println!("{:?}, Not a register PAIR", register_pair),
+        _ => warn!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
@@ -1459,7 +1461,7 @@ pub fn dec_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
         RegisterPair::SP => {
             cpu.sp = cpu.sp.wrapping_sub(1);
         }
-        _ => println!("{:?}, Not a register PAIR", register_pair),
+        _ => warn!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
@@ -1555,7 +1557,7 @@ pub fn add_rr_hl(cpu: &mut Cpu, register_pair: RegisterPair) {
 
             cpu.registers.set_hl(c as u16);
         }
-        _ => println!("{:?}, Not a register PAIR", register_pair),
+        _ => warn!("{:?}, Not a register PAIR", register_pair),
     }
 }
 
