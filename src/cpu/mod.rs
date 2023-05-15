@@ -4,7 +4,10 @@ pub mod interrupts;
 
 use log::debug;
 
-use crate::constants::{INTERRUPTS, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME};
+use crate::constants::{
+    INTERRUPTS, INTERRUPT_ENABLE, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME, SERIAL_TRANSFER_CONTROL,
+    SERIAL_TRASFER_DATA,
+};
 use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
@@ -340,18 +343,18 @@ impl Cpu {
             if !self.halted {
                 self.execute_instruction(interconnect);
 
-                if interconnect.read_mem(0xFF02) == 0x81 {
-                    let c: char = interconnect.read_mem(0xFF01) as char;
+                if interconnect.read_mem(SERIAL_TRANSFER_CONTROL) == 0x81 {
+                    let c: char = interconnect.read_mem(SERIAL_TRASFER_DATA) as char;
                     interconnect.serial.write_byte(c as u8);
                     interconnect.serial.output();
-                    interconnect.write_mem(0xFF02, 0x00);
+                    interconnect.write_mem(SERIAL_TRANSFER_CONTROL, 0x00);
                 }
             } else {
                 interconnect.emu_cycles(1);
 
-                let interrupt_flag = interconnect.read_mem(0xFF0F);
+                let interrupt_flag = interconnect.read_mem(INTERRUPT_FLAG);
 
-                //Iterrupt has been requested
+                // Iterrupt has been requested
                 if interrupt_flag != 0 {
                     self.halted = false;
                 }
@@ -6247,9 +6250,9 @@ impl Cpu {
 
         debug!("{}", reg);
 
-        debug!("IF: {:#X}", interconnect.read_mem(0xFF0F));
-        debug!("IE: {:#X}", interconnect.read_mem(0xFFFF));
-        debug!("mem[FF0F]: {:#X}", interconnect.read_mem(0xFF0F));
+        debug!("IF: {:#X}", interconnect.read_mem(INTERRUPT_FLAG));
+        debug!("IE: {:#X}", interconnect.read_mem(INTERRUPT_ENABLE));
+        debug!("mem[FF0F]: {:#X}", interconnect.read_mem(INTERRUPT_FLAG));
 
         debug!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
