@@ -2,11 +2,14 @@ use rustboy::gameboy::GameBoy;
 
 use anyhow::Error;
 use anyhow::Result;
+use env_logger::*;
 use std::env;
 
 fn main() -> Result<(), Error> {
     // Logger
-    pretty_env_logger::init();
+    let mut logger = Builder::from_default_env();
+    logger.target(Target::Stdout);
+    logger.init();
 
     // Command Line Arguments
     let args: Vec<String> = env::args().collect();
