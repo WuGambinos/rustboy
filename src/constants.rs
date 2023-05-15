@@ -30,9 +30,6 @@ pub const INTERRUPTS: [InterruptType; 5] = [
     InterruptType::Joypad,
 ];
 
-pub const INTERRUPT_ENABLE: u16 = 0xFFFF;
-pub const INTERRUPT_FLAG: u16 = 0xFF0F;
-
 pub const TARGET_FRAME_TIME: u32 = 1000 / 60;
 
 pub const TILE_COLORS: [Color; 4] = [
@@ -41,3 +38,12 @@ pub const TILE_COLORS: [Color; 4] = [
     Color::RGB(84, 84, 84),
     Color::RGB(0, 0, 0),
 ];
+
+// Memory Map Addresses
+pub const SERIAL_TRASFER_DATA: u16 = 0xFF01;
+pub const SERIAL_TRANSFER_CONTROL: u16 = 0xFF02;
+
+pub const LCDC: u16 = 0xFF40;
+
+pub const INTERRUPT_FLAG: u16 = 0xFF0F;
+pub const INTERRUPT_ENABLE: u16 = 0xFFFF;
