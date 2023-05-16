@@ -11,7 +11,7 @@ pub enum LcdMode {
     Transfer = 3,
 }
 
-const DEFUALT_COLORS: [Color; 4] = [
+const DEFAULT_COLORS: [Color; 4] = [
     Color::RGB(255, 255, 255),
     Color::RGB(169, 169, 169),
     Color::RGB(84, 84, 84),
@@ -118,7 +118,7 @@ impl Lcd {
             sp2_colors: [Color::RGB(0, 0, 0); 4],
         };
 
-        for (i, color) in DEFUALT_COLORS.iter().enumerate() {
+        for (i, color) in DEFAULT_COLORS.iter().enumerate() {
             initial_state.bg_colors[i] = *color;
             initial_state.sp1_colors[i] = *color;
             initial_state.sp2_colors[i] = *color;
@@ -179,13 +179,13 @@ impl Lcd {
         match pal {
             1 => pal_colors = self.sp1_colors,
             2 => pal_colors = self.sp2_colors,
-            _ => warn!("NOT A VALID PAL"),
+            _ => warn!("NOT A VALID PAL: {}", pal),
         }
 
-        pal_colors[0] = DEFUALT_COLORS[(pal_data & 0b11) as usize];
-        pal_colors[1] = DEFUALT_COLORS[((pal_data >> 2) & 0b11) as usize];
-        pal_colors[2] = DEFUALT_COLORS[((pal_data >> 4) & 0b11) as usize];
-        pal_colors[3] = DEFUALT_COLORS[((pal_data >> 6) & 0b11) as usize];
+        pal_colors[0] = DEFAULT_COLORS[(pal_data & 0b11) as usize];
+        pal_colors[1] = DEFAULT_COLORS[((pal_data >> 2) & 0b11) as usize];
+        pal_colors[2] = DEFAULT_COLORS[((pal_data >> 4) & 0b11) as usize];
+        pal_colors[3] = DEFAULT_COLORS[((pal_data >> 6) & 0b11) as usize];
     }
 
     pub fn set_lcd_stat(&mut self, value: u8) {

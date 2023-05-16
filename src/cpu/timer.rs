@@ -74,11 +74,11 @@ impl Timer {
     }
 
     pub fn set_tma(&mut self, value: u8) {
-        self.tima = value;
+        self.tma = value;
     }
 
     pub fn tma(&self) -> u8 {
-        self.tima
+        self.tma
     }
 
     pub fn set_tac(&mut self, value: u8) {
