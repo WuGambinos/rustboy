@@ -3,19 +3,23 @@ use core::time;
 
 use log::debug;
 use log::info;
-
 use log::warn;
+
 use sdl2::pixels::Color;
+use sdl2::sys::X_PROTOCOL_REVISION;
 
 use crate::constants::*;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
-use crate::lcd::Lcd;
-use crate::lcd::LcdMode;
 use crate::mmu::Mmu;
+use crate::ppu::Control;
 use crate::ppu::FetchState;
+use crate::ppu::LcdMode;
 use crate::ppu::Ppu;
+use crate::ppu::Stat;
+
+static mut LY: u8 = 0;
 
 #[derive(Debug)]
 pub struct SerialOutput {
@@ -56,26 +60,18 @@ pub struct Interconnect {
     pub mmu: Mmu,
     pub timer: Timer,
     pub ppu: Ppu,
-    pub lcd: Lcd,
     pub serial: SerialOutput,
 }
 
 impl Interconnect {
     /// Constructor
     pub fn new() -> Self {
-        let mut interconnect = Self {
+        Self {
             mmu: Mmu::new(),
             timer: Timer::new(),
             ppu: Ppu::new(),
-            lcd: Lcd::new(),
             serial: SerialOutput::new(),
-        };
-        interconnect.ppu_init();
-        interconnect
-    }
-
-    pub fn ppu_init(&mut self) {
-        self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
+        }
     }
 
     /// Logs the state of the Timer
@@ -94,30 +90,6 @@ impl Interconnect {
         for i in (0x8000..0x9FFF).rev() {
             debug!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
         }
-    }
-
-    /// Logs state of ppu
-    pub fn log_ppu(&self) {
-        debug!(
-            "TICKS: {} FETCH STATE: {:?} line_x: {} pushed_x: {} fetch_x: {} LY: {} bgw_enable: {}",
-            self.ppu.line_ticks(),
-            self.ppu.fetch_state(),
-            self.ppu.line_x(),
-            self.ppu.pushed_x(),
-            self.ppu.fetch_x(),
-            self.lcd.ly(),
-            u8::from(self.lcd.lcdc_bgw_enabled())
-        );
-        debug!(
-            "MODE: {:?} map_y: {} map_x: {} tile_y: {} fifo_x: {} fifo_length: {} stat: {:#X}",
-            self.lcd.lcd_stat_mode(),
-            self.ppu.map_y(),
-            self.ppu.map_x(),
-            self.ppu.tile_y(),
-            self.ppu.fifo_x(),
-            self.ppu.pixel_fifo().len(),
-            self.lcd.lcd_stat(),
-        );
     }
 
     pub fn dma_transfer(&mut self, value: u8) {
@@ -157,9 +129,9 @@ impl Interconnect {
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_write(addr, value);
         }
-        // LCD Control
+        // LCD
         else if (0xFF40..0xFF4C).contains(&addr) {
-            self.lcd.write(&mut self.ppu, addr, value);
+            self.ppu.write_lcd(addr, value)
         }
         // IO registers
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -207,9 +179,9 @@ impl Interconnect {
         else if (0xFF04..0xFF08).contains(&addr) {
             self.timer.timer_read(addr)
         }
-        // LCD Control
+        // LCD
         else if (0xFF40..0xFF4C).contains(&addr) {
-            self.lcd.read(addr)
+            self.ppu.read_lcd(addr)
         }
         // IO Regsiters
         else if (0xFF00..0xFF80).contains(&addr) {
@@ -279,14 +251,6 @@ impl Interconnect {
         }
     }
 
-    /// Set initial dma state
-    pub fn dma_start(&mut self, value: u8) {
-        self.ppu.set_dma_active(true);
-        self.ppu.set_dma_byte(0);
-        self.ppu.set_dma_start_delay(2);
-        self.ppu.set_dma_value(value);
-    }
-
     pub fn dma_tick(&mut self) {
         if !self.ppu.dma_active() {
             return;
@@ -315,207 +279,141 @@ impl Interconnect {
         }
     }
 
-    pub fn ppu_tick(&mut self) {
-        self.ppu.increase_line_ticks();
-
-        match self.lcd.lcd_stat_mode() {
-            LcdMode::OAM => self.ppu_mode_oam(),
-            LcdMode::Transfer => self.ppu_mode_transfer(),
-            LcdMode::VBlank => self.ppu_mode_vblank(),
-            LcdMode::HBlank => self.ppu_mode_hblank(),
-        }
-    }
+    /****************************************************
+     * PPU FUNCTIONS
+     ****************************************************/
 
     pub fn increment_ly(&mut self) {
-        let value = self.lcd.ly().wrapping_add(1);
-        self.lcd.set_ly(value);
+        // increment ly
+        let value = self.ppu.ly().wrapping_add(1);
+        self.ppu.set_ly(value);
 
-        if self.lcd.ly() == self.lcd.lyc() {
-            self.lcd.set_lyc_ly_flag(1);
+        if self.ppu.ly() == self.ppu.lyc() {
+            self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, true);
 
-            if self.lcd.lcd_stat_interrupt(SI_LYC) {
+            // stat interrupt
+            if self.ppu.stat().contains(Stat::LYC_LY_EQ_INTERRUPT) {
                 request_interrupt(self, InterruptType::LcdStat);
             }
-        } else {
-            self.lcd.set_lyc_ly_flag(0);
+            //clear flag
+            else {
+                self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, false);
+            }
         }
     }
 
-    pub fn ppu_mode_oam(&mut self) {
+    /// Fetcher grabs a row of 8 pixels at a time to be fed to either fifo
+    pub fn fetch(&mut self) {
+        match self.ppu.pixel_fifo.fetch_state() {
+            FetchState::Tile => {
+                if self.ppu.control().contains(Control::BG_WINDOW) {
+                    /*
+                    let mut base_addr: u16 = self.ppu.bg_tile_map_addr();
+
+                    let map_x: u16 =
+                        u16::from(self.ppu.pixel_fifo.x().wrapping_add(self.ppu.scroll_x()));
+                    let map_y: u16 = u16::from(self.ppu.ly().wrapping_add(self.ppu.scroll_y()));
+
+                    let addr = base_addr + (map_x / 8) + ((map_y / 8) * 32);
+                    let value: u8 = self.read_mem(addr);
+
+                    if self.ppu.bg_window_data_area() == 0x8800 {
+                        //let value: u8 = self.
+                    }
+
+                    self.ppu.pixel_fifo.set_fetch_state(FetchState::Data0);
+                    self.ppu
+                        .pixel_fifo
+                        .set_x(self.ppu.pixel_fifo.x().wrapping_add(8));
+                        */
+                }
+            }
+            FetchState::Data0 => {}
+            FetchState::Data1 => {}
+        }
+    }
+
+    /// Search OAM for Sprites whose Y coordinate
+    /// overlaps this line
+    ///
+    /// Duration: 80 "dots"
+    pub fn oam_mode(&mut self) {
+        // No longer in oam mode
         if self.ppu.line_ticks() >= 80 {
-            self.lcd.set_lcd_stat_mode(LcdMode::Transfer as u8);
+            self.ppu.set_stat_mode(LcdMode::Transfer);
 
-            self.ppu.set_fetch_state(FetchState::Tile);
-            self.ppu.set_line_x(0);
-            self.ppu.set_fetch_x(0);
-            self.ppu.set_pushed_x(0);
-            self.ppu.set_fifo_x(0);
+            self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
+            self.ppu.pixel_fifo.set_x(0);
         }
     }
 
-    pub fn ppu_mode_transfer(&mut self) {
-        self.pipeline_process();
-        if u32::from(self.ppu.pushed_x()) >= u32::from(X_RES) {
-            self.pipeline_fifo_reset();
-            self.lcd.set_lcd_stat_mode(LcdMode::HBlank as u8);
+    /// Reading OAM and VRAM to generate picture
+    ///
+    /// Duration: 168-291 "dots", depends on sprite count
+    pub fn transfer_mode(&mut self) {
+        // Pipeline TODO
+        if self.ppu.pixel_fifo.x() >= X_RES {
+            self.ppu.pixel_fifo.clear();
 
-            if self.lcd.lcd_stat_interrupt(SI_HBLANK) {
+            self.ppu.set_stat_mode(LcdMode::HBlank);
+
+            if self.ppu.stat().contains(Stat::HBLANK_INTERRUPT) {
                 request_interrupt(self, InterruptType::LcdStat);
             }
         }
     }
 
-    pub fn ppu_mode_vblank(&mut self) {
-        if self.ppu.line_ticks() >= u32::from(TICKS_PER_LINE) {
+    /// Duration: 4560 "dots" (10 scanlines)
+    pub fn vblank_mode(&mut self) {
+        if self.ppu.line_ticks() >= TICKS_PER_LINE {
             self.increment_ly();
 
-            if self.lcd.ly() >= LINES_PER_FRAME {
-                self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
-                self.lcd.set_ly(0);
+            // Onto next screen
+            if self.ppu.ly() >= LINES_PER_FRAME {
+                self.ppu.set_stat_mode(LcdMode::Oam);
+                self.ppu.set_ly(0);
             }
+
+            // Reset line ticks
             self.ppu.set_line_ticks(0);
         }
     }
 
-    pub fn ppu_mode_hblank(&mut self) {
-        if self.ppu.line_ticks() >= u32::from(TICKS_PER_LINE) {
+    /// Duration: 87-204 "dots"
+    pub fn hblank_mode(&mut self) {
+        //  End of scanline
+        if self.ppu.line_ticks() >= TICKS_PER_LINE {
             self.increment_ly();
 
-            if self.lcd.ly() >= Y_RES {
-                self.lcd.set_lcd_stat_mode(LcdMode::VBlank as u8);
+            // Trigger vblank
+            if self.ppu.ly() == Y_RES {
+                self.ppu.set_stat_mode(LcdMode::VBlank);
                 request_interrupt(self, InterruptType::VBlank);
 
-                if self.lcd.lcd_stat_interrupt(SI_VBLANK) {
-                    request_interrupt(self, InterruptType::LcdStat);
+                // STAT interrupt
+                if self.ppu.stat().contains(Stat::VBLANK_INTERRUPT) {
+                    request_interrupt(self, InterruptType::VBlank);
                 }
-            } else {
-                self.lcd.set_lcd_stat_mode(LcdMode::OAM as u8);
+            }
+            // OAM Search
+            else {
+                self.ppu.set_stat_mode(LcdMode::Oam);
             }
 
+            // Reset line ticks
             self.ppu.set_line_ticks(0);
         }
     }
 
-    fn pipline_fifo_add(&mut self) -> bool {
-        if self.ppu.pixel_fifo().len() > 8 {
-            // fifo is full
-            return false;
+    pub fn ppu_tick(&mut self) {
+        self.ppu.increment_line_ticks();
+
+        match self.ppu.stat_mode() {
+            LcdMode::Oam => self.oam_mode(),
+            LcdMode::Transfer => self.transfer_mode(),
+            LcdMode::VBlank => self.vblank_mode(),
+            LcdMode::HBlank => self.hblank_mode(),
         }
-
-        let x: i16 = (self.ppu.fetch_x() - (8 - (self.lcd.scx() % 8))).into();
-
-        let second_byte: u8 = self.ppu.bgw_fetch_data()[1];
-        let first_byte: u8 = self.ppu.bgw_fetch_data()[2];
-
-        let mut color: u8;
-
-        for bit in (0..8).rev() {
-            let first_bit = (first_byte >> bit) & 1;
-            let second_bit = (second_byte >> bit) & 1;
-
-            if first_bit == 0 && second_bit == 0 {
-                color = 1;
-            } else if first_bit == 0 && second_bit == 1 {
-                color = 0;
-            } else if first_bit == 1 && second_bit == 0 {
-                color = 2;
-            } else {
-                color = 3;
-            }
-
-            let new_color = TILE_COLORS[color as usize];
-
-            if x >= 0 {
-                self.ppu.pixel_fifo_push(new_color);
-                self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
-            }
-        }
-
-        true
-    }
-
-    fn pipeline_fetch(&mut self) {
-        match self.ppu.fetch_state() {
-            FetchState::Tile => {
-                if self.lcd.lcdc_bgw_enabled() {
-                    let addr: u16 = self.lcd.lcdc_bg_tile_map_addr()
-                        + (u16::from(self.ppu.map_x() / 8))
-                        + (u16::from(self.ppu.map_y() / 8) * 32);
-                    let value: u8 = self.read_mem(addr);
-                    self.ppu.set_bgw_fetch_data(0, value);
-
-                    if self.lcd.lcdc_bgw_data_area() == 0x8800 {
-                        let value: u8 = self.ppu.bgw_fetch_data()[0].wrapping_add(128);
-                        self.ppu.set_bgw_fetch_data(0, value);
-                    }
-                }
-                self.ppu.set_fetch_state(FetchState::Data0);
-                self.ppu.set_fetch_x(self.ppu.fetch_x().wrapping_add(8));
-            }
-            FetchState::Data0 => {
-                let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + (u16::from(self.ppu.bgw_fetch_data()[0]) * 16)
-                    + u16::from(self.ppu.tile_y());
-                self.ppu.set_bgw_fetch_data(1, self.read_mem(addr));
-
-                self.ppu.set_fetch_state(FetchState::Data1);
-            }
-            FetchState::Data1 => {
-                let addr: u16 = self.lcd.lcdc_bgw_data_area()
-                    + ((u16::from(self.ppu.bgw_fetch_data()[0]) * 16)
-                        + (u16::from(self.ppu.tile_y()) + 1));
-                self.ppu.set_bgw_fetch_data(2, self.read_mem(addr));
-
-                self.ppu.set_fetch_state(FetchState::Idle);
-            }
-            FetchState::Idle => {
-                self.ppu.set_fetch_state(FetchState::Push);
-            }
-            FetchState::Push => {
-                if self.pipline_fifo_add() {
-                    self.ppu.set_fetch_state(FetchState::Tile);
-                }
-            }
-        }
-    }
-
-    fn pipline_push_pixel(&mut self) {
-        if self.ppu.pixel_fifo().len() > 8 {
-            let pixel_data: Color = self.ppu.pixel_fifo_pop();
-
-            if self.ppu.line_x() >= (self.lcd.scx() % 8) {
-                let index = (u32::from(self.ppu.pushed_x())
-                    + (u32::from(self.lcd.ly()) * u32::from(X_RES)))
-                    as usize;
-                self.ppu.video_buffer[index] = pixel_data;
-
-                self.ppu.set_pushed_x(self.ppu.pushed_x().wrapping_add(1));
-            }
-            self.ppu.set_line_x(self.ppu.line_x().wrapping_add(1));
-        }
-    }
-
-    fn pipeline_process(&mut self) {
-        self.ppu
-            .set_map_y(self.lcd.ly().wrapping_add(self.lcd.scy()));
-        self.ppu
-            .set_map_x(self.ppu.fetch_x().wrapping_add(self.lcd.scx()));
-        self.ppu
-            .set_tile_y(((self.lcd.ly().wrapping_add(self.lcd.scy())) % 8) * 2);
-
-        if self.ppu.line_ticks() & 1 != 1 {
-            self.pipeline_fetch();
-        }
-
-        self.pipline_push_pixel();
-    }
-
-    fn pipeline_fifo_reset(&mut self) {
-        while !self.ppu.pixel_fifo().is_empty() {
-            self.ppu.pixel_fifo_pop();
-        }
-
-        //self.ppu.pixel_fifo_push(Color::RGB(0,0,0));
     }
 }
 

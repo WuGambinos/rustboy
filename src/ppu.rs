@@ -1,79 +1,20 @@
 #![allow(clippy::must_use_candidate)]
+use std::{collections::VecDeque, iter::FusedIterator};
+
 use crate::constants::*;
-use modular_bitfield::prelude::*;
+use bitflags::*;
 use sdl2::pixels::Color;
-use std::collections::VecDeque;
 
-#[derive(Debug, Clone)]
-pub enum FetchState {
-    Tile,
-    Data0,
-    Data1,
-    Idle,
-    Push,
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
-pub struct PixelFifoContext {
-    fetch_state: FetchState,
-    pixel_fifo: VecDeque<Color>,
-    line_x: u8,
-    pushed_x: u8,
-    fetch_x: u8,
-    bgw_fetch_data: [u8; 3],
-    fetch_entry_data: [u8; 6],
-    map_y: u8,
-    map_x: u8,
-    tile_y: u8,
-    fifo_x: u8,
-}
-
-impl PixelFifoContext {
-    fn new() -> Self {
-        PixelFifoContext {
-            fetch_state: FetchState::Tile,
-            pixel_fifo: VecDeque::new(),
-            line_x: 0,
-            pushed_x: 0,
-            fetch_x: 0,
-            bgw_fetch_data: [0; 3],
-            fetch_entry_data: [0; 6],
-            map_y: 0,
-            map_x: 0,
-            tile_y: 0,
-            fifo_x: 0,
-        }
+bitflags! {
+    #[derive(Clone, Copy, Debug)]
+    struct OamAttr: u8 {
+        const PALETTE_NUMBER_CGB    = 0b00000111;
+        const TILE_VRAM_BANK        = 0b00001000;
+        const PALETTE_NUMBER        = 0b00010000;
+        const X_FLIP                = 0b00100000;
+        const Y_FLIP                = 0b01000000;
+        const BG_WINDOW             = 0b10000000;
     }
-}
-
-/// Single Entry in OAM (Object Atribute Memory)
-#[bitfield]
-#[derive(Debug, Copy, Clone)]
-pub struct OamAttr {
-    // BG and Window over OBJ
-    // (0=No, 1=BG and Windows colors 1-3 over the OBJ)
-    bg_window: B1,
-
-    // Y Flip
-    // (0=Normal, 1=Vertically Mirrored)
-    y_flip: B1,
-
-    // X Flip
-    // (0=Nomral, 1=Horizontally Mirrored)
-    x_flip: B1,
-
-    /// Palette Number
-    /// **Non CGB Mode only** (0=OBP0, 1=OBP1)
-    pn: B1,
-
-    // Tile VRAM-BANK ***CGB Mode only**
-    // (0=Bank 0, 1=Bank1)
-    tile_vram_bank: B1,
-
-    // Palette Number **CGB Mode Only**
-    // (OBP0-7)
-    cbg_pn: B3,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -90,7 +31,7 @@ impl OamEntry {
             y: 0,
             x: 0,
             tile: 0,
-            oam_attr: OamAttr::new(),
+            oam_attr: OamAttr::empty(),
         }
     }
 }
@@ -114,6 +55,89 @@ impl Dma {
     }
 }
 
+bitflags! {
+    #[derive(Clone, Copy, Debug)]
+   pub struct Control: u8 {
+        const BG_WINDOW                 = 0b00000001;
+        const SPRITE_ENABLE             = 0b00000010;
+        const SPRITE_SIZE               = 0b00000100;
+        const BG_TILE_MAP_AREA          = 0b00001000;
+        const BG_WINDOW_TILE_DATA_AREA  = 0b00010000;
+        const WINDOW_ENABLE             = 0b00100000;
+        const WINDOW_TILE_MAP_AREA      = 0b01000000;
+        const LCD_PPU_ENABLE            = 0b10000000;
+
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum LcdMode {
+    HBlank,
+    VBlank,
+    Oam,
+    Transfer,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum FetchState {
+    /// Determines which background/window tile to fetch pixels from
+    Tile,
+
+    /// first of the slice's two bitplanes is fetched
+    Data0,
+
+    /// second of the slice's two bitplanes is fetched
+    Data1,
+}
+
+bitflags! {
+    #[derive(Clone, Copy, Debug)]
+    pub struct Stat: u8 {
+        const LYC_LY_EQ_FLAG        = 0b00000100;
+        const HBLANK_INTERRUPT      = 0b00001000;
+        const VBLANK_INTERRUPT      = 0b00010000;
+        const OAM_INTERRUPT         = 0b00100000;
+        const LYC_LY_EQ_INTERRUPT   = 0b01000000;
+    }
+}
+
+#[derive(Debug)]
+pub struct PixelFifoInfo {
+    fetch_state: FetchState,
+    fifo: VecDeque<Color>,
+    x: u8,
+}
+
+impl PixelFifoInfo {
+    fn new() -> PixelFifoInfo {
+        PixelFifoInfo {
+            fetch_state: FetchState::Tile,
+            fifo: VecDeque::new(),
+            x: 0,
+        }
+    }
+
+    pub fn clear(&mut self) {
+        self.fifo.clear();
+    }
+
+    pub fn set_x(&mut self, value: u8) {
+        self.x = value
+    }
+
+    pub fn x(&self) -> u8 {
+        self.x
+    }
+
+    pub fn set_fetch_state(&mut self, state: FetchState) {
+        self.fetch_state = state
+    }
+
+    pub fn fetch_state(&self) -> FetchState {
+        self.fetch_state
+    }
+}
+
 /// Pixel Processing Unit
 ///
 /// Used to display graphics
@@ -125,12 +149,44 @@ pub struct Ppu {
     //OAM
     oam: [OamEntry; 40],
 
-    pub dma: Dma,
+    current_frame: u32,
+    line_ticks: u32,
 
-    pub current_frame: u32,
-    pub line_ticks: u32,
+    pub dma: Dma,
     pub video_buffer: [Color; BUFFER_SIZE],
-    pfc: PixelFifoContext,
+    pub pixel_fifo: PixelFifoInfo,
+
+    // LCD status
+    pub stat: Stat,
+
+    pub mode: LcdMode,
+
+    // LCD control
+    pub control: Control,
+
+    // Viewport X position
+    scroll_x: u8,
+
+    // Viewport Y position
+    scroll_y: u8,
+
+    // LCD Y coordinate (read only)
+    ly: u8,
+
+    // LY compare
+    lyc: u8,
+
+    // Window X position (Top left)
+    window_x: u8,
+
+    // Window Y position (Top left)
+    window_y: u8,
+
+    // Background palette (Non-CGB mode only)
+    bg_palette: u8,
+
+    // Object palettes data (Non-CGB mode only)
+    object_palette: [u8; 2],
 }
 
 impl Ppu {
@@ -140,10 +196,21 @@ impl Ppu {
             vram: [0; 0x2000],
             oam: [OamEntry::new(); 40],
             dma: Dma::new(),
+            pixel_fifo: PixelFifoInfo::new(),
             line_ticks: 0,
             current_frame: 0,
             video_buffer: [Color::RGB(0, 0, 0); BUFFER_SIZE],
-            pfc: PixelFifoContext::new(),
+            stat: Stat::empty(),
+            mode: LcdMode::Oam,
+            control: Control::empty(),
+            scroll_x: 0,
+            scroll_y: 0,
+            ly: 0,
+            lyc: 0,
+            window_x: 0,
+            window_y: 0,
+            bg_palette: 0,
+            object_palette: [0; 2],
         }
     }
 
@@ -183,6 +250,13 @@ impl Ppu {
         self.dma.value
     }
 
+    pub fn dma_start(&mut self, value: u8) {
+        self.dma.active = true;
+        self.dma.byte = 0;
+        self.dma.start_delay = 2;
+        self.dma.value = value;
+    }
+
     pub fn set_line_ticks(&mut self, value: u32) {
         self.line_ticks = value;
     }
@@ -191,7 +265,7 @@ impl Ppu {
         self.line_ticks
     }
 
-    pub fn increase_line_ticks(&mut self) {
+    pub fn increment_line_ticks(&mut self) {
         self.line_ticks = self.line_ticks.wrapping_add(1);
     }
 
@@ -199,93 +273,68 @@ impl Ppu {
         self.current_frame
     }
 
-    pub fn set_fetch_state(&mut self, state: FetchState) {
-        self.pfc.fetch_state = state;
+    pub fn set_ly(&mut self, value: u8) {
+        self.ly = value
     }
 
-    pub fn fetch_state(&self) -> &FetchState {
-         &self.pfc.fetch_state
+    pub fn ly(&self) -> u8 {
+        self.ly
     }
 
-    pub fn set_line_x(&mut self, value: u8) {
-        self.pfc.line_x = value;
+    pub fn set_lyc(&mut self, value: u8) {
+        self.lyc = value;
     }
 
-    pub fn line_x(&self) -> u8 {
-        self.pfc.line_x
+    pub fn lyc(&self) -> u8 {
+        self.lyc
     }
 
-    pub fn set_pushed_x(&mut self, value: u8) {
-        self.pfc.pushed_x = value;
+    pub fn set_scroll_x(&mut self, value: u8) {
+        self.scroll_x = value;
     }
 
-    pub fn pushed_x(&self) -> u8 {
-        self.pfc.pushed_x
+    pub fn scroll_x(&self) -> u8 {
+        self.scroll_x
     }
 
-    pub fn set_fetch_x(&mut self, value: u8) {
-        self.pfc.fetch_x = value;
+    pub fn set_scroll_y(&mut self, value: u8) {
+        self.scroll_y = value;
     }
 
-    pub fn fetch_x(&self) -> u8 {
-        self.pfc.fetch_x
+    pub fn scroll_y(&self) -> u8 {
+        self.scroll_y
     }
 
-    pub fn set_map_y(&mut self, value: u8) {
-        self.pfc.map_y = value;
+    pub fn set_window_x(&mut self, value: u8) {
+        self.window_x = value;
     }
 
-    pub fn map_y(&self) -> u8 {
-        self.pfc.map_y
+    pub fn window_x(&self) -> u8 {
+        self.window_x
     }
 
-    pub fn set_map_x(&mut self, value: u8) {
-        self.pfc.map_x = value;
+    pub fn set_window_y(&mut self, value: u8) {
+        self.window_y = value;
     }
 
-    pub fn map_x(&self) -> u8 {
-        self.pfc.map_x
+    pub fn window_y(&self) -> u8 {
+        self.window_y
     }
 
-    pub fn set_tile_y(&mut self, value: u8) {
-        self.pfc.tile_y = value;
+    pub fn set_stat_mode(&mut self, mode: LcdMode) {
+        self.mode = mode
     }
 
-    pub fn tile_y(&self) -> u8 {
-        self.pfc.tile_y
+    pub fn stat_mode(&self) -> LcdMode {
+        self.mode
     }
 
-    pub fn set_fifo_x(&mut self, value: u8) {
-        self.pfc.fifo_x = value;
+    pub fn stat(&self) -> Stat {
+        self.stat
     }
 
-    pub fn fifo_x(&self) -> u8 {
-        self.pfc.fifo_x
-    }
-
-    pub fn pixel_fifo(&self) -> VecDeque<Color> {
-        self.pfc.pixel_fifo.clone()
-    }
-
-    pub fn pixel_fifo_push(&mut self, color: Color) {
-        self.pfc.pixel_fifo.push_back(color);
-    }
-
-    pub fn pixel_fifo_pop(&mut self) -> Color {
-        match self.pfc.pixel_fifo.pop_front() {
-            Some(color) => {
-                 color
-            }
-            None => panic!("NO VALUE TO POP"),
-        }
-    }
-
-    pub fn set_bgw_fetch_data(&mut self, index: usize, value: u8) {
-        self.pfc.bgw_fetch_data[index] = value;
-    }
-
-    pub fn bgw_fetch_data(&self) -> [u8; 3] {
-        self.pfc.bgw_fetch_data
+    pub fn control(&self) -> Control {
+        self.control
     }
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
@@ -296,7 +345,7 @@ impl Ppu {
                 0 => self.oam[index].y = value,
                 1 => self.oam[index].x = value,
                 2 => self.oam[index].tile = value,
-                3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
+                3 => self.oam[index].oam_attr = OamAttr::from_bits_truncate(value),
                 _ => panic!("NOT AN INDEX"),
             }
         } else {
@@ -306,7 +355,7 @@ impl Ppu {
                 0 => self.oam[index].y = value,
                 1 => self.oam[index].x = value,
                 2 => self.oam[index].tile = value,
-                3 => self.oam[index].oam_attr = OamAttr::from_bytes([value]),
+                3 => self.oam[index].oam_attr = OamAttr::from_bits_truncate(value),
                 _ => panic!("NOT AN INDEX"),
             }
         }
@@ -319,7 +368,7 @@ impl Ppu {
             0 => self.oam[index].y,
             1 => self.oam[index].x,
             2 => self.oam[index].tile,
-            3 => self.oam[index].oam_attr.into_bytes()[0],
+            3 => self.oam[index].oam_attr.bits(),
             _ => panic!("NOT AN INDEX"),
         }
     }
@@ -330,6 +379,78 @@ impl Ppu {
 
     pub fn read_vram(&self, addr: u16) -> u8 {
         self.vram[(addr - 0x8000) as usize]
+    }
+
+    pub fn write_lcd(&mut self, addr: u16, value: u8) {
+        let index: u8 = (addr - 0xFF40) as u8;
+
+        match index {
+            0x0 => self.control = Control::from_bits_truncate(value),
+            0x1 => self.write_stat(value),
+            0x2 => self.scroll_y = value,
+            0x3 => self.scroll_x = value,
+            0x4 => self.ly = value,
+            0x5 => self.lyc = value,
+            0x6 => {
+                log::info!("DMA START");
+                self.dma_start(value);
+            }
+            0x7 => todo!(),
+            0x8 => todo!(),
+            0x9 => todo!(),
+            0xA => self.window_y = value,
+            0xB => self.window_x = value,
+            _ => panic!("NOT AN INDEX"),
+        }
+    }
+
+    pub fn read_lcd(&self, addr: u16) -> u8 {
+        let index: u8 = (addr - 0xFF40) as u8;
+
+        match index {
+            0x0 => self.control.bits(),
+            0x1 => self.read_stat(),
+            0x2 => self.scroll_y,
+            0x3 => self.scroll_x,
+            0x4 => self.ly,
+            0x5 => self.lyc,
+            0x6 => todo!(),
+            0xA => self.window_y,
+            0xB => self.window_x,
+            _ => panic!("NOT AN INDEX"),
+        }
+    }
+
+    pub fn read_stat(&self) -> u8 {
+        self.stat.bits() | self.mode as u8
+    }
+
+    pub fn write_stat(&mut self, value: u8) {
+        self.stat = Stat::from_bits_truncate(value);
+
+        self.mode = match value & 0b11 {
+            0b00 => LcdMode::HBlank,
+            0b01 => LcdMode::VBlank,
+            0b10 => LcdMode::Oam,
+            0b11 => LcdMode::Transfer,
+            _ => panic!("NOT A MODE"),
+        };
+    }
+
+    pub fn bg_tile_map_addr(&self) -> u16 {
+        if self.control().contains(Control::BG_TILE_MAP_AREA) {
+            0x9C00
+        } else {
+            0x9800
+        }
+    }
+
+    pub fn bg_window_data_area(&self) -> u16 {
+        if self.control().contains(Control::BG_WINDOW_TILE_DATA_AREA) {
+            0x8000
+        } else {
+            0x8800
+        }
     }
 }
 

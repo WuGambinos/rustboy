@@ -12,7 +12,7 @@ pub const CLOCK_SPEED: usize = 4_194_304;
 pub const MAX_CYCLES_PER_FRAME: usize = (CLOCK_SPEED as f32 / 59.7275) as usize;
 
 pub const LINES_PER_FRAME: u8 = 154;
-pub const TICKS_PER_LINE: u16 = 456;
+pub const TICKS_PER_LINE: u32 = 456;
 pub const Y_RES: u8 = 144;
 pub const X_RES: u8 = 160;
 pub const BUFFER_SIZE: usize = (144 * 160) as usize;
