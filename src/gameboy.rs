@@ -1,3 +1,6 @@
+use crate::constants::{
+    MAIN_SCREEN_HEIGHT, MAIN_SCREEN_WIDTH, PC_AFTER_BOOT, SCREEN_HEIGHT, SCREEN_WIDTH,
+};
 use crate::cpu::Cpu;
 use crate::frontend;
 use crate::interconnect::Interconnect;
@@ -11,7 +14,6 @@ use std::path::Path;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-///
 /// Struct that represents the gameboy system
 ///
 /// Contains the CPU and Interconnect
@@ -32,28 +34,24 @@ impl GameBoy {
     pub fn start_up(&mut self, game: &str) -> Result<(), Error> {
         let boot_rom = "roms/boot-rom.gb";
 
-        // Path to rom
-        let rom_path: &Path = Path::new(game);
+        let game_rom_path: &Path = Path::new(game);
 
-        // Path to boot rom
-        let boot_path: &Path = Path::new(boot_rom);
+        let boot_rom_path: &Path = Path::new(boot_rom);
 
-        // Contents of rom
-        let rom: Vec<u8> = read_file(rom_path)?;
+        let game_rom: Vec<u8> = read_file(game_rom_path)?;
 
-        // Contents of boot rom
-        let _boot: Vec<u8> = read_file(boot_path)?;
+        let _boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
-        self.interconnect.read_rom(&rom);
+        self.interconnect.load_game_rom(&game_rom);
 
-        // Put PC where the game starts
-        self.cpu.pc = 0x100;
+        self.cpu.pc = PC_AFTER_BOOT;
 
         let sdl_context = sdl2::init().expect("Failed to start SDL");
-        let mut debug = frontend::init_window(&sdl_context);
+        let mut debug_window = frontend::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
         let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
-        let mut main_window = frontend::init_main_window(&sdl_context);
+        let mut main_window =
+            frontend::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
 
         'running: loop {
             self.cpu.run(&mut self.interconnect);
@@ -71,7 +69,7 @@ impl GameBoy {
                     _ => {}
                 }
             }
-            frontend::debug_window(&mut debug, &self.interconnect);
+            frontend::debug_window(&mut debug_window, &self.interconnect);
             frontend::main_window(&mut main_window, &self.interconnect);
         }
 
@@ -80,6 +78,5 @@ impl GameBoy {
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
-    //Reads file contents into vector
     fs::read(path)
 }

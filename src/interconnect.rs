@@ -5,9 +5,6 @@ use log::debug;
 use log::info;
 use log::warn;
 
-use sdl2::pixels::Color;
-use sdl2::sys::X_PROTOCOL_REVISION;
-
 use crate::constants::*;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
@@ -18,8 +15,6 @@ use crate::ppu::FetchState;
 use crate::ppu::LcdMode;
 use crate::ppu::Ppu;
 use crate::ppu::Stat;
-
-static mut LY: u8 = 0;
 
 #[derive(Debug)]
 pub struct SerialOutput {
@@ -64,7 +59,6 @@ pub struct Interconnect {
 }
 
 impl Interconnect {
-    /// Constructor
     pub fn new() -> Self {
         Self {
             mmu: Mmu::new(),
@@ -74,7 +68,6 @@ impl Interconnect {
         }
     }
 
-    /// Logs the state of the Timer
     pub fn log_timer(&self) {
         debug!(
             "DIV: {:#X} TIMA: {:#X} TMA: {:#X} TAC: {:#X}",
@@ -85,7 +78,6 @@ impl Interconnect {
         );
     }
 
-    /// Logs state of vram
     pub fn log_vram(&self) {
         for i in (0x8000..0x9FFF).rev() {
             debug!("Addr: {:#X} Val: {:#X}", i, self.read_mem(i));
@@ -100,7 +92,6 @@ impl Interconnect {
         }
     }
 
-    /// Write u8 to mem/home/lajuan/Downloads/dmg-acid2.gbory
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
@@ -149,7 +140,6 @@ impl Interconnect {
         }
     }
 
-    /// Read u8 value from memory
     pub fn read_mem(&self, addr: u16) -> u8 {
         // ROM Bank
         if (0x0000..0x8000).contains(&addr) {
@@ -200,37 +190,36 @@ impl Interconnect {
         }
     }
 
-    /// Read gameboy rom and write it into memory
-    pub fn read_rom(&mut self, rom: &[u8]) {
+    pub fn load_game_rom(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
     }
 
-    // Read gameboy boot rom and write it into memory
-    pub fn read_boot(&mut self, rom: &[u8]) {
+    pub fn load_boot_rom(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
     }
 
-    /// Tick Timer
-    pub fn emu_cycles(&mut self, cyc: u32) {
+    pub fn emu_tick(&mut self, cyc: u32) {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
+        /*
         for _ in 0..cyc {
             self.ppu_tick();
         }
+        */
 
         // Used to get cycle count over in main loop
         self.timer.set_internal_ticks(u64::from(cyc));
 
-        // Increase Div
-        let div_value = self.timer.div_clock.next(cycles) as u8;
+        let div_value: u8 = self.timer.div_clock.next(cycles) as u8;
         self.timer.set_div(div_value);
 
-        if (self.timer.tac() & 0x04) != 0x00 {
+        let timer_enabled: bool = (self.timer.tac() & 0x04) != 0x00;
+        if timer_enabled {
             let n = self.timer.tma_clock.next(cycles);
 
             for _ in 0..n {
@@ -239,14 +228,13 @@ impl Interconnect {
 
                 if self.timer.tima() == 0x00 {
                     self.timer.set_tima(self.timer.tma());
-
-                    // Trigger Interrupt
                     request_interrupt(self, InterruptType::Timer);
                 }
             }
         }
 
-        for _ in 0..(cyc / 4) {
+        let dma_cycles = cyc / 4;
+        for _ in 0..dma_cycles {
             self.dma_tick();
         }
     }
@@ -284,19 +272,15 @@ impl Interconnect {
      ****************************************************/
 
     pub fn increment_ly(&mut self) {
-        // increment ly
         let value = self.ppu.ly().wrapping_add(1);
         self.ppu.set_ly(value);
 
         if self.ppu.ly() == self.ppu.lyc() {
             self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, true);
 
-            // stat interrupt
             if self.ppu.stat().contains(Stat::LYC_LY_EQ_INTERRUPT) {
                 request_interrupt(self, InterruptType::LcdStat);
-            }
-            //clear flag
-            else {
+            } else {
                 self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, false);
             }
         }
@@ -338,8 +322,8 @@ impl Interconnect {
     ///
     /// Duration: 80 "dots"
     pub fn oam_mode(&mut self) {
-        // No longer in oam mode
-        if self.ppu.line_ticks() >= 80 {
+        let oam_is_over = self.ppu.line_ticks() >= 80;
+        if oam_is_over {
             self.ppu.set_stat_mode(LcdMode::Transfer);
 
             self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
@@ -352,7 +336,7 @@ impl Interconnect {
     /// Duration: 168-291 "dots", depends on sprite count
     pub fn transfer_mode(&mut self) {
         // Pipeline TODO
-        if self.ppu.pixel_fifo.x() >= X_RES {
+        if self.ppu.pixel_fifo.x() >= X_RESOLUTION {
             self.ppu.pixel_fifo.clear();
 
             self.ppu.set_stat_mode(LcdMode::HBlank);
@@ -365,42 +349,37 @@ impl Interconnect {
 
     /// Duration: 4560 "dots" (10 scanlines)
     pub fn vblank_mode(&mut self) {
-        if self.ppu.line_ticks() >= TICKS_PER_LINE {
+        let end_of_scanline = self.ppu.line_ticks() >= TICKS_PER_LINE;
+        if end_of_scanline {
             self.increment_ly();
 
-            // Onto next screen
-            if self.ppu.ly() >= LINES_PER_FRAME {
+            let onto_next_screen = self.ppu.ly() >= LINES_PER_FRAME;
+            if onto_next_screen {
                 self.ppu.set_stat_mode(LcdMode::Oam);
                 self.ppu.set_ly(0);
             }
 
-            // Reset line ticks
             self.ppu.set_line_ticks(0);
         }
     }
 
     /// Duration: 87-204 "dots"
     pub fn hblank_mode(&mut self) {
-        //  End of scanline
-        if self.ppu.line_ticks() >= TICKS_PER_LINE {
+        let end_of_scanline = self.ppu.line_ticks() >= TICKS_PER_LINE;
+        if end_of_scanline {
             self.increment_ly();
 
-            // Trigger vblank
-            if self.ppu.ly() == Y_RES {
+            if self.ppu.ly() == Y_RESOLUTION {
                 self.ppu.set_stat_mode(LcdMode::VBlank);
                 request_interrupt(self, InterruptType::VBlank);
 
-                // STAT interrupt
                 if self.ppu.stat().contains(Stat::VBLANK_INTERRUPT) {
                     request_interrupt(self, InterruptType::VBlank);
                 }
-            }
-            // OAM Search
-            else {
+            } else {
                 self.ppu.set_stat_mode(LcdMode::Oam);
             }
 
-            // Reset line ticks
             self.ppu.set_line_ticks(0);
         }
     }

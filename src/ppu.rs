@@ -1,5 +1,5 @@
 #![allow(clippy::must_use_candidate)]
-use std::{collections::VecDeque, iter::FusedIterator};
+use std::collections::VecDeque;
 
 use crate::constants::*;
 use bitflags::*;
@@ -190,7 +190,6 @@ pub struct Ppu {
 }
 
 impl Ppu {
-    /// Constructor
     pub fn new() -> Self {
         Self {
             vram: [0; 0x2000],
@@ -395,9 +394,15 @@ impl Ppu {
                 log::info!("DMA START");
                 self.dma_start(value);
             }
-            0x7 => todo!(),
-            0x8 => todo!(),
-            0x9 => todo!(),
+            0x7 => {
+                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+            }
+            0x8 => {
+                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+            }
+            0x9 => {
+                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+            }
             0xA => self.window_y = value,
             0xB => self.window_x = value,
             _ => panic!("NOT AN INDEX"),
@@ -414,7 +419,10 @@ impl Ppu {
             0x3 => self.scroll_x,
             0x4 => self.ly,
             0x5 => self.lyc,
-            0x6 => todo!(),
+            0x6 => {
+                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+                0
+            }
             0xA => self.window_y,
             0xB => self.window_x,
             _ => panic!("NOT AN INDEX"),
