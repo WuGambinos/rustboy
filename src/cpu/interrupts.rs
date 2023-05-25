@@ -1,7 +1,6 @@
 use super::Interconnect;
 use crate::constants::*;
 
-/// Different types of interrupts
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum InterruptType {
     VBlank,
@@ -12,24 +11,20 @@ pub enum InterruptType {
 }
 
 pub fn is_interrupt_enabled(interconnect: &mut Interconnect, index: usize) -> bool {
-    let int_enable = interconnect.read_mem(INTERRUPT_ENABLE);
-
-    (int_enable & (1 << index)) > 0
+    let interrupt_enable = interconnect.read_mem(INTERRUPT_ENABLE);
+    (interrupt_enable & (1 << index)) > 0
 }
 
 pub fn is_interrupt_requested(interconnect: &mut Interconnect, index: usize) -> bool {
-    let int_flag = interconnect.read_mem(INTERRUPT_FLAG);
-    (int_flag & (1 << index)) > 0
+    let interrupt_flag = interconnect.read_mem(INTERRUPT_FLAG);
+    (interrupt_flag & (1 << index)) > 0
 }
 
 pub fn request_interrupt(interconnect: &mut Interconnect, interrupt: InterruptType) {
-    let mut int_request = interconnect.read_mem(INTERRUPT_FLAG);
-
-    let bit = INTERRUPTS.iter().position(|&i| i == interrupt).unwrap();
-
-    int_request |= 1 << bit;
-
-    interconnect.write_mem(INTERRUPT_FLAG, int_request);
+    let mut interrupt_request = interconnect.read_mem(INTERRUPT_FLAG);
+    let nth_bit = INTERRUPTS.iter().position(|&i| i == interrupt).unwrap();
+    interrupt_request |= 1 << nth_bit;
+    interconnect.write_mem(INTERRUPT_FLAG, interrupt_request);
 }
 
 pub fn get_interrupt(interconnect: &mut Interconnect) -> Option<InterruptType> {

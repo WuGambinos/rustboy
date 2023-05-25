@@ -12,7 +12,7 @@ use crate::cpu::instructions::*;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
 
-///Struct that represents flags of the Gameboy CPU
+/// Struct that represents flags of the Gameboy CPU
 #[derive(Debug)]
 pub struct Flags {
     pub data: u8,

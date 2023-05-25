@@ -1,4 +1,6 @@
-use log::debug;
+use log::{debug, warn};
+
+use crate::constants::{DIV, TAC, TIMA, TMA};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Clock {
@@ -112,41 +114,30 @@ impl Timer {
         );
     }
 
-    /// Read u8 value from Timer/Divider register at addr
     pub fn timer_read(&self, addr: u16) -> u8 {
         match addr {
-            0xFF04 => self.div,
-
-            0xFF05 => self.tima,
-
-            0xFF06 => self.tma,
-
-            0xFF07 => self.tac,
-
-            _ => 123,
+            DIV => self.div,
+            TIMA => self.tima,
+            TMA => self.tma,
+            TAC => self.tac,
+            _ => panic!("{}:  NOT A READABLE TIMER ADRESS", addr),
         }
     }
-    /// Write u8 value to Timer/Divider register at addr
+
     pub fn timer_write(&mut self, addr: u16, value: u8) {
         match addr {
-            // DIV
-            0xFF04 => {
+            DIV => {
                 self.div = 0x00;
                 self.div_clock.n = 0x00;
             }
-
-            // TIMA
-            0xFF05 => self.tima = value,
-
-            // TMA
-            0xFF06 => self.tma = value,
-
-            // TAC
-            0xFF07 => {
-                // If Clock is enabled
-                if (self.tac & 0x03) != (value & 0x03) {
+            TIMA => self.tima = value,
+            TMA => self.tma = value,
+            TAC => {
+                let clocked_enabled: bool = (self.tac & 0x03) != (value & 0x03);
+                if clocked_enabled {
                     self.tma_clock.n = 0x00;
-                    self.tma_clock.period = match value & 0x03 {
+                    let clock_select = value & 0x03;
+                    self.tma_clock.period = match clock_select {
                         0x00 => 1024,
                         0x01 => 16,
                         0x02 => 64,
@@ -158,7 +149,7 @@ impl Timer {
                 self.tac = value;
             }
 
-            _ => (),
+            _ => warn!("{}: NOT A WRITABLE TIMER ADDRESS", addr),
         }
     }
 }

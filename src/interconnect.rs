@@ -31,8 +31,7 @@ impl SerialOutput {
     }
 
     pub fn read_bytes(&self) -> Vec<u8> {
-        let output = self.buffer.clone();
-        output
+        self.buffer.clone()
     }
 
     pub fn output(&mut self) {
@@ -93,47 +92,30 @@ impl Interconnect {
     }
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
-        // ROM Bank
-        if (0x0000..0x8000).contains(&addr) {
+        if ROM_BANK.contains(&addr) {
             self.mmu.write_rom_bank(addr, value);
-        }
-        // VRAM
-        else if (0x8000..0xA000).contains(&addr) {
+        } else if VRAM.contains(&addr) {
             self.ppu.write_vram(addr, value);
-        }
-        // External RAM
-        else if (0xA000..0xC000).contains(&addr) {
+        } else if EXTERNAL_RAM.contains(&addr) {
             self.mmu.write_external_ram(addr - 0xA000, value);
-        }
-        // Work RAM
-        else if (0xC000..0xE000).contains(&addr) {
+        } else if WORK_RAM.contains(&addr) {
             self.mmu.write_work_ram(addr - 0xC000, value);
-        }
-        // OAM
-        else if (0xFE00..0xFEA0).contains(&addr) {
+        } else if OAM.contains(&addr) {
             if self.ppu.dma_transferring() {
                 return;
             }
             self.ppu.write_oam(addr, value);
-        }
-        // Timer
-        else if (0xFF04..0xFF08).contains(&addr) {
+        } else if TIMER.contains(&addr) {
             self.timer.timer_write(addr, value);
-        }
-        // LCD
-        else if (0xFF40..0xFF4C).contains(&addr) {
+        } else if LCD.contains(&addr) {
             self.ppu.write_lcd(addr, value)
-        }
-        // IO registers
-        else if (0xFF00..0xFF80).contains(&addr) {
+        } else if IO.contains(&addr) {
             self.mmu.write_io(addr - 0xFF00, value);
-        }
-        // High RAM (HRAM)
-        else if (0xFF80..0xFFFF).contains(&addr) {
+        } else if HIGH_RAM.contains(&addr) {
             self.mmu.write_hram(addr - 0xFF80, value);
         }
         // Interrupt Enable
-        else if addr == 0xFFFF {
+        else if addr == INTERRUPT_ENABLE {
             self.mmu.enable_interrupt(value);
         } else {
             warn!("UNREACHABLE Addr: {:#X}", addr);
@@ -142,23 +124,23 @@ impl Interconnect {
 
     pub fn read_mem(&self, addr: u16) -> u8 {
         // ROM Bank
-        if (0x0000..0x8000).contains(&addr) {
+        if ROM_BANK.contains(&addr) {
             self.mmu.read_rom_bank(addr)
         }
         // VRAM
-        else if (0x8000..0xA000).contains(&addr) {
+        else if VRAM.contains(&addr) {
             self.ppu.read_vram(addr)
         }
         // External RAM
-        else if (0xA000..0xC000).contains(&addr) {
+        else if EXTERNAL_RAM.contains(&addr) {
             self.mmu.read_external_ram(addr - 0xA000)
         }
         // Work RAM
-        else if (0xC000..0xE000).contains(&addr) {
+        else if WORK_RAM.contains(&addr) {
             self.mmu.read_work_ram(addr - 0xC000)
         }
         // OAM
-        else if (0xFE00..0xFEA0).contains(&addr) {
+        else if OAM.contains(&addr) {
             if self.ppu.dma_transferring() {
                 0xFF
             } else {
@@ -166,23 +148,23 @@ impl Interconnect {
             }
         }
         // Timer
-        else if (0xFF04..0xFF08).contains(&addr) {
+        else if TIMER.contains(&addr) {
             self.timer.timer_read(addr)
         }
         // LCD
-        else if (0xFF40..0xFF4C).contains(&addr) {
+        else if LCD.contains(&addr) {
             self.ppu.read_lcd(addr)
         }
         // IO Regsiters
-        else if (0xFF00..0xFF80).contains(&addr) {
+        else if IO.contains(&addr) {
             self.mmu.read_io(addr - 0xFF00)
         }
         // High RAM
-        else if (0xFF80..0xFFFF).contains(&addr) {
+        else if HIGH_RAM.contains(&addr) {
             self.mmu.read_hram(addr - 0xFF80)
         }
         // Interrupt Enable
-        else if addr == 0xFFFF {
+        else if addr == INTERRUPT_ENABLE {
             self.mmu.read_interrupt_enable()
         } else {
             warn!("NOT REACHABLE ADDR: {:#X}", addr);
