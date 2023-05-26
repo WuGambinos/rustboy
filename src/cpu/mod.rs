@@ -1,5 +1,5 @@
 #![allow(clippy::must_use_candidate)]
-pub mod instructions;
+mod instructions;
 pub mod interrupts;
 
 use log::debug;
@@ -19,7 +19,6 @@ pub struct Flags {
 }
 
 impl Flags {
-    /// Constructor
     fn new() -> Self {
         Flags { data: 0xB0 }
     }
@@ -28,62 +27,50 @@ impl Flags {
         self.data = 0;
     }
 
-    /// Retrieves Zero Flag
     pub fn zero_flag(&self) -> u8 {
         (self.data >> 7) & 1
     }
 
-    /// Retrieves Sub Flag
     pub fn sub_flag(&self) -> u8 {
         (self.data >> 6) & 1
     }
 
-    /// Retrieves Half Carry Flag
     pub fn half_carry_flag(&self) -> u8 {
         (self.data >> 5) & 1
     }
 
-    /// Retrieves Carry Flag
     pub fn carry_flag(&self) -> u8 {
         (self.data >> 4) & 1
     }
 
-    /// Set Zero Flag
     pub fn set_zero_flag(&mut self) {
         self.data |= 1 << 7;
     }
 
-    /// Clear Zero Flag
     pub fn clear_zero_flag(&mut self) {
         self.data &= !(1 << 7);
     }
 
-    /// Set Sub Flag
     pub fn set_sub_flag(&mut self) {
         self.data |= 1 << 6;
     }
 
-    /// Clear Sub Flag
     pub fn clear_sub_flag(&mut self) {
         self.data &= !(1 << 6);
     }
 
-    /// Set Half Carry Flag
     pub fn set_half_carry_flag(&mut self) {
         self.data |= 1 << 5;
     }
 
-    /// Clear Half Carry Flag
     pub fn clear_half_carry_flag(&mut self) {
         self.data &= !(1 << 5);
     }
 
-    /// Set Carry Flag
     pub fn set_carry_flag(&mut self) {
         self.data |= 1 << 4;
     }
 
-    /// Clear Carry Flag
     pub fn clear_carry_flag(&mut self) {
         self.data &= !(1 << 4);
     }
@@ -165,9 +152,6 @@ impl Flags {
         }
     }
 
-    /// Updates the zero flag
-    ///
-    /// Zero flag is set when operation results in 0
     fn update_zero_flag(&mut self, v: u8) {
         if v == 0 {
             self.set_zero_flag();
@@ -206,7 +190,6 @@ pub struct Registers {
 }
 
 impl Registers {
-    /// Constructor
     pub fn new() -> Self {
         Registers {
             a: 0x01,
@@ -220,48 +203,40 @@ impl Registers {
         }
     }
 
-    /// Retrieve register pair BC
     pub fn bc(&self) -> u16 {
         u16::from_be_bytes([self.b, self.c])
     }
 
-    /// Store value in register pair BC
     pub fn set_bc(&mut self, data: u16) {
         let [b, c] = data.to_be_bytes();
         self.b = b;
         self.c = c;
     }
 
-    /// Retrieve register pair DE
     pub fn de(&self) -> u16 {
         u16::from_be_bytes([self.d, self.e])
     }
 
-    /// Store value in register pair DE
     pub fn set_de(&mut self, data: u16) {
         let [d, e] = data.to_be_bytes();
         self.d = d;
         self.e = e;
     }
 
-    /// Retrieve register pair HL
     pub fn hl(&self) -> u16 {
         u16::from_be_bytes([self.h, self.l])
     }
 
-    /// Store value in register pair HL
     pub fn set_hl(&mut self, data: u16) {
         let [h, l] = data.to_be_bytes();
         self.h = h;
         self.l = l;
     }
 
-    /// Get Register Pair AF
     pub fn af(&self) -> u16 {
         u16::from_be_bytes([self.a, self.f.data])
     }
 
-    /// Store value in register pair AF
     pub fn set_af(&mut self, data: u16) {
         let [a, f] = data.to_be_bytes();
         self.a = a;
@@ -319,7 +294,6 @@ impl Default for Cpu {
 }
 
 impl Cpu {
-    /// Constructor
     pub fn new() -> Self {
         Cpu {
             registers: Registers::new(),
@@ -364,59 +338,46 @@ impl Cpu {
 
     /// Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
-        // Check if interrupts are enabled
-        if !self.ime && !self.halted {
-            return;
+        let interrupts_enabled = self.ime || self.halted;
+        if interrupts_enabled {
+            let triggered = get_interrupt(interconnect);
+            if let Some(triggered_interrupt) = triggered {
+                self.halted = false;
+                if !self.ime {
+                    return;
+                }
+
+                // Disable Interrupts
+                self.ime = false;
+
+                let n = INTERRUPTS
+                    .iter()
+                    .position(|&i| i == triggered_interrupt)
+                    .unwrap();
+
+                // Push Current PC onto stack
+                let lower_pc = self.pc as u8;
+                let upper_pc = (self.pc >> 8) as u8;
+                push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
+
+                // Set PC equal to address of handler
+                self.pc = match triggered_interrupt {
+                    InterruptType::VBlank => 0x40,
+                    InterruptType::LcdStat => 0x48,
+                    InterruptType::Timer => 0x50,
+                    InterruptType::Serial => 0x58,
+                    _ => panic!("NOT AN ENUM"),
+                };
+
+                // Clean up the interrupt
+                let mut interrupt_flags = interconnect.read_mem(INTERRUPT_FLAG);
+                interrupt_flags &= !(1 << n);
+                interconnect.write_mem(INTERRUPT_FLAG, interrupt_flags);
+
+                self.ime_to_be_enabled = false;
+                interconnect.emu_tick(4);
+            }
         }
-
-        // Check if some interrupt have been triggered
-        let triggered = get_interrupt(interconnect); //interconnect.read_mem(INTERRUPT_IE) & interconnect.read_mem(INTERRUPT_F);
-
-        if triggered.is_none() {
-            return;
-        }
-
-        self.halted = false;
-        if !self.ime {
-            return;
-        }
-
-        // Disable Interrupts
-        self.ime = false;
-
-        // Valid Interrupt
-        /*let n = triggered.trailing_zeros();
-        if n >= 5 {
-            panic!("Invalid Interrupt Triggered");
-        }*/
-        let n = INTERRUPTS
-            .iter()
-            .position(|&i| i == triggered.unwrap())
-            .unwrap();
-
-        // Push Current PC onto stack
-        let lower_pc = self.pc as u8;
-        let upper_pc = (self.pc >> 8) as u8;
-        push_rr(interconnect, upper_pc, lower_pc, &mut self.sp);
-
-        // Set PC equal to address of handler
-        self.pc = match triggered.unwrap() {
-            InterruptType::VBlank => 0x40,
-            InterruptType::LcdStat => 0x48,
-            InterruptType::Timer => 0x50,
-            InterruptType::Serial => 0x58,
-            _ => panic!("NOT AN ENUM"),
-        };
-
-        // Clean up the interrupt
-        let mut interrupt_flags = interconnect.read_mem(INTERRUPT_FLAG);
-        interrupt_flags &= !(1 << n);
-        interconnect.write_mem(INTERRUPT_FLAG, interrupt_flags);
-
-        self.ime_to_be_enabled = false;
-
-        // Increase Timer
-        interconnect.emu_tick(4);
     }
 
     pub fn execute_instruction(&mut self, interconnect: &mut Interconnect) {
@@ -425,50 +386,30 @@ impl Cpu {
             self.ime_to_be_enabled = false;
         }
 
-        // Handle Interrupts
         self.handle_interrupt(interconnect);
-
-        // Get last cycle
         self.last_cycle = interconnect.timer.internal_ticks();
-
-        // Fetch opcode
-        self.fetch(interconnect);
+        self.fetch_opcode(interconnect);
 
         #[allow(clippy::match_same_arms)]
         match self.opcode {
             // NOP
             0x00 => {
-                // Increase Program Counter
                 self.pc += 1;
-
-                // Increase Timer
                 interconnect.emu_tick(1);
             }
 
             // LD BC, u16
             0x01 => {
-                // Grab u16 value
                 let data = self.get_u16(interconnect);
-
-                // BC = u16
                 self.registers.set_bc(data);
-
-                // Increase program counter
                 self.pc = self.pc.wrapping_add(3);
-
-                // Increase Timer
                 interconnect.emu_tick(3);
             }
 
             // LD (BC), A
             0x02 => {
-                // mem[BC] = A
                 interconnect.write_mem(self.registers.bc(), self.registers.a);
-
-                // Increase program counter
                 self.pc += 1;
-
-                // Increase Timer
                 interconnect.emu_tick(2);
             }
 
@@ -6188,12 +6129,10 @@ impl Cpu {
         }
     }
 
-    /// Fetch opcode
-    pub fn fetch(&mut self, interconnect: &Interconnect) {
+    pub fn fetch_opcode(&mut self, interconnect: &Interconnect) {
         self.opcode = interconnect.read_mem(self.pc);
     }
 
-    /// Retrieve u16 value after opcode
     pub fn get_u16(&mut self, interconnect: &Interconnect) -> u16 {
         u16::from_be_bytes([
             interconnect.read_mem(self.pc + 2),
@@ -6201,7 +6140,6 @@ impl Cpu {
         ])
     }
 
-    /// Log State of registers
     pub fn log_registers(&self) {
         debug!(
             "A: {} B: {} C: {} D: {} E: {} H: {} L: {}",
@@ -6215,7 +6153,6 @@ impl Cpu {
         );
     }
 
-    /// Log State of Emulator
     pub fn log_state(&self, interconnect: &Interconnect) {
         debug!("PC: {:#X}", self.pc);
         debug!("SP: {:#X}", self.sp);

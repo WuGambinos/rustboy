@@ -4,3 +4,5 @@
 /roms
 flamegraph.svg
 perf.data
+test.py
+test.txt
