@@ -83,11 +83,15 @@ pub enum FetchState {
     /// Determines which background/window tile to fetch pixels from
     Tile,
 
-    /// first of the slice's two bitplanes is fetched
+    /// First of the slice's two bitplanes is fetched
     Data0,
 
-    /// second of the slice's two bitplanes is fetched
+    /// Second of the slice's two bitplanes is fetched
     Data1,
+
+    Push,
+
+    Sleep,
 }
 
 bitflags! {

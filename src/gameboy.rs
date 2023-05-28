@@ -31,7 +31,7 @@ impl GameBoy {
         }
     }
 
-    pub fn start_up(&mut self, game: &str) -> Result<(), Error> {
+    pub fn start_up(&mut self, game: &str, headless: bool) -> Result<(), Error> {
         let boot_rom = "roms/boot-rom.gb";
 
         let game_rom_path: &Path = Path::new(game);
@@ -46,33 +46,38 @@ impl GameBoy {
 
         self.cpu.pc = PC_AFTER_BOOT;
 
-        let sdl_context = sdl2::init().expect("Failed to start SDL");
-        let mut debug_window = frontend::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
-        let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
-
-        let mut main_window =
-            frontend::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
-
-        'running: loop {
-            self.cpu.run(&mut self.interconnect);
-
-            // Logs
-            self.cpu.log_registers();
-
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    _ => {}
-                }
+        if headless {
+            loop {
+                self.cpu.run(&mut self.interconnect);
             }
-            frontend::debug_window(&mut debug_window, &self.interconnect);
-            frontend::main_window(&mut main_window, &self.interconnect);
-        }
+        } else {
+            let sdl_context = sdl2::init().expect("Failed to start SDL");
+            let mut debug_window = frontend::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
+            let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
+            let mut main_window =
+                frontend::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
+
+            'running: loop {
+                self.cpu.run(&mut self.interconnect);
+
+                // Logs
+                self.cpu.log_registers();
+
+                for event in event_pump.poll_iter() {
+                    match event {
+                        Event::Quit { .. }
+                        | Event::KeyDown {
+                            keycode: Some(Keycode::Escape),
+                            ..
+                        } => break 'running,
+                        _ => {}
+                    }
+                }
+                frontend::debug_window(&mut debug_window, &self.interconnect);
+                frontend::main_window(&mut main_window, &self.interconnect);
+            }
+        }
         Ok(())
     }
 }

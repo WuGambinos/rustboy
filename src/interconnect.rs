@@ -296,6 +296,7 @@ impl Interconnect {
             }
             FetchState::Data0 => {}
             FetchState::Data1 => {}
+            _ => {}
         }
     }
 
