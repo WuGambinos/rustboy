@@ -30,9 +30,11 @@ fn all_cpu_blaargs() {
     }
 }
 
-fn run_test(path: &str) {
+fn run_test(rom_path: &str) {
     let mut emulator = Command::new("target/release/rustboy")
-        .arg(path)
+        .arg("--rom")
+        .arg(rom_path)
+        .arg("--headless")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .spawn()
@@ -41,7 +43,7 @@ fn run_test(path: &str) {
     let stdout = emulator.stdout.take().expect("FAILED TO cAPTURE");
     let reader = BufReader::new(stdout);
 
-    let path_parts: Vec<&str> = path.split("/").collect();
+    let path_parts: Vec<&str> = rom_path.split("/").collect();
 
     let file_name = path_parts[path_parts.len() - 1];
 
