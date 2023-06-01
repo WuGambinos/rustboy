@@ -5,6 +5,12 @@ use crate::constants::*;
 use bitflags::*;
 use sdl2::pixels::Color;
 
+pub enum PaletteType {
+    Background,
+    Sprite0,
+    Sprite1,
+}
+
 bitflags! {
     #[derive(Clone, Copy, Debug)]
     struct OamAttr: u8 {
@@ -107,9 +113,13 @@ bitflags! {
 
 #[derive(Debug)]
 pub struct PixelFifoInfo {
-    fetch_state: FetchState,
-    fifo: VecDeque<Color>,
-    x: u8,
+    pub fetch_state: FetchState,
+    pub fifo: VecDeque<Color>,
+    pub x: u8,
+    pub tile_data: u8,
+    pub map_y: u8,
+    pub map_x: u8,
+    pub bg_window_data: [u8; 3],
 }
 
 impl PixelFifoInfo {
@@ -118,7 +128,23 @@ impl PixelFifoInfo {
             fetch_state: FetchState::Tile,
             fifo: VecDeque::new(),
             x: 0,
+            tile_data: 0,
+            map_y: 0,
+            map_x: 0,
+            bg_window_data: [0; 3],
         }
+    }
+
+    pub fn fifo(&self) -> VecDeque<Color> {
+        self.fifo.clone()
+    }
+
+    pub fn push_fifo(&mut self, color: Color) {
+        self.fifo.push_back(color);
+    }
+
+    pub fn pop_fifo(&mut self) -> Option<Color> {
+        self.fifo.pop_back()
     }
 
     pub fn clear(&mut self) {
@@ -187,10 +213,11 @@ pub struct Ppu {
     window_y: u8,
 
     // Background palette (Non-CGB mode only)
-    bg_palette: u8,
+    bg_palette: [Color; 4],
 
-    // Object palettes data (Non-CGB mode only)
-    object_palette: [u8; 2],
+    // Sprite palettes data (Non-CGB mode only)
+    sprite0_palette: [Color; 4],
+    sprite1_palette: [Color; 4],
 }
 
 impl Ppu {
@@ -203,17 +230,21 @@ impl Ppu {
             line_ticks: 0,
             current_frame: 0,
             video_buffer: [Color::RGB(0, 0, 0); BUFFER_SIZE],
+
             stat: Stat::empty(),
             mode: LcdMode::Oam,
             control: Control::empty(),
+
             scroll_x: 0,
             scroll_y: 0,
             ly: 0,
             lyc: 0,
             window_x: 0,
             window_y: 0,
-            bg_palette: 0,
-            object_palette: [0; 2],
+
+            bg_palette: TILE_COLORS,
+            sprite0_palette: TILE_COLORS,
+            sprite1_palette: TILE_COLORS,
         }
     }
 
@@ -340,6 +371,19 @@ impl Ppu {
         self.control
     }
 
+    pub fn update_palette(&mut self, palette_type: PaletteType, palette_data: u8) {
+        let palette_colors = match palette_type {
+            PaletteType::Background => &mut self.bg_palette,
+            PaletteType::Sprite0 => &mut self.sprite0_palette,
+            PaletteType::Sprite1 => &mut self.sprite1_palette,
+        };
+
+        palette_colors[0] = TILE_COLORS[(palette_data & 0b11) as usize];
+        palette_colors[1] = TILE_COLORS[((palette_data >> 2) & 0b11) as usize];
+        palette_colors[2] = TILE_COLORS[((palette_data >> 4) & 0b11) as usize];
+        palette_colors[3] = TILE_COLORS[((palette_data >> 6) & 0b11) as usize];
+    }
+
     pub fn write_oam(&mut self, addr: u16, value: u8) {
         if addr >= 0xFE00 {
             let index = ((addr - 0xFE00) % 40) as usize;
@@ -399,13 +443,13 @@ impl Ppu {
                 self.dma_start(value);
             }
             0x7 => {
-                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+                self.update_palette(PaletteType::Background, value);
             }
             0x8 => {
-                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+                self.update_palette(PaletteType::Sprite0, value & 0b11111100);
             }
             0x9 => {
-                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
+                self.update_palette(PaletteType::Sprite1, value & 0b11111100);
             }
             0xA => self.window_y = value,
             0xB => self.window_x = value,
@@ -424,8 +468,8 @@ impl Ppu {
             0x4 => self.ly,
             0x5 => self.lyc,
             0x6 => {
-                log::warn!("NOT IMPLEMENTED: {:#X}", addr);
-                0
+                log::warn!("MAY BE A BUG HERE: DMA: {:?}", self.dma.value);
+                self.dma.value
             }
             0xA => self.window_y,
             0xB => self.window_x,

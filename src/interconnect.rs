@@ -188,11 +188,9 @@ impl Interconnect {
         // Convert M cycles to T cycles
         let cycles = cyc * 4;
 
-        /*
         for _ in 0..cyc {
             self.ppu_tick();
         }
-        */
 
         // Used to get cycle count over in main loop
         self.timer.set_internal_ticks(u64::from(cyc));
@@ -268,35 +266,80 @@ impl Interconnect {
         }
     }
 
+    pub fn add_pixel(&mut self) {}
+
+    pub fn push_pixel(&mut self) {
+        if self.ppu.pixel_fifo.fifo.len() > 8 {
+            let pixel_data: sdl2::pixels::Color = self.ppu.pixel_fifo.pop_fifo().unwrap();
+
+            if self.ppu.pixel_fifo.x() >= (self.ppu.scroll_x() % 8) {
+                self.ppu.video_buffer[0] = pixel_data;
+            }
+        }
+    }
+
+    pub fn process(&mut self) {
+        let ly = self.ppu.ly();
+        let scroll_y = self.ppu.scroll_y();
+
+        self.ppu.pixel_fifo.map_x = (self.ppu.pixel_fifo.x() + self.ppu.scroll_x()) & 0x1F;
+        self.ppu.pixel_fifo.map_y = ((ly + scroll_y) / 8) * 32;
+
+        self.ppu.pixel_fifo.tile_data = ((ly + scroll_y) & 0xFF) / 8;
+
+        if self.ppu.line_ticks() % 2 == 0 {
+            self.ppu_fetch();
+        }
+
+        self.push_pixel();
+    }
+
     /// Fetcher grabs a row of 8 pixels at a time to be fed to either fifo
-    pub fn fetch(&mut self) {
+    pub fn ppu_fetch(&mut self) {
         match self.ppu.pixel_fifo.fetch_state() {
             FetchState::Tile => {
-                if self.ppu.control().contains(Control::BG_WINDOW) {
-                    /*
-                    let mut base_addr: u16 = self.ppu.bg_tile_map_addr();
+                let bg_and_window_enabled: bool = self.ppu.control().contains(Control::BG_WINDOW);
+                if bg_and_window_enabled {
+                    let addr: u16 = self.ppu.bg_tile_map_addr()
+                        + self.ppu.pixel_fifo.map_x as u16
+                        + self.ppu.pixel_fifo.map_y as u16;
 
-                    let map_x: u16 =
-                        u16::from(self.ppu.pixel_fifo.x().wrapping_add(self.ppu.scroll_x()));
-                    let map_y: u16 = u16::from(self.ppu.ly().wrapping_add(self.ppu.scroll_y()));
+                    self.ppu.pixel_fifo.bg_window_data[0] = self.read_mem(addr);
 
-                    let addr = base_addr + (map_x / 8) + ((map_y / 8) * 32);
-                    let value: u8 = self.read_mem(addr);
-
-                    if self.ppu.bg_window_data_area() == 0x8800 {
-                        //let value: u8 = self.
+                    let fetch_window_pixels: bool = self.ppu.bg_window_data_area() == 0x8800;
+                    if fetch_window_pixels {
+                        self.ppu.pixel_fifo.bg_window_data[0] =
+                            self.ppu.pixel_fifo.bg_window_data[0].wrapping_add(128);
                     }
 
                     self.ppu.pixel_fifo.set_fetch_state(FetchState::Data0);
                     self.ppu
                         .pixel_fifo
                         .set_x(self.ppu.pixel_fifo.x().wrapping_add(8));
-                        */
                 }
             }
-            FetchState::Data0 => {}
-            FetchState::Data1 => {}
-            _ => {}
+            FetchState::Data0 => {
+                let addr: u16 = self.ppu.bg_window_data_area()
+                    + (self.ppu.pixel_fifo.bg_window_data[0] as u16 * 16) as u16
+                    + self.ppu.pixel_fifo.tile_data as u16;
+
+                self.ppu.pixel_fifo.bg_window_data[1] = self.read_mem(addr);
+                self.ppu.pixel_fifo.set_fetch_state(FetchState::Data1);
+            }
+            FetchState::Data1 => {
+                let addr: u16 = self.ppu.bg_window_data_area()
+                    + (self.ppu.pixel_fifo.bg_window_data[0] as u16 * 16) as u16
+                    + (self.ppu.pixel_fifo.tile_data as u16 + 1);
+
+                self.ppu.pixel_fifo.bg_window_data[2] = self.read_mem(addr);
+                self.ppu.pixel_fifo.set_fetch_state(FetchState::Sleep);
+            }
+            FetchState::Sleep => {
+                self.ppu.pixel_fifo.set_fetch_state(FetchState::Push);
+            }
+            FetchState::Push => {
+                self.add_pixel();
+            }
         }
     }
 
