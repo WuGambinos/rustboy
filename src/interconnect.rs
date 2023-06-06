@@ -10,11 +10,9 @@ use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
 use crate::mmu::Mmu;
-use crate::ppu::Control;
 use crate::ppu::FetchState;
 use crate::ppu::LcdMode;
 use crate::ppu::Ppu;
-use crate::ppu::Stat;
 
 #[derive(Debug)]
 pub struct SerialOutput {
@@ -256,36 +254,67 @@ impl Interconnect {
         self.ppu.set_ly(value);
 
         if self.ppu.ly() == self.ppu.lyc() {
-            self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, true);
+            self.ppu.stat.set_lyc_ly_compare(1);
 
-            if self.ppu.stat().contains(Stat::LYC_LY_EQ_INTERRUPT) {
+            if self.ppu.stat().lyc_ly_interrupt_source() == 1 {
                 request_interrupt(self, InterruptType::LcdStat);
-            } else {
-                self.ppu.stat.set(Stat::LYC_LY_EQ_FLAG, false);
             }
+        } else {
+            self.ppu.stat.set_lyc_ly_compare(0);
         }
     }
 
-    pub fn add_pixel(&mut self) {}
+    pub fn add_pixel(&mut self) -> bool {
+        let fifo_full: bool = self.ppu.pixel_fifo().len() > 8;
+        if fifo_full {
+            return false;
+        }
+
+        let x: i16 = (self.ppu.fetch_x() - (8 - (self.ppu.scroll_x() % 8))) as i16;
+
+        let mut hi: u8 = self.ppu.pixel_fifo.bg_window_data[1];
+        let mut low: u8 = self.ppu.pixel_fifo.bg_window_data[2];
+
+        for bit in (0..8).rev() {
+            let hi_bit = (hi >> bit) & 1;
+            let low_bit = ((low >> bit) & 1) << 1;
+
+            let color = hi_bit | low_bit;
+            let new_color = self.ppu.bg_palette[color as usize];
+
+            if x >= 0 {
+                self.ppu.pixel_fifo.push(new_color);
+                self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
+            }
+        }
+
+        true
+    }
 
     pub fn push_pixel(&mut self) {
         if self.ppu.pixel_fifo.fifo.len() > 8 {
-            let pixel_data: sdl2::pixels::Color = self.ppu.pixel_fifo.pop_fifo().unwrap();
+            let pixel_data: sdl2::pixels::Color = self.ppu.pixel_fifo.pop_fifo();
 
-            if self.ppu.pixel_fifo.x() >= (self.ppu.scroll_x() % 8) {
-                self.ppu.video_buffer[0] = pixel_data;
+            if self.ppu.pixel_fifo.line_x() >= (self.ppu.scroll_x() % 8) {
+                let index =
+                    self.ppu.pushed_x() as u32 + (self.ppu.ly() as u32 * X_RESOLUTION as u32);
+                self.ppu.video_buffer[index as usize] = pixel_data;
+                self.ppu.set_pushed_x(self.ppu.pushed_x().wrapping_add(1));
             }
+
+            self.ppu.set_line_x(self.ppu.line_x().wrapping_add(1));
         }
     }
 
     pub fn process(&mut self) {
-        let ly = self.ppu.ly();
-        let scroll_y = self.ppu.scroll_y();
+        let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
+        self.ppu.set_map_y(map_y);
 
-        self.ppu.pixel_fifo.map_x = (self.ppu.pixel_fifo.x() + self.ppu.scroll_x()) & 0x1F;
-        self.ppu.pixel_fifo.map_y = ((ly + scroll_y) / 8) * 32;
+        let map_x = self.ppu.fetch_x().wrapping_add(self.ppu.scroll_x());
+        self.ppu.set_map_x(map_x);
 
-        self.ppu.pixel_fifo.tile_data = ((ly + scroll_y) & 0xFF) / 8;
+        self.ppu
+            .set_tile_data(((self.ppu.ly().wrapping_add(self.ppu.scroll_y())) % 8) * 2);
 
         if self.ppu.line_ticks() % 2 == 0 {
             self.ppu_fetch();
@@ -298,25 +327,22 @@ impl Interconnect {
     pub fn ppu_fetch(&mut self) {
         match self.ppu.pixel_fifo.fetch_state() {
             FetchState::Tile => {
-                let bg_and_window_enabled: bool = self.ppu.control().contains(Control::BG_WINDOW);
+                let bg_and_window_enabled: bool = self.ppu.control().bg_window() == 1;
                 if bg_and_window_enabled {
                     let addr: u16 = self.ppu.bg_tile_map_addr()
-                        + self.ppu.pixel_fifo.map_x as u16
-                        + self.ppu.pixel_fifo.map_y as u16;
+                        + ((self.ppu.pixel_fifo.map_x / 8) as u16)
+                        + ((self.ppu.pixel_fifo.map_y / 8) as u32 * 32) as u16;
 
                     self.ppu.pixel_fifo.bg_window_data[0] = self.read_mem(addr);
 
-                    let fetch_window_pixels: bool = self.ppu.bg_window_data_area() == 0x8800;
-                    if fetch_window_pixels {
+                    let using_signed_tile_data: bool = self.ppu.bg_window_data_area() == 0x8800;
+                    if using_signed_tile_data {
                         self.ppu.pixel_fifo.bg_window_data[0] =
                             self.ppu.pixel_fifo.bg_window_data[0].wrapping_add(128);
                     }
-
-                    self.ppu.pixel_fifo.set_fetch_state(FetchState::Data0);
-                    self.ppu
-                        .pixel_fifo
-                        .set_x(self.ppu.pixel_fifo.x().wrapping_add(8));
                 }
+                self.ppu.pixel_fifo.set_fetch_state(FetchState::Data0);
+                self.ppu.set_fetch_x(self.ppu.fetch_x().wrapping_add(8));
             }
             FetchState::Data0 => {
                 let addr: u16 = self.ppu.bg_window_data_area()
@@ -338,7 +364,9 @@ impl Interconnect {
                 self.ppu.pixel_fifo.set_fetch_state(FetchState::Push);
             }
             FetchState::Push => {
-                self.add_pixel();
+                if self.add_pixel() {
+                    self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
+                }
             }
         }
     }
@@ -349,11 +377,15 @@ impl Interconnect {
     /// Duration: 80 "dots"
     pub fn oam_mode(&mut self) {
         let oam_is_over = self.ppu.line_ticks() >= 80;
+
         if oam_is_over {
             self.ppu.set_stat_mode(LcdMode::Transfer);
 
             self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
-            self.ppu.pixel_fifo.set_x(0);
+            self.ppu.pixel_fifo.set_line_x(0);
+            self.ppu.set_fetch_x(0);
+            self.ppu.set_pushed_x(0);
+            self.ppu.set_fifo_x(0);
         }
     }
 
@@ -361,13 +393,13 @@ impl Interconnect {
     ///
     /// Duration: 168-291 "dots", depends on sprite count
     pub fn transfer_mode(&mut self) {
-        // Pipeline TODO
-        if self.ppu.pixel_fifo.x() >= X_RESOLUTION {
+        self.process();
+        if self.ppu.pushed_x() >= X_RESOLUTION {
             self.ppu.pixel_fifo.clear();
 
             self.ppu.set_stat_mode(LcdMode::HBlank);
 
-            if self.ppu.stat().contains(Stat::HBLANK_INTERRUPT) {
+            if self.ppu.stat().hblank_interrupt_soruce() == 1 {
                 request_interrupt(self, InterruptType::LcdStat);
             }
         }
@@ -395,11 +427,11 @@ impl Interconnect {
         if end_of_scanline {
             self.increment_ly();
 
-            if self.ppu.ly() == Y_RESOLUTION {
+            if self.ppu.ly() >= Y_RESOLUTION {
                 self.ppu.set_stat_mode(LcdMode::VBlank);
                 request_interrupt(self, InterruptType::VBlank);
 
-                if self.ppu.stat().contains(Stat::VBLANK_INTERRUPT) {
+                if self.ppu.stat().vblank_interrupt_source() == 1 {
                     request_interrupt(self, InterruptType::VBlank);
                 }
             } else {

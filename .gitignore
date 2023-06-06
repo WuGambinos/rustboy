@@ -4,5 +4,6 @@
 /roms
 flamegraph.svg
 perf.data
-test.py
+remove_comments.py
 test.txt
+out.txt
