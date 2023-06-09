@@ -11,6 +11,30 @@ pub enum PaletteType {
     Sprite1,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum LcdMode {
+    HBlank,
+    VBlank,
+    Oam,
+    Transfer,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum FetchState {
+    /// Determines which background/window tile to fetch pixels from
+    Tile,
+
+    /// First of the slice's two bitplanes is fetched
+    Data0,
+
+    /// Second of the slice's two bitplanes is fetched
+    Data1,
+
+    Push,
+
+    Sleep,
+}
+
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
 pub struct SpriteAttribute {
@@ -85,42 +109,16 @@ pub struct Stat {
     empty: B1,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum LcdMode {
-    HBlank,
-    VBlank,
-    Oam,
-    Transfer,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum FetchState {
-    /// Determines which background/window tile to fetch pixels from
-    Tile,
-
-    /// First of the slice's two bitplanes is fetched
-    Data0,
-
-    /// Second of the slice's two bitplanes is fetched
-    Data1,
-
-    Push,
-
-    Sleep,
-}
-
 #[derive(Debug)]
 pub struct PixelFifoInfo {
-    pub fetch_state: FetchState,
+    fetch_state: FetchState,
     pub fifo: VecDeque<Color>,
-    pub line_x: u8,
-    pub pushed_x: u8,
-    pub fetch_x: u8,
-    pub fifo_x: u8,
-    pub map_y: u8,
-    pub map_x: u8,
-    pub tile_data: u8,
-    pub bg_window_data: [u8; 3],
+    line_x: u8,
+    pushed_x: u8,
+    fetch_x: u8,
+    fifo_x: u8,
+    tile_data: u8,
+    pub fetched_tile_data: [u8; 3],
 }
 
 impl PixelFifoInfo {
@@ -133,45 +131,8 @@ impl PixelFifoInfo {
             fetch_x: 0,
             fifo_x: 0,
             tile_data: 0,
-            map_y: 0,
-            map_x: 0,
-            bg_window_data: [0; 3],
+            fetched_tile_data: [0; 3],
         }
-    }
-
-    pub fn fifo(&self) -> VecDeque<Color> {
-        self.fifo.clone()
-    }
-
-    pub fn push(&mut self, color: Color) {
-        self.fifo.push_back(color);
-    }
-
-    pub fn pop_fifo(&mut self) -> Color {
-        match self.fifo.pop_front() {
-            Some(color) => color,
-            None => panic!("NO PIXEL TO POP"),
-        }
-    }
-
-    pub fn clear(&mut self) {
-        self.fifo.clear();
-    }
-
-    pub fn set_line_x(&mut self, value: u8) {
-        self.line_x = value
-    }
-
-    pub fn line_x(&self) -> u8 {
-        self.line_x
-    }
-
-    pub fn set_fetch_state(&mut self, state: FetchState) {
-        self.fetch_state = state
-    }
-
-    pub fn fetch_state(&self) -> FetchState {
-        self.fetch_state
     }
 }
 
@@ -180,18 +141,17 @@ impl PixelFifoInfo {
 /// Used to display graphics
 #[derive(Debug)]
 pub struct Ppu {
-    //Video RAM
+    // Video RAM
     vram: [u8; 0x2000],
 
-    //OAM
+    // OAM
     oam: [SpriteEntry; 40],
 
-    current_frame: u32,
     line_ticks: u32,
 
     pub dma: Dma,
     pub video_buffer: [Color; BUFFER_SIZE],
-    pub pixel_fifo: PixelFifoInfo,
+    pub pixel_fifo_info: PixelFifoInfo,
 
     // LCD status
     pub stat: Stat,
@@ -231,9 +191,8 @@ impl Ppu {
             vram: [0; 0x2000],
             oam: [SpriteEntry::new(); 40],
             dma: Dma::new(),
-            pixel_fifo: PixelFifoInfo::new(),
+            pixel_fifo_info: PixelFifoInfo::new(),
             line_ticks: 0,
-            current_frame: 0,
             video_buffer: [Color::RGB(0, 0, 0); BUFFER_SIZE],
 
             stat: Stat::new(),
@@ -310,10 +269,6 @@ impl Ppu {
         self.line_ticks = self.line_ticks.wrapping_add(1);
     }
 
-    pub fn current_frame(&self) -> u32 {
-        self.current_frame
-    }
-
     pub fn set_ly(&mut self, value: u8) {
         self.ly = value
     }
@@ -361,21 +316,6 @@ impl Ppu {
     pub fn window_y(&self) -> u8 {
         self.window_y
     }
-    pub fn set_map_y(&mut self, value: u8) {
-        self.pixel_fifo.map_y = value;
-    }
-
-    pub fn map_y(&self) -> u8 {
-        self.pixel_fifo.map_y
-    }
-
-    pub fn set_map_x(&mut self, value: u8) {
-        self.pixel_fifo.map_x = value;
-    }
-
-    pub fn map_x(&self) -> u8 {
-        self.pixel_fifo.map_x
-    }
 
     pub fn stat(&self) -> Stat {
         self.stat
@@ -386,47 +326,70 @@ impl Ppu {
     }
 
     pub fn pixel_fifo(&self) -> VecDeque<Color> {
-        self.pixel_fifo.fifo.clone()
+        self.pixel_fifo_info.fifo.clone()
     }
 
     pub fn fetch_x(&self) -> u8 {
-        self.pixel_fifo.fetch_x
+        self.pixel_fifo_info.fetch_x
     }
 
     pub fn set_fetch_x(&mut self, value: u8) {
-        self.pixel_fifo.fetch_x = value;
+        self.pixel_fifo_info.fetch_x = value;
     }
 
     pub fn fifo_x(&self) -> u8 {
-        self.pixel_fifo.fifo_x
+        self.pixel_fifo_info.fifo_x
     }
 
     pub fn set_fifo_x(&mut self, value: u8) {
-        self.pixel_fifo.fifo_x = value;
+        self.pixel_fifo_info.fifo_x = value;
     }
 
     pub fn pushed_x(&self) -> u8 {
-        self.pixel_fifo.pushed_x
+        self.pixel_fifo_info.pushed_x
     }
 
     pub fn set_pushed_x(&mut self, value: u8) {
-        self.pixel_fifo.pushed_x = value;
+        self.pixel_fifo_info.pushed_x = value;
     }
 
     pub fn line_x(&self) -> u8 {
-        self.pixel_fifo.line_x
+        self.pixel_fifo_info.line_x
     }
 
     pub fn set_line_x(&mut self, value: u8) {
-        self.pixel_fifo.line_x = value;
+        self.pixel_fifo_info.line_x = value;
     }
 
     pub fn tile_data(&self) -> u8 {
-        self.pixel_fifo.tile_data
+        self.pixel_fifo_info.tile_data
     }
 
     pub fn set_tile_data(&mut self, value: u8) {
-        self.pixel_fifo.tile_data = value;
+        self.pixel_fifo_info.tile_data = value;
+    }
+
+    pub fn fetch_state(&self) -> FetchState {
+        self.pixel_fifo_info.fetch_state
+    }
+
+    pub fn set_fetch_state(&mut self, state: FetchState) {
+        self.pixel_fifo_info.fetch_state = state;
+    }
+
+    pub fn push_fifo(&mut self, color: Color) {
+        self.pixel_fifo_info.fifo.push_back(color);
+    }
+
+    pub fn pop_fifo(&mut self) -> Color {
+        match self.pixel_fifo_info.fifo.pop_front() {
+            Some(color) => color,
+            None => panic!("NOTHING COULD BE POPPED"),
+        }
+    }
+
+    pub fn clear_fifo(&mut self) {
+        self.pixel_fifo_info.fifo.clear();
     }
 
     pub fn update_palette(&mut self, palette_type: PaletteType, palette_data: u8) {

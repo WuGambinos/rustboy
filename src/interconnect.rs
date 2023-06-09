@@ -264,16 +264,16 @@ impl Interconnect {
         }
     }
 
-    pub fn add_pixel(&mut self) -> bool {
+    pub fn add_pixel_to_fifo(&mut self) -> bool {
         let fifo_full: bool = self.ppu.pixel_fifo().len() > 8;
         if fifo_full {
             return false;
         }
 
-        let x: i16 = (self.ppu.fetch_x() - (8 - (self.ppu.scroll_x() % 8))) as i16;
+        let x: i16 = (self.ppu.fetch_x() as i16 - (8 - (self.ppu.scroll_x() % 8)) as i16) as i16;
 
-        let mut hi: u8 = self.ppu.pixel_fifo.bg_window_data[1];
-        let mut low: u8 = self.ppu.pixel_fifo.bg_window_data[2];
+        let hi: u8 = self.ppu.pixel_fifo_info.fetched_tile_data[1];
+        let low: u8 = self.ppu.pixel_fifo_info.fetched_tile_data[2];
 
         for bit in (0..8).rev() {
             let hi_bit = (hi >> bit) & 1;
@@ -283,7 +283,7 @@ impl Interconnect {
             let new_color = self.ppu.bg_palette[color as usize];
 
             if x >= 0 {
-                self.ppu.pixel_fifo.push(new_color);
+                self.ppu.push_fifo(new_color);
                 self.ppu.set_fifo_x(self.ppu.fifo_x().wrapping_add(1));
             }
         }
@@ -291,11 +291,12 @@ impl Interconnect {
         true
     }
 
-    pub fn push_pixel(&mut self) {
-        if self.ppu.pixel_fifo.fifo.len() > 8 {
-            let pixel_data: sdl2::pixels::Color = self.ppu.pixel_fifo.pop_fifo();
+    pub fn push_pixel_to_buffer(&mut self) {
+        let fifo_full: bool = self.ppu.pixel_fifo().len() > 8;
+        if fifo_full {
+            let pixel_data: sdl2::pixels::Color = self.ppu.pop_fifo();
 
-            if self.ppu.pixel_fifo.line_x() >= (self.ppu.scroll_x() % 8) {
+            if self.ppu.line_x() >= (self.ppu.scroll_x() % 8) {
                 let index =
                     self.ppu.pushed_x() as u32 + (self.ppu.ly() as u32 * X_RESOLUTION as u32);
                 self.ppu.video_buffer[index as usize] = pixel_data;
@@ -306,66 +307,55 @@ impl Interconnect {
         }
     }
 
-    pub fn process(&mut self) {
-        let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
-        self.ppu.set_map_y(map_y);
-
-        let map_x = self.ppu.fetch_x().wrapping_add(self.ppu.scroll_x());
-        self.ppu.set_map_x(map_x);
-
-        self.ppu
-            .set_tile_data(((self.ppu.ly().wrapping_add(self.ppu.scroll_y())) % 8) * 2);
-
-        if self.ppu.line_ticks() % 2 == 0 {
-            self.ppu_fetch();
-        }
-
-        self.push_pixel();
-    }
+    pub fn process(&mut self) {}
 
     /// Fetcher grabs a row of 8 pixels at a time to be fed to either fifo
     pub fn ppu_fetch(&mut self) {
-        match self.ppu.pixel_fifo.fetch_state() {
+        match self.ppu.fetch_state() {
             FetchState::Tile => {
                 let bg_and_window_enabled: bool = self.ppu.control().bg_window() == 1;
                 if bg_and_window_enabled {
+                    let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
+                    let map_x = self.ppu.fetch_x().wrapping_add(self.ppu.scroll_x());
+                    self.ppu
+                        .set_tile_data(((self.ppu.ly().wrapping_add(self.ppu.scroll_y())) % 8) * 2);
                     let addr: u16 = self.ppu.bg_tile_map_addr()
-                        + ((self.ppu.pixel_fifo.map_x / 8) as u16)
-                        + ((self.ppu.pixel_fifo.map_y / 8) as u32 * 32) as u16;
+                        + ((map_x / 8) as u16)
+                        + ((map_y / 8) as u32 * 32) as u16;
 
-                    self.ppu.pixel_fifo.bg_window_data[0] = self.read_mem(addr);
+                    self.ppu.pixel_fifo_info.fetched_tile_data[0] = self.read_mem(addr);
 
                     let using_signed_tile_data: bool = self.ppu.bg_window_data_area() == 0x8800;
                     if using_signed_tile_data {
-                        self.ppu.pixel_fifo.bg_window_data[0] =
-                            self.ppu.pixel_fifo.bg_window_data[0].wrapping_add(128);
+                        self.ppu.pixel_fifo_info.fetched_tile_data[0] =
+                            self.ppu.pixel_fifo_info.fetched_tile_data[0].wrapping_add(128);
                     }
                 }
-                self.ppu.pixel_fifo.set_fetch_state(FetchState::Data0);
+                self.ppu.set_fetch_state(FetchState::Data0);
                 self.ppu.set_fetch_x(self.ppu.fetch_x().wrapping_add(8));
             }
             FetchState::Data0 => {
                 let addr: u16 = self.ppu.bg_window_data_area()
-                    + (self.ppu.pixel_fifo.bg_window_data[0] as u16 * 16) as u16
-                    + self.ppu.pixel_fifo.tile_data as u16;
+                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16) as u16
+                    + self.ppu.tile_data() as u16;
 
-                self.ppu.pixel_fifo.bg_window_data[1] = self.read_mem(addr);
-                self.ppu.pixel_fifo.set_fetch_state(FetchState::Data1);
+                self.ppu.pixel_fifo_info.fetched_tile_data[1] = self.read_mem(addr);
+                self.ppu.set_fetch_state(FetchState::Data1);
             }
             FetchState::Data1 => {
                 let addr: u16 = self.ppu.bg_window_data_area()
-                    + (self.ppu.pixel_fifo.bg_window_data[0] as u16 * 16) as u16
-                    + (self.ppu.pixel_fifo.tile_data as u16 + 1);
+                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16) as u16
+                    + (self.ppu.tile_data() as u16 + 1);
 
-                self.ppu.pixel_fifo.bg_window_data[2] = self.read_mem(addr);
-                self.ppu.pixel_fifo.set_fetch_state(FetchState::Sleep);
+                self.ppu.pixel_fifo_info.fetched_tile_data[2] = self.read_mem(addr);
+                self.ppu.set_fetch_state(FetchState::Sleep);
             }
             FetchState::Sleep => {
-                self.ppu.pixel_fifo.set_fetch_state(FetchState::Push);
+                self.ppu.set_fetch_state(FetchState::Push);
             }
             FetchState::Push => {
-                if self.add_pixel() {
-                    self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
+                if self.add_pixel_to_fifo() {
+                    self.ppu.set_fetch_state(FetchState::Tile);
                 }
             }
         }
@@ -381,8 +371,8 @@ impl Interconnect {
         if oam_is_over {
             self.ppu.set_stat_mode(LcdMode::Transfer);
 
-            self.ppu.pixel_fifo.set_fetch_state(FetchState::Tile);
-            self.ppu.pixel_fifo.set_line_x(0);
+            self.ppu.set_fetch_state(FetchState::Tile);
+            self.ppu.set_line_x(0);
             self.ppu.set_fetch_x(0);
             self.ppu.set_pushed_x(0);
             self.ppu.set_fifo_x(0);
@@ -393,9 +383,13 @@ impl Interconnect {
     ///
     /// Duration: 168-291 "dots", depends on sprite count
     pub fn transfer_mode(&mut self) {
-        self.process();
+        if self.ppu.line_ticks() % 2 == 0 {
+            self.ppu_fetch();
+        }
+
+        self.push_pixel_to_buffer();
         if self.ppu.pushed_x() >= X_RESOLUTION {
-            self.ppu.pixel_fifo.clear();
+            self.ppu.clear_fifo();
 
             self.ppu.set_stat_mode(LcdMode::HBlank);
 
