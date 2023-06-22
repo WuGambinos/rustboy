@@ -17,7 +17,7 @@ impl Cpu {
         match self.opcode {
             // NOP
             0x00 => {
-                self.pc += 1;
+                self.pc = self.pc.wrapping_add(1);
                 interconnect.emu_tick(1);
             }
 

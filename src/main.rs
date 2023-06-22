@@ -14,6 +14,9 @@ struct Args {
     /// Determines whether GUI will be run or not
     #[arg(long, default_value = "false")]
     headless: bool,
+
+    #[arg(long, default_value = "false")]
+    skip_boot: bool,
 }
 
 fn main() -> Result<(), anyhow::Error> {
@@ -28,6 +31,6 @@ fn main() -> Result<(), anyhow::Error> {
     logger.init();
 
     let mut gameboy = GameBoy::new();
-    gameboy.start_up(args.rom.as_str(), args.headless)?;
+    gameboy.boot(args.rom.as_str(), args.headless, args.skip_boot)?;
     Ok(())
 }

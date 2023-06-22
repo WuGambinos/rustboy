@@ -117,7 +117,7 @@ pub struct PixelFifoInfo {
     pushed_x: u8,
     fetch_x: u8,
     fifo_x: u8,
-    tile_data: u8,
+    tile_number: u8,
     pub fetched_tile_data: [u8; 3],
 }
 
@@ -130,7 +130,7 @@ impl PixelFifoInfo {
             pushed_x: 0,
             fetch_x: 0,
             fifo_x: 0,
-            tile_data: 0,
+            tile_number: 0,
             fetched_tile_data: [0; 3],
         }
     }
@@ -179,10 +179,14 @@ pub struct Ppu {
 
     // Background palette (Non-CGB mode only)
     pub bg_palette: [Color; 4],
+    pub bg_palette_data: u8,
 
     // Sprite palettes data (Non-CGB mode only)
     pub sprite0_palette: [Color; 4],
+    pub sprite0_palette_data: u8,
+
     pub sprite1_palette: [Color; 4],
+    pub sprite1_palette_data: u8,
 }
 
 impl Ppu {
@@ -206,8 +210,13 @@ impl Ppu {
             window_y: 0,
 
             bg_palette: TILE_COLORS,
+            bg_palette_data: 0,
+
             sprite0_palette: TILE_COLORS,
+            sprite0_palette_data: 0,
+
             sprite1_palette: TILE_COLORS,
+            sprite1_palette_data: 0,
         };
 
         ppu.set_stat_mode(LcdMode::Oam);
@@ -361,12 +370,12 @@ impl Ppu {
         self.pixel_fifo_info.line_x = value;
     }
 
-    pub fn tile_data(&self) -> u8 {
-        self.pixel_fifo_info.tile_data
+    pub fn tile_number(&self) -> u8 {
+        self.pixel_fifo_info.tile_number
     }
 
-    pub fn set_tile_data(&mut self, value: u8) {
-        self.pixel_fifo_info.tile_data = value;
+    pub fn set_tile_number(&mut self, value: u8) {
+        self.pixel_fifo_info.tile_number = value;
     }
 
     pub fn fetch_state(&self) -> FetchState {
@@ -393,11 +402,13 @@ impl Ppu {
     }
 
     pub fn update_palette(&mut self, palette_type: PaletteType, palette_data: u8) {
-        let palette_colors = match palette_type {
-            PaletteType::Background => &mut self.bg_palette,
-            PaletteType::Sprite0 => &mut self.sprite0_palette,
-            PaletteType::Sprite1 => &mut self.sprite1_palette,
+        let (palette_colors, pal_data) = match palette_type {
+            PaletteType::Background => (&mut self.bg_palette, &mut self.bg_palette_data),
+            PaletteType::Sprite0 => (&mut self.sprite0_palette, &mut self.sprite0_palette_data),
+            PaletteType::Sprite1 => (&mut self.sprite1_palette, &mut self.sprite1_palette_data),
         };
+
+        *pal_data = palette_data;
 
         palette_colors[0] = TILE_COLORS[(palette_data & 0b11) as usize];
         palette_colors[1] = TILE_COLORS[((palette_data >> 2) & 0b11) as usize];
@@ -492,6 +503,9 @@ impl Ppu {
                 log::warn!("MAY BE A BUG HERE: DMA: {:?}", self.dma.value);
                 self.dma.value
             }
+            0x7 => self.bg_palette_data,
+            0x8 => self.sprite0_palette_data,
+            0x9 => self.sprite1_palette_data,
             0xA => self.window_y,
             0xB => self.window_x,
             _ => panic!("NOT AN INDEX"),

@@ -84,12 +84,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "bitflags"
-version = "2.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24a6904aef64d73cf10ab17ebace7befb918b82164785cb89907993be7f83813"
-
-[[package]]
 name = "c_vec"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -126,7 +120,7 @@ checksum = "4f423e341edefb78c9caba2d9c7f7687d0e72e89df3ce3394554754393ac3990"
 dependencies = [
  "anstream",
  "anstyle",
- "bitflags 1.3.2",
+ "bitflags",
  "clap_lex",
  "strsim",
 ]
@@ -377,14 +371,12 @@ name = "rustboy"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "bitflags 2.2.1",
  "clap",
  "env_logger 0.10.0",
  "log",
  "modular-bitfield",
  "pretty_env_logger",
  "sdl2",
- "text_io",
 ]
 
 [[package]]
@@ -393,7 +385,7 @@ version = "0.37.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acf8729d8542766f1b2cf77eb034d52f40d375bb8b615d0b147089946e16613d"
 dependencies = [
- "bitflags 1.3.2",
+ "bitflags",
  "errno",
  "io-lifetimes",
  "libc",
@@ -407,7 +399,7 @@ version = "0.35.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7959277b623f1fb9e04aea73686c3ca52f01b2145f8ea16f4ff30d8b7623b1a"
 dependencies = [
- "bitflags 1.3.2",
+ "bitflags",
  "c_vec",
  "lazy_static",
  "libc",
@@ -467,12 +459,6 @@ checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
 ]
-
-[[package]]
-name = "text_io"
-version = "0.1.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "442f2674e6bd8489052b958e0eaebd89c26eefa3be9dc359d1e2ecccdc510f45"
 
 [[package]]
 name = "unicode-ident"

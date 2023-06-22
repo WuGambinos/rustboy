@@ -270,7 +270,7 @@ impl Interconnect {
             return false;
         }
 
-        let x: i16 = (self.ppu.fetch_x() as i16 - (8 - (self.ppu.scroll_x() % 8)) as i16) as i16;
+        let x: i16 = (self.ppu.fetch_x()) as i16 - (8 - (self.ppu.scroll_x() % 8)) as i16;
 
         let hi: u8 = self.ppu.pixel_fifo_info.fetched_tile_data[1];
         let low: u8 = self.ppu.pixel_fifo_info.fetched_tile_data[2];
@@ -315,13 +315,14 @@ impl Interconnect {
             FetchState::Tile => {
                 let bg_and_window_enabled: bool = self.ppu.control().bg_window() == 1;
                 if bg_and_window_enabled {
-                    let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
-                    let map_x = self.ppu.fetch_x().wrapping_add(self.ppu.scroll_x());
-                    self.ppu
-                        .set_tile_data(((self.ppu.ly().wrapping_add(self.ppu.scroll_y())) % 8) * 2);
-                    let addr: u16 = self.ppu.bg_tile_map_addr()
-                        + ((map_x / 8) as u16)
-                        + ((map_y / 8) as u32 * 32) as u16;
+                    let map_x: u8 = (self.ppu.fetch_x().wrapping_add(self.ppu.scroll_x())) / 8;
+                    let map_y: u8 = self.ppu.ly().wrapping_add(self.ppu.scroll_y()) / 8;
+                    let tile_number: u8 =
+                        ((self.ppu.ly().wrapping_add(self.ppu.scroll_y())) % 8) * 2;
+                    self.ppu.set_tile_number(tile_number);
+
+                    let addr: u16 =
+                        self.ppu.bg_tile_map_addr() + (u16::from(map_x)) + (u16::from(map_y) * 32);
 
                     self.ppu.pixel_fifo_info.fetched_tile_data[0] = self.read_mem(addr);
 
@@ -336,16 +337,16 @@ impl Interconnect {
             }
             FetchState::Data0 => {
                 let addr: u16 = self.ppu.bg_window_data_area()
-                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16) as u16
-                    + self.ppu.tile_data() as u16;
+                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16)
+                    + self.ppu.tile_number() as u16;
 
                 self.ppu.pixel_fifo_info.fetched_tile_data[1] = self.read_mem(addr);
                 self.ppu.set_fetch_state(FetchState::Data1);
             }
             FetchState::Data1 => {
                 let addr: u16 = self.ppu.bg_window_data_area()
-                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16) as u16
-                    + (self.ppu.tile_data() as u16 + 1);
+                    + (self.ppu.pixel_fifo_info.fetched_tile_data[0] as u16 * 16)
+                    + (self.ppu.tile_number() as u16 + 1);
 
                 self.ppu.pixel_fifo_info.fetched_tile_data[2] = self.read_mem(addr);
                 self.ppu.set_fetch_state(FetchState::Sleep);

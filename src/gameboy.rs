@@ -31,20 +31,23 @@ impl GameBoy {
         }
     }
 
-    pub fn start_up(&mut self, game: &str, headless: bool) -> Result<(), Error> {
+    pub fn boot(&mut self, game: &str, headless: bool, skip_boot: bool) -> Result<(), Error> {
         let boot_rom = "roms/boot-rom.gb";
-
         let game_rom_path: &Path = Path::new(game);
-
         let boot_rom_path: &Path = Path::new(boot_rom);
 
         let game_rom: Vec<u8> = read_file(game_rom_path)?;
+        let boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
-        let _boot_rom: Vec<u8> = read_file(boot_rom_path)?;
-
-        self.interconnect.load_game_rom(&game_rom);
-
-        self.cpu.pc = PC_AFTER_BOOT;
+        // TODO CHANGE LATER
+        self.cpu.pc = if skip_boot {
+            self.interconnect.load_game_rom(&game_rom);
+            PC_AFTER_BOOT
+        } else {
+            self.interconnect.load_game_rom(&game_rom);
+            self.interconnect.load_boot_rom(&boot_rom);
+            0x0000
+        };
 
         if headless {
             loop {
