@@ -249,6 +249,49 @@ impl Interconnect {
      * PPU FUNCTIONS
      ****************************************************/
 
+    pub fn draw_line(&mut self) {
+        let slice_start = (X_RESOLUTION as usize) * (self.ppu.ly() as usize);
+        let slice_end = (X_RESOLUTION as usize) + slice_start;
+        let mut bg_priority = [false; X_RESOLUTION as usize];
+
+        let background_on = self.ppu.control().bg_window() == 1;
+        if background_on {
+            let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
+            let row = map_y / 8;
+
+            for i in 0..X_RESOLUTION {
+                let map_x = (i as u8).wrapping_add(self.ppu.scroll_x());
+                let col = map_x / 8;
+                let tile_number = (map_y % 8) * 2;
+
+                let tile_data_addr =
+                    self.ppu.bg_tile_map_addr() + (u16::from(col)) + (u16::from(row) * 32);
+                let tile_data = self.read_mem(tile_data_addr);
+                let tile_data = if self.ppu.bg_window_data_area() == 0x8800 {
+                    tile_data.wrapping_add(128)
+                } else {
+                    tile_data
+                };
+
+                let hi_addr: u16 =
+                    self.ppu.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16;
+                let low_addr: u16 =
+                    self.ppu.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16 + 1;
+
+                let hi = self.read_mem(hi_addr);
+                let low = self.read_mem(low_addr);
+
+                let bit = (map_x % 8).wrapping_sub(7).wrapping_mul(0xFF) as usize;
+                let hi_bit = (hi >> bit) & 1;
+                let low_bit = ((low >> bit) & 1) << 1;
+                let color_value = (hi_bit | low_bit) as usize;
+                let color = self.ppu.bg_palette[color_value];
+                let pixels = &mut self.ppu.video_buffer[slice_start..slice_end];
+                pixels[i as usize] = color;
+            }
+        }
+    }
+
     pub fn increment_ly(&mut self) {
         let value = self.ppu.ly().wrapping_add(1);
         self.ppu.set_ly(value);
@@ -442,7 +485,14 @@ impl Interconnect {
 
         match self.ppu.stat_mode() {
             LcdMode::Oam => self.oam_mode(),
-            LcdMode::Transfer => self.transfer_mode(),
+            LcdMode::Transfer => {
+                //self.transfer_mode();
+                self.draw_line();
+                self.ppu.set_stat_mode(LcdMode::HBlank);
+                if self.ppu.stat().hblank_interrupt_soruce() == 1 {
+                    request_interrupt(self, InterruptType::LcdStat);
+                }
+            }
             LcdMode::VBlank => self.vblank_mode(),
             LcdMode::HBlank => self.hblank_mode(),
         }

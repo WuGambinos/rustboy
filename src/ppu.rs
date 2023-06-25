@@ -142,7 +142,7 @@ impl PixelFifoInfo {
 #[derive(Debug)]
 pub struct Ppu {
     // Video RAM
-    vram: [u8; 0x2000],
+    pub vram: [u8; 0x2000],
 
     // OAM
     oam: [SpriteEntry; 40],
