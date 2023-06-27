@@ -38,20 +38,20 @@ pub enum FetchState {
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
 pub struct SpriteAttribute {
-    bg_window: B1,
-    y_flip: B1,
-    x_flip: B1,
-    palette_number: B1,
-    tile_vram_bank: B1,
-    palette_number_cgb: B3,
+    pub bg_window: B1,
+    pub y_flip: B1,
+    pub x_flip: B1,
+    pub palette_number: B1,
+    pub tile_vram_bank: B1,
+    pub palette_number_cgb: B3,
 }
 
 #[derive(Debug, Copy, Clone)]
 pub struct SpriteEntry {
-    y: u8,
-    x: u8,
-    tile: u8,
-    oam_attr: SpriteAttribute,
+    pub y: u8,
+    pub x: u8,
+    pub tile: u8,
+    pub oam_attr: SpriteAttribute,
 }
 
 impl SpriteEntry {
@@ -145,7 +145,7 @@ pub struct Ppu {
     pub vram: [u8; 0x2000],
 
     // OAM
-    oam: [SpriteEntry; 40],
+    pub oam: [SpriteEntry; 40],
 
     line_ticks: u32,
 

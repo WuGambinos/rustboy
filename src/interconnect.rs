@@ -1,5 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 use core::time;
+use std::cmp::Ordering;
 
 use log::debug;
 use log::info;
@@ -13,6 +14,7 @@ use crate::mmu::Mmu;
 use crate::ppu::FetchState;
 use crate::ppu::LcdMode;
 use crate::ppu::Ppu;
+use crate::ppu::SpriteEntry;
 
 #[derive(Debug)]
 pub struct SerialOutput {
@@ -252,26 +254,68 @@ impl Interconnect {
     pub fn draw_line(&mut self) {
         let slice_start = (X_RESOLUTION as usize) * (self.ppu.ly() as usize);
         let slice_end = (X_RESOLUTION as usize) + slice_start;
-        let mut bg_priority = [false; X_RESOLUTION as usize];
+        let mut bg_prio = [false; X_RESOLUTION as usize];
 
         let background_on = self.ppu.control().bg_window() == 1;
         if background_on {
-            let map_y = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
+            let map_y: u8 = self.ppu.ly().wrapping_add(self.ppu.scroll_y());
+            let row: u8 = map_y / 8;
+
+            for x_pos in 0..X_RESOLUTION {
+                let map_x: u8 = x_pos.wrapping_add(self.ppu.scroll_x());
+                let col: u8 = map_x / 8;
+                let tile_number: u8 = (map_y % 8) * 2;
+
+                let tile_data_addr: u16 =
+                    self.ppu.bg_tile_map_addr() + (u16::from(col)) + (u16::from(row) * 32);
+                let mut tile_data: u8 = self.read_mem(tile_data_addr);
+                if self.ppu.bg_window_data_area() == 0x8800 {
+                    tile_data = tile_data.wrapping_add(128)
+                }
+
+                let hi_addr: u16 =
+                    self.ppu.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16;
+                let low_addr: u16 =
+                    self.ppu.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16 + 1;
+                let hi: u8 = self.read_mem(hi_addr);
+                let low: u8 = self.read_mem(low_addr);
+
+                let bit = (map_x % 8).wrapping_sub(7).wrapping_mul(0xFF) as usize;
+                let hi_bit = (hi >> bit) & 1;
+                let low_bit = ((low >> bit) & 1) << 1;
+                let color_value = (hi_bit | low_bit) as usize;
+                let color = self.ppu.bg_palette[color_value];
+                bg_prio[x_pos as usize] = color_value != 0;
+
+                let pixels = &mut self.ppu.video_buffer[slice_start..slice_end];
+                pixels[x_pos as usize] = color;
+            }
+        }
+
+        let window_enabled: bool =
+            self.ppu.control().window_enable() == 1 && self.ppu.window_y() <= self.ppu.ly();
+        if window_enabled {
+            let window_x = self.ppu.window_x().wrapping_sub(7);
+
+            let map_y = self.ppu.ly() - self.ppu.window_y();
             let row = map_y / 8;
 
-            for i in 0..X_RESOLUTION {
-                let map_x = (i as u8).wrapping_add(self.ppu.scroll_x());
-                let col = map_x / 8;
-                let tile_number = (map_y % 8) * 2;
+            for i in (window_x as usize)..X_RESOLUTION as usize {
+                let mut map_x = (i as u8).wrapping_add(self.ppu.scroll_x());
 
-                let tile_data_addr =
-                    self.ppu.bg_tile_map_addr() + (u16::from(col)) + (u16::from(row) * 32);
-                let tile_data = self.read_mem(tile_data_addr);
-                let tile_data = if self.ppu.bg_window_data_area() == 0x8800 {
-                    tile_data.wrapping_add(128)
-                } else {
-                    tile_data
-                };
+                if map_x >= window_x {
+                    map_x = i as u8 - window_x;
+                }
+                let col = map_x / 8;
+
+                let tile_data_addr: u16 =
+                    self.ppu.window_map_area() + (u16::from(col)) + (u16::from(row) * 32);
+                let mut tile_data: u8 = self.read_mem(tile_data_addr);
+                if self.ppu.bg_window_data_area() == 0x8800 {
+                    tile_data = tile_data.wrapping_add(128)
+                }
+
+                let tile_number = (map_y % 8) * 2;
 
                 let hi_addr: u16 =
                     self.ppu.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16;
@@ -286,6 +330,8 @@ impl Interconnect {
                 let low_bit = ((low >> bit) & 1) << 1;
                 let color_value = (hi_bit | low_bit) as usize;
                 let color = self.ppu.bg_palette[color_value];
+                bg_prio[i as usize] = color_value != 0;
+
                 let pixels = &mut self.ppu.video_buffer[slice_start..slice_end];
                 pixels[i as usize] = color;
             }
