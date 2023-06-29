@@ -1,9 +1,9 @@
 #![allow(clippy::must_use_candidate)]
-use crate::constants::*;
+use crate::{constants::*, cpu::interrupts::InterruptType};
 use log::warn;
 use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
-use std::collections::VecDeque;
+use std::cmp::Ordering;
 
 pub enum PaletteType {
     Background,
@@ -19,39 +19,23 @@ pub enum LcdMode {
     Transfer,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum FetchState {
-    /// Determines which background/window tile to fetch pixels from
-    Tile,
-
-    /// First of the slice's two bitplanes is fetched
-    Data0,
-
-    /// Second of the slice's two bitplanes is fetched
-    Data1,
-
-    Push,
-
-    Sleep,
-}
-
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
-pub struct SpriteAttribute {
-    pub bg_window: B1,
-    pub y_flip: B1,
-    pub x_flip: B1,
-    pub palette_number: B1,
-    pub tile_vram_bank: B1,
-    pub palette_number_cgb: B3,
+pub struct SpriteFlags {
+    palette_number_cgb: B3,
+    tile_vram_bank: B1,
+    palette_number: B1,
+    x_flip: B1,
+    y_flip: B1,
+    bg_window: B1,
 }
 
 #[derive(Debug, Copy, Clone)]
 pub struct SpriteEntry {
-    pub y: u8,
-    pub x: u8,
-    pub tile: u8,
-    pub oam_attr: SpriteAttribute,
+    y: u8,
+    x: u8,
+    tile_index: u8,
+    flags: SpriteFlags,
 }
 
 impl SpriteEntry {
@@ -59,8 +43,8 @@ impl SpriteEntry {
         Self {
             y: 0,
             x: 0,
-            tile: 0,
-            oam_attr: SpriteAttribute::new(),
+            tile_index: 0,
+            flags: SpriteFlags::new(),
         }
     }
 }
@@ -87,53 +71,26 @@ impl Dma {
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
 pub struct Control {
-    pub bg_window: B1,
-    pub sprite_enable: B1,
-    pub sprite_size: B1,
-    pub bg_tile_map_area: B1,
-    pub bg_window_tile_data_area: B1,
-    pub window_enable: B1,
-    pub window_tile_map_area: B1,
-    pub lcd_ppu_enable: B1,
+    bg_window: B1,
+    sprite_enable: B1,
+    sprite_size: B1,
+    bg_tile_map_area: B1,
+    bg_window_tile_data_area: B1,
+    window_enable: B1,
+    window_tile_map_area: B1,
+    lcd_ppu_enable: B1,
 }
 
 #[bitfield]
 #[derive(Debug, Copy, Clone)]
 pub struct Stat {
-    pub mode: B2,
-    pub lyc_ly_compare: B1,
-    pub hblank_interrupt_soruce: B1,
-    pub vblank_interrupt_source: B1,
-    pub oam_interrupt_source: B1,
-    pub lyc_ly_interrupt_source: B1,
+    mode: B2,
+    lyc_ly_compare: B1,
+    hblank_interrupt_soruce: B1,
+    vblank_interrupt_source: B1,
+    oam_interrupt_source: B1,
+    lyc_ly_interrupt_source: B1,
     empty: B1,
-}
-
-#[derive(Debug)]
-pub struct PixelFifoInfo {
-    fetch_state: FetchState,
-    pub fifo: VecDeque<Color>,
-    line_x: u8,
-    pushed_x: u8,
-    fetch_x: u8,
-    fifo_x: u8,
-    tile_number: u8,
-    pub fetched_tile_data: [u8; 3],
-}
-
-impl PixelFifoInfo {
-    fn new() -> PixelFifoInfo {
-        PixelFifoInfo {
-            fetch_state: FetchState::Tile,
-            fifo: VecDeque::new(),
-            line_x: 0,
-            pushed_x: 0,
-            fetch_x: 0,
-            fifo_x: 0,
-            tile_number: 0,
-            fetched_tile_data: [0; 3],
-        }
-    }
 }
 
 /// Pixel Processing Unit
@@ -142,22 +99,21 @@ impl PixelFifoInfo {
 #[derive(Debug)]
 pub struct Ppu {
     // Video RAM
-    pub vram: [u8; 0x2000],
+    vram: [u8; 0x2000],
 
     // OAM
-    pub oam: [SpriteEntry; 40],
+    oam: [SpriteEntry; 40],
 
     line_ticks: u32,
 
     pub dma: Dma,
     pub video_buffer: [Color; BUFFER_SIZE],
-    pub pixel_fifo_info: PixelFifoInfo,
 
     // LCD status
-    pub stat: Stat,
+    stat: Stat,
 
     // LCD control
-    pub control: Control,
+    control: Control,
 
     // Viewport X position
     scroll_x: u8,
@@ -187,6 +143,8 @@ pub struct Ppu {
 
     pub sprite1_palette: [Color; 4],
     pub sprite1_palette_data: u8,
+
+    pub bg_prio: [bool; X_RESOLUTION as usize],
 }
 
 impl Ppu {
@@ -195,7 +153,6 @@ impl Ppu {
             vram: [0; 0x2000],
             oam: [SpriteEntry::new(); 40],
             dma: Dma::new(),
-            pixel_fifo_info: PixelFifoInfo::new(),
             line_ticks: 0,
             video_buffer: [Color::RGB(0, 0, 0); BUFFER_SIZE],
 
@@ -217,6 +174,7 @@ impl Ppu {
 
             sprite1_palette: TILE_COLORS,
             sprite1_palette_data: 0,
+            bg_prio: [false; X_RESOLUTION as usize],
         };
 
         ppu.set_stat_mode(LcdMode::Oam);
@@ -334,73 +292,6 @@ impl Ppu {
         self.control
     }
 
-    pub fn pixel_fifo(&self) -> VecDeque<Color> {
-        self.pixel_fifo_info.fifo.clone()
-    }
-
-    pub fn fetch_x(&self) -> u8 {
-        self.pixel_fifo_info.fetch_x
-    }
-
-    pub fn set_fetch_x(&mut self, value: u8) {
-        self.pixel_fifo_info.fetch_x = value;
-    }
-
-    pub fn fifo_x(&self) -> u8 {
-        self.pixel_fifo_info.fifo_x
-    }
-
-    pub fn set_fifo_x(&mut self, value: u8) {
-        self.pixel_fifo_info.fifo_x = value;
-    }
-
-    pub fn pushed_x(&self) -> u8 {
-        self.pixel_fifo_info.pushed_x
-    }
-
-    pub fn set_pushed_x(&mut self, value: u8) {
-        self.pixel_fifo_info.pushed_x = value;
-    }
-
-    pub fn line_x(&self) -> u8 {
-        self.pixel_fifo_info.line_x
-    }
-
-    pub fn set_line_x(&mut self, value: u8) {
-        self.pixel_fifo_info.line_x = value;
-    }
-
-    pub fn tile_number(&self) -> u8 {
-        self.pixel_fifo_info.tile_number
-    }
-
-    pub fn set_tile_number(&mut self, value: u8) {
-        self.pixel_fifo_info.tile_number = value;
-    }
-
-    pub fn fetch_state(&self) -> FetchState {
-        self.pixel_fifo_info.fetch_state
-    }
-
-    pub fn set_fetch_state(&mut self, state: FetchState) {
-        self.pixel_fifo_info.fetch_state = state;
-    }
-
-    pub fn push_fifo(&mut self, color: Color) {
-        self.pixel_fifo_info.fifo.push_back(color);
-    }
-
-    pub fn pop_fifo(&mut self) -> Color {
-        match self.pixel_fifo_info.fifo.pop_front() {
-            Some(color) => color,
-            None => panic!("NOTHING COULD BE POPPED"),
-        }
-    }
-
-    pub fn clear_fifo(&mut self) {
-        self.pixel_fifo_info.fifo.clear();
-    }
-
     pub fn update_palette(&mut self, palette_type: PaletteType, palette_data: u8) {
         let (palette_colors, pal_data) = match palette_type {
             PaletteType::Background => (&mut self.bg_palette, &mut self.bg_palette_data),
@@ -418,36 +309,36 @@ impl Ppu {
 
     pub fn write_oam(&mut self, addr: u16, value: u8) {
         if addr >= 0xFE00 {
-            let index = ((addr - 0xFE00) % 40) as usize;
+            let index = ((addr - 0xFE00) / 4) as usize;
             let inner_index = ((addr - 0xFE00) % 4) as usize;
             match inner_index {
                 0 => self.oam[index].y = value,
                 1 => self.oam[index].x = value,
-                2 => self.oam[index].tile = value,
-                3 => self.oam[index].oam_attr = SpriteAttribute::from_bytes([value]),
+                2 => self.oam[index].tile_index = value,
+                3 => self.oam[index].flags = SpriteFlags::from_bytes([value]),
                 _ => panic!("NOT AN INDEX"),
             }
         } else {
-            let index = (addr % 40) as usize;
+            let index = (addr / 4) as usize;
             let inner_index = (addr % 4) as usize;
             match inner_index {
                 0 => self.oam[index].y = value,
                 1 => self.oam[index].x = value,
-                2 => self.oam[index].tile = value,
-                3 => self.oam[index].oam_attr = SpriteAttribute::from_bytes([value]),
+                2 => self.oam[index].tile_index = value,
+                3 => self.oam[index].flags = SpriteFlags::from_bytes([value]),
                 _ => panic!("NOT AN INDEX"),
             }
         }
     }
 
     pub fn read_oam(&self, addr: u16) -> u8 {
-        let index = ((addr - 0xFE00) % 40) as usize;
+        let index = ((addr - 0xFE00) / 4) as usize;
         let inner_index = ((addr - 0xFE00) % 4) as usize;
         match inner_index {
             0 => self.oam[index].y,
             1 => self.oam[index].x,
-            2 => self.oam[index].tile,
-            3 => self.oam[index].oam_attr.into_bytes()[0],
+            2 => self.oam[index].tile_index,
+            3 => self.oam[index].flags.into_bytes()[0],
             _ => panic!("NOT AN INDEX"),
         }
     }
@@ -552,6 +443,274 @@ impl Ppu {
         let bits = self.stat.bytes[0] & !0b11;
         let value = bits | mode as u8;
         self.stat = Stat::from_bytes([value]);
+    }
+
+    pub fn increment_ly(&mut self) -> Vec<InterruptType> {
+        let value = self.ly().wrapping_add(1);
+        let mut vec: Vec<InterruptType> = Vec::new();
+        self.set_ly(value);
+
+        if self.ly() == self.lyc() {
+            self.stat.set_lyc_ly_compare(1);
+
+            if self.stat().lyc_ly_interrupt_source() == 1 {
+                vec.push(InterruptType::LcdStat);
+            }
+        } else {
+            self.stat.set_lyc_ly_compare(0);
+        }
+
+        return vec;
+    }
+
+    /// Search OAM for Sprites whose Y coordinate
+    /// overlaps this line
+    ///
+    /// Duration: 80 "dots"
+    pub fn oam_mode(&mut self) {
+        let oam_is_over = self.line_ticks() >= 80;
+        if oam_is_over {
+            self.set_stat_mode(LcdMode::Transfer);
+        }
+    }
+
+    /// Reading OAM and VRAM to generate picture
+    ///
+    /// Duration: 168-291 "dots", depends on sprite count
+    ///
+    pub fn transfer_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
+        self.draw_line();
+        self.set_stat_mode(LcdMode::HBlank);
+        if self.stat().hblank_interrupt_soruce() == 1 {
+            interrupts.push(InterruptType::LcdStat);
+        }
+    }
+
+    /// Duration: 4560 "dots" (10 scanlines)
+    pub fn vblank_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
+        let end_of_scanline = self.line_ticks() >= TICKS_PER_LINE;
+        if end_of_scanline {
+            let mut ints = self.increment_ly();
+            interrupts.append(&mut ints);
+
+            let onto_next_screen = self.ly() >= LINES_PER_FRAME;
+            if onto_next_screen {
+                self.set_stat_mode(LcdMode::Oam);
+                self.set_ly(0);
+            }
+
+            self.set_line_ticks(0);
+        }
+    }
+
+    /// Duration: 87-204 "dots"
+    pub fn hblank_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
+        let end_of_scanline = self.line_ticks() >= TICKS_PER_LINE;
+        if end_of_scanline {
+            let mut ints = self.increment_ly();
+            interrupts.append(&mut ints);
+
+            if self.ly() >= Y_RESOLUTION {
+                self.set_stat_mode(LcdMode::VBlank);
+                interrupts.push(InterruptType::VBlank);
+
+                if self.stat().vblank_interrupt_source() == 1 {
+                    interrupts.push(InterruptType::VBlank);
+                }
+            } else {
+                self.set_stat_mode(LcdMode::Oam);
+            }
+
+            self.set_line_ticks(0);
+        }
+    }
+
+    pub fn tick(&mut self) -> Vec<InterruptType> {
+        self.increment_line_ticks();
+
+        let mut interrupts: Vec<InterruptType> = Vec::new();
+
+        match self.stat_mode() {
+            LcdMode::Oam => self.oam_mode(),
+            LcdMode::Transfer => self.transfer_mode(&mut interrupts),
+            LcdMode::VBlank => self.vblank_mode(&mut interrupts),
+            LcdMode::HBlank => self.hblank_mode(&mut interrupts),
+        };
+
+        return interrupts;
+    }
+
+    pub fn draw_line(&mut self) {
+        let slice_start = (X_RESOLUTION as usize) * (self.ly() as usize);
+        let slice_end = (X_RESOLUTION as usize) + slice_start;
+
+        let background_on = self.control().bg_window() == 1;
+        if background_on {
+            let map_y: u8 = self.ly().wrapping_add(self.scroll_y());
+            let row: u8 = map_y / 8;
+
+            for x_pos in 0..X_RESOLUTION {
+                let map_x: u8 = x_pos.wrapping_add(self.scroll_x());
+                let col: u8 = map_x / 8;
+                let tile_number: u8 = (map_y % 8) * 2;
+
+                let tile_data_addr: u16 =
+                    self.bg_tile_map_addr() + (u16::from(col)) + (u16::from(row) * 32);
+                let mut tile_data: u8 = self.vram[(tile_data_addr - 0x8000) as usize];
+                if self.bg_window_data_area() == 0x8800 {
+                    tile_data = tile_data.wrapping_add(128)
+                }
+
+                let hi_addr: u16 =
+                    self.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16;
+                let low_addr: u16 =
+                    self.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16 + 1;
+                let hi: u8 = self.vram[(hi_addr - 0x8000) as usize];
+                let low: u8 = self.vram[(low_addr - 0x8000) as usize];
+
+                let bit = (map_x % 8).wrapping_sub(7).wrapping_mul(0xFF) as usize;
+                let hi_bit = (hi >> bit) & 1;
+                let low_bit = ((low >> bit) & 1) << 1;
+                let color_value = (hi_bit | low_bit) as usize;
+                let color = self.bg_palette[color_value];
+                self.bg_prio[x_pos as usize] = color_value != 0;
+
+                let pixels = &mut self.video_buffer[slice_start..slice_end];
+                pixels[x_pos as usize] = color;
+            }
+        }
+
+        let window_enabled: bool =
+            self.control().window_enable() == 1 && self.window_y() <= self.ly();
+        if window_enabled {
+            let window_x = self.window_x().wrapping_sub(7);
+
+            let map_y = self.ly() - self.window_y();
+            let row = map_y / 8;
+
+            for i in (window_x as usize)..X_RESOLUTION as usize {
+                let mut map_x = (i as u8).wrapping_add(self.scroll_x());
+
+                if map_x >= window_x {
+                    map_x = i as u8 - window_x;
+                }
+                let col = map_x / 8;
+
+                let tile_data_addr: u16 =
+                    self.window_map_area() + (u16::from(col)) + (u16::from(row) * 32);
+                let mut tile_data: u8 = self.vram[(tile_data_addr - 0x8000) as usize];
+                if self.bg_window_data_area() == 0x8800 {
+                    tile_data = tile_data.wrapping_add(128)
+                }
+
+                let tile_number = (map_y % 8) * 2;
+
+                let hi_addr: u16 =
+                    self.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16;
+                let low_addr: u16 =
+                    self.bg_window_data_area() + tile_data as u16 * 16 + tile_number as u16 + 1;
+
+                let hi = self.vram[(hi_addr - 0x8000) as usize];
+                let low = self.vram[(low_addr - 0x8000) as usize];
+
+                let bit = (map_x % 8).wrapping_sub(7).wrapping_mul(0xFF) as usize;
+                let hi_bit = (hi >> bit) & 1;
+                let low_bit = ((low >> bit) & 1) << 1;
+                let color_value = (hi_bit | low_bit) as usize;
+                let color = self.bg_palette[color_value];
+                self.bg_prio[i as usize] = color_value != 0;
+
+                let pixels = &mut self.video_buffer[slice_start..slice_end];
+                pixels[i as usize] = color;
+            }
+        }
+
+        if self.control().sprite_enable() == 1 {
+            let sprite_size = if self.control().sprite_size() == 1 {
+                16
+            } else {
+                8
+            };
+
+            let current_line = self.ly();
+
+            let mut sprites_to_draw: Vec<(usize, SpriteEntry)> = Vec::with_capacity(10);
+
+            for (index, sprite) in self.oam.iter().enumerate() {
+                let y = sprite.y.wrapping_sub(16);
+                let x = sprite.x.wrapping_sub(8);
+                let flags = sprite.flags;
+
+                if current_line.wrapping_sub(y) < sprite_size {
+                    let res = SpriteEntry {
+                        y,
+                        x,
+                        tile_index: sprite.tile_index,
+                        flags,
+                    };
+                    if sprites_to_draw.len() < 10 {
+                        sprites_to_draw.push((index, res));
+                    }
+                }
+            }
+
+            sprites_to_draw.sort_by(|&(a_index, a), &(b_index, b)| {
+                match a.x.cmp(&b.x) {
+                    // If X coordinates are the same, use OAM index as priority (low index => draw last)
+                    Ordering::Equal => a_index.cmp(&b_index).reverse(),
+                    // Use X coordinate as priority (low X => draw last)
+                    other => other.reverse(),
+                }
+            });
+
+            for (_, sprite) in sprites_to_draw {
+                let palette = if sprite.flags.palette_number() == 1 {
+                    &self.sprite1_palette
+                } else {
+                    &self.sprite0_palette
+                };
+
+                let mut tile_num = sprite.tile_index as usize;
+                if sprite_size == 16 {
+                    tile_num = tile_num & 0xFE;
+                } else {
+                    tile_num = tile_num & 0xFF;
+                }
+
+                let mut line = if sprite.flags.y_flip() == 1 {
+                    sprite_size - current_line.wrapping_sub(sprite.y) - 1
+                } else {
+                    current_line.wrapping_sub(sprite.y)
+                };
+
+                if line >= 8 {
+                    tile_num += 1;
+                    line -= 8;
+                }
+                line *= 2;
+
+                let hi_addr: u16 = 0x8000 + tile_num as u16 * 16 + (line) as u16;
+                let low_addr: u16 = 0x8000 + tile_num as u16 * 16 + (line) as u16 + 1;
+                let hi = self.vram[(hi_addr - 0x8000) as usize];
+                let low = self.vram[(low_addr - 0x8000) as usize];
+
+                for x in (0..8).rev() {
+                    let bit = if sprite.flags.x_flip() == 1 { 7 - x } else { x } as usize;
+
+                    let hi_bit = (hi >> bit) & 1;
+                    let low_bit = ((low >> bit) & 1) << 1;
+                    let color_value = (hi_bit | low_bit) as usize;
+                    let color = palette[color_value];
+                    let target_x = sprite.x.wrapping_add(7 - x);
+                    if target_x < X_RESOLUTION && color_value != 0 {
+                        if sprite.flags.bg_window() == 0 || !self.bg_prio[target_x as usize] {
+                            let pixels = &mut self.video_buffer[slice_start..slice_end];
+                            pixels[target_x as usize] = color;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
