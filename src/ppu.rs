@@ -1,6 +1,5 @@
 #![allow(clippy::must_use_candidate)]
 use crate::{constants::*, cpu::interrupts::InterruptType};
-use log::warn;
 use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
 use std::cmp::Ordering;

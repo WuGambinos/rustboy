@@ -50,6 +50,7 @@ pub const INTERRUPTS: [InterruptType; 5] = [
 ];
 
 // Memory Address Ranges
+pub const BOOT: Range<u16> = 0x00..0x100;
 pub const ROM_BANK: Range<u16> = 0x0000..0x8000;
 pub const VRAM: Range<u16> = 0x8000..0xA000;
 pub const EXTERNAL_RAM: Range<u16> = 0xA000..0xC000;

@@ -35,6 +35,7 @@ fn run_test(rom_path: &str) {
         .arg("--rom")
         .arg(rom_path)
         .arg("--headless")
+        .arg("--skip-boot")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .spawn()

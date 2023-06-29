@@ -1,6 +1,5 @@
 #![allow(clippy::must_use_candidate)]
 use core::time;
-use std::cmp::Ordering;
 
 use log::debug;
 use log::info;
@@ -11,9 +10,20 @@ use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
 use crate::mmu::Mmu;
-use crate::ppu::LcdMode;
 use crate::ppu::Ppu;
-use crate::ppu::SpriteEntry;
+use modular_bitfield::prelude::*;
+
+#[bitfield]
+#[derive(Debug)]
+pub struct JoypadInput {
+    right_or_a: B1,
+    left_or_b: B1,
+    up_or_select: B1,
+    down_or_start: B1,
+    select_direction: B1,
+    select_action: B1,
+    empty: B2,
+}
 
 #[derive(Debug)]
 pub struct SerialOutput {
@@ -54,6 +64,7 @@ pub struct Interconnect {
     pub timer: Timer,
     pub ppu: Ppu,
     pub serial: SerialOutput,
+    pub boot_active: bool,
 }
 
 impl Interconnect {
@@ -63,6 +74,7 @@ impl Interconnect {
             timer: Timer::new(),
             ppu: Ppu::new(),
             serial: SerialOutput::new(),
+            boot_active: true,
         }
     }
 
@@ -112,9 +124,7 @@ impl Interconnect {
             self.mmu.write_io(addr - 0xFF00, value);
         } else if HIGH_RAM.contains(&addr) {
             self.mmu.write_hram(addr - 0xFF80, value);
-        }
-        // Interrupt Enable
-        else if addr == INTERRUPT_ENABLE {
+        } else if addr == INTERRUPT_ENABLE {
             self.mmu.enable_interrupt(value);
         } else {
             warn!("UNREACHABLE Addr: {:#X}", addr);
@@ -122,52 +132,37 @@ impl Interconnect {
     }
 
     pub fn read_mem(&self, addr: u16) -> u8 {
-        // ROM Bank
-        if ROM_BANK.contains(&addr) {
-            self.mmu.read_rom_bank(addr)
-        }
-        // VRAM
-        else if VRAM.contains(&addr) {
-            self.ppu.read_vram(addr)
-        }
-        // External RAM
-        else if EXTERNAL_RAM.contains(&addr) {
-            self.mmu.read_external_ram(addr - 0xA000)
-        }
-        // Work RAM
-        else if WORK_RAM.contains(&addr) {
-            self.mmu.read_work_ram(addr - 0xC000)
-        }
-        // OAM
-        else if OAM.contains(&addr) {
-            if self.ppu.dma_transferring() {
-                0xFF
-            } else {
-                self.ppu.read_oam(addr)
-            }
-        }
-        // Timer
-        else if TIMER.contains(&addr) {
-            self.timer.timer_read(addr)
-        }
-        // LCD
-        else if LCD.contains(&addr) {
-            self.ppu.read_lcd(addr)
-        }
-        // IO Regsiters
-        else if IO.contains(&addr) {
-            self.mmu.read_io(addr - 0xFF00)
-        }
-        // High RAM
-        else if HIGH_RAM.contains(&addr) {
-            self.mmu.read_hram(addr - 0xFF80)
-        }
-        // Interrupt Enable
-        else if addr == INTERRUPT_ENABLE {
-            self.mmu.read_interrupt_enable()
+        if self.boot_active && BOOT.contains(&addr) {
+            self.mmu.read_boot(addr)
         } else {
-            warn!("NOT REACHABLE ADDR: {:#X}", addr);
-            0
+            if ROM_BANK.contains(&addr) {
+                self.mmu.read_rom_bank(addr)
+            } else if VRAM.contains(&addr) {
+                self.ppu.read_vram(addr)
+            } else if EXTERNAL_RAM.contains(&addr) {
+                self.mmu.read_external_ram(addr - 0xA000)
+            } else if WORK_RAM.contains(&addr) {
+                self.mmu.read_work_ram(addr - 0xC000)
+            } else if OAM.contains(&addr) {
+                if self.ppu.dma_transferring() {
+                    0xFF
+                } else {
+                    self.ppu.read_oam(addr)
+                }
+            } else if TIMER.contains(&addr) {
+                self.timer.timer_read(addr)
+            } else if LCD.contains(&addr) {
+                self.ppu.read_lcd(addr)
+            } else if IO.contains(&addr) {
+                self.mmu.read_io(addr - 0xFF00)
+            } else if HIGH_RAM.contains(&addr) {
+                self.mmu.read_hram(addr - 0xFF80)
+            } else if addr == INTERRUPT_ENABLE {
+                self.mmu.read_interrupt_enable()
+            } else {
+                warn!("NOT REACHABLE ADDR: {:#X}", addr);
+                0
+            }
         }
     }
 
@@ -179,7 +174,7 @@ impl Interconnect {
 
     pub fn load_boot_rom(&mut self, rom: &[u8]) {
         for (i, _) in rom.iter().enumerate() {
-            self.write_mem(i as u16, rom[i]);
+            self.mmu.write_boot(i as u16, rom[i]);
         }
     }
 

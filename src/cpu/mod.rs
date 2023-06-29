@@ -315,6 +315,11 @@ impl Cpu {
             let cycles = self.last_cycle as usize;
             cycles_this_update += cycles;
 
+            if self.pc == 0x100 {
+                self.log_registers();
+                interconnect.boot_active = false;
+            }
+
             if !self.halted {
                 self.execute_instruction(interconnect);
 
