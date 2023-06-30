@@ -64,7 +64,9 @@ pub struct Interconnect {
     pub timer: Timer,
     pub ppu: Ppu,
     pub serial: SerialOutput,
+    pub joypad: JoypadInput,
     pub boot_active: bool,
+    pub write_enabled: bool,
 }
 
 impl Interconnect {
@@ -74,7 +76,9 @@ impl Interconnect {
             timer: Timer::new(),
             ppu: Ppu::new(),
             serial: SerialOutput::new(),
+            joypad: JoypadInput::new(),
             boot_active: true,
+            write_enabled: true,
         }
     }
 
@@ -104,7 +108,9 @@ impl Interconnect {
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if ROM_BANK.contains(&addr) {
-            self.mmu.write_rom_bank(addr, value);
+            if self.write_enabled {
+                self.mmu.write_rom_bank(addr, value);
+            }
         } else if VRAM.contains(&addr) {
             self.ppu.write_vram(addr, value);
         } else if EXTERNAL_RAM.contains(&addr) {
@@ -134,35 +140,37 @@ impl Interconnect {
     pub fn read_mem(&self, addr: u16) -> u8 {
         if self.boot_active && BOOT.contains(&addr) {
             self.mmu.read_boot(addr)
-        } else {
-            if ROM_BANK.contains(&addr) {
-                self.mmu.read_rom_bank(addr)
-            } else if VRAM.contains(&addr) {
-                self.ppu.read_vram(addr)
-            } else if EXTERNAL_RAM.contains(&addr) {
-                self.mmu.read_external_ram(addr - 0xA000)
-            } else if WORK_RAM.contains(&addr) {
-                self.mmu.read_work_ram(addr - 0xC000)
-            } else if OAM.contains(&addr) {
-                if self.ppu.dma_transferring() {
-                    0xFF
-                } else {
-                    self.ppu.read_oam(addr)
-                }
-            } else if TIMER.contains(&addr) {
-                self.timer.timer_read(addr)
-            } else if LCD.contains(&addr) {
-                self.ppu.read_lcd(addr)
-            } else if IO.contains(&addr) {
-                self.mmu.read_io(addr - 0xFF00)
-            } else if HIGH_RAM.contains(&addr) {
-                self.mmu.read_hram(addr - 0xFF80)
-            } else if addr == INTERRUPT_ENABLE {
-                self.mmu.read_interrupt_enable()
+        } else if ROM_BANK.contains(&addr) {
+            self.mmu.read_rom_bank(addr)
+        } else if VRAM.contains(&addr) {
+            self.ppu.read_vram(addr)
+        } else if EXTERNAL_RAM.contains(&addr) {
+            self.mmu.read_external_ram(addr - 0xA000)
+        } else if WORK_RAM.contains(&addr) {
+            self.mmu.read_work_ram(addr - 0xC000)
+        } else if OAM.contains(&addr) {
+            if self.ppu.dma_transferring() {
+                0xFF
             } else {
-                warn!("NOT REACHABLE ADDR: {:#X}", addr);
-                0
+                self.ppu.read_oam(addr)
             }
+        } else if TIMER.contains(&addr) {
+            self.timer.timer_read(addr)
+        } else if LCD.contains(&addr) {
+            self.ppu.read_lcd(addr)
+        } else if IO.contains(&addr) {
+            if addr == 0xFF00 {
+                0xFF
+            } else {
+                self.mmu.read_io(addr - 0xFF00)
+            }
+        } else if HIGH_RAM.contains(&addr) {
+            self.mmu.read_hram(addr - 0xFF80)
+        } else if addr == INTERRUPT_ENABLE {
+            self.mmu.read_interrupt_enable()
+        } else {
+            warn!("NOT REACHABLE ADDR: {:#X}", addr);
+            0
         }
     }
 

@@ -11,12 +11,11 @@ fn ld_bc_u16() {
     let mut cpu = Cpu::new();
 
     let mut interconnect = Interconnect::new();
-    cpu.pc = 0;
+    cpu.pc = 0xFF80;
 
-    interconnect.write_mem(0, 0x01);
-    interconnect.write_mem(1, 0xFA);
-    interconnect.write_mem(2, 0xDC);
-
+    interconnect.write_mem(cpu.pc, 0x01);
+    interconnect.write_mem(cpu.pc + 1, 0xFA);
+    interconnect.write_mem(cpu.pc + 2, 0xDC);
 
     //FADC
 
@@ -572,7 +571,7 @@ fn jp_nz_test() {
 
     cpu.registers.f.clear_zero_flag();
 
-    instructions::jp_nz(&mut cpu,&mut interconnect, nn);
+    instructions::jp_nz(&mut cpu, &mut interconnect, nn);
 
     assert_eq!(cpu.pc, nn);
 }
@@ -1030,7 +1029,7 @@ fn swap_hl_test() {
     let mut cpu = Cpu::new();
     let mut mmu = Interconnect::new();
 
-    let addr = 0xFF;
+    let addr = 0xFF80;
     let value = 0xBC;
 
     mmu.write_mem(addr, value);

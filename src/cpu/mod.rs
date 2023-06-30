@@ -316,7 +316,7 @@ impl Cpu {
             cycles_this_update += cycles;
 
             if self.pc == 0x100 {
-                self.log_registers();
+                interconnect.write_enabled = false;
                 interconnect.boot_active = false;
             }
 

@@ -459,7 +459,7 @@ impl Ppu {
             self.stat.set_lyc_ly_compare(0);
         }
 
-        return vec;
+        vec
     }
 
     /// Search OAM for Sprites whose Y coordinate
@@ -536,7 +536,7 @@ impl Ppu {
             LcdMode::HBlank => self.hblank_mode(&mut interrupts),
         };
 
-        return interrupts;
+        interrupts
     }
 
     pub fn draw_line(&mut self) {
@@ -617,10 +617,10 @@ impl Ppu {
                 let low_bit = ((low >> bit) & 1) << 1;
                 let color_value = (hi_bit | low_bit) as usize;
                 let color = self.bg_palette[color_value];
-                self.bg_prio[i as usize] = color_value != 0;
+                self.bg_prio[i] = color_value != 0;
 
                 let pixels = &mut self.video_buffer[slice_start..slice_end];
-                pixels[i as usize] = color;
+                pixels[i] = color;
             }
         }
 
@@ -671,9 +671,9 @@ impl Ppu {
 
                 let mut tile_num = sprite.tile_index as usize;
                 if sprite_size == 16 {
-                    tile_num = tile_num & 0xFE;
+                    tile_num &= 0xFE;
                 } else {
-                    tile_num = tile_num & 0xFF;
+                    tile_num &= 0xFF;
                 }
 
                 let mut line = if sprite.flags.y_flip() == 1 {

@@ -42,6 +42,7 @@ impl GameBoy {
         // TODO CHANGE LATER
         self.cpu.pc = if skip_boot {
             self.interconnect.load_game_rom(&game_rom);
+            self.interconnect.boot_active = false;
             PC_AFTER_BOOT
         } else {
             self.interconnect.load_game_rom(&game_rom);
