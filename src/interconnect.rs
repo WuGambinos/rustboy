@@ -160,7 +160,8 @@ impl Interconnect {
             self.ppu.read_lcd(addr)
         } else if IO.contains(&addr) {
             if addr == 0xFF00 {
-                0xFF
+                //0x1F
+                0x1D
             } else {
                 self.mmu.read_io(addr - 0xFF00)
             }
