@@ -1,4 +1,4 @@
-use super::*;
+use crate::cpu::*;
 use crate::interconnect::Interconnect;
 
 #[test]

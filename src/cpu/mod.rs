@@ -1,5 +1,5 @@
 #![allow(clippy::must_use_candidate)]
-pub mod execute;
+mod execute;
 mod instructions;
 pub mod interrupts;
 

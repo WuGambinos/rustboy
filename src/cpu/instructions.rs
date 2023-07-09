@@ -1,7 +1,8 @@
 #![allow(clippy::must_use_candidate)]
 use log::warn;
 
-use super::{Cpu, Flags, Interconnect, RegisterPair};
+use crate::cpu::{Cpu, Flags, RegisterPair};
+use crate::interconnect::Interconnect;
 
 /************************************************************************
  * 8-bit Arithmetic instructions

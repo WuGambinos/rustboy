@@ -1,7 +1,10 @@
 #![allow(clippy::must_use_candidate)]
 
-pub mod mmu;
-pub mod ppu;
+mod joypad;
+mod mbc1;
+mod mmu;
+mod ppu;
+mod serial;
 
 use log::debug;
 use log::warn;
@@ -10,51 +13,10 @@ use crate::constants::*;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
+use crate::interconnect::joypad::JoypadInput;
 use crate::interconnect::mmu::Mmu;
 use crate::interconnect::ppu::Ppu;
-use modular_bitfield::prelude::*;
-
-#[bitfield]
-#[derive(Debug)]
-pub struct JoypadInput {
-    right_or_a: B1,
-    left_or_b: B1,
-    up_or_select: B1,
-    down_or_start: B1,
-    select_direction: B1,
-    select_action: B1,
-    empty: B2,
-}
-
-#[derive(Debug)]
-pub struct SerialOutput {
-    buffer: Vec<u8>,
-}
-
-impl SerialOutput {
-    fn new() -> SerialOutput {
-        SerialOutput { buffer: Vec::new() }
-    }
-
-    pub fn write_byte(&mut self, data: u8) {
-        self.buffer.push(data);
-    }
-
-    pub fn read_bytes(&self) -> Vec<u8> {
-        self.buffer.clone()
-    }
-
-    pub fn output(&mut self) {
-        let result = String::from_utf8(self.buffer.clone());
-
-        match result {
-            Ok(s) => print!("{}", s),
-            Err(e) => println!("Error: {}", e),
-        }
-
-        self.buffer.clear();
-    }
-}
+use crate::interconnect::serial::SerialOutput;
 
 /// Struct used to link CPU to other components of system
 ///

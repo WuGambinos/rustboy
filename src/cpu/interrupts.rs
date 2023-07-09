@@ -1,5 +1,5 @@
-use super::Interconnect;
-use crate::constants::*;
+use crate::constants::{INTERRUPTS, INTERRUPT_ENABLE, INTERRUPT_FLAG};
+use crate::interconnect::Interconnect;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum InterruptType {

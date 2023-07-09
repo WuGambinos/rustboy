@@ -32,14 +32,13 @@ impl GameBoy {
     }
 
     pub fn boot(&mut self, game: &str, headless: bool, skip_boot: bool) -> Result<(), Error> {
-        let boot_rom = "roms/boot-rom.gb";
+        let boot_rom = "roms/bootix_dmg.bin";
         let game_rom_path: &Path = Path::new(game);
         let boot_rom_path: &Path = Path::new(boot_rom);
 
         let game_rom: Vec<u8> = read_file(game_rom_path)?;
         let boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
-        // TODO CHANGE LATER
         self.cpu.pc = if skip_boot {
             self.interconnect.load_game_rom(&game_rom);
             self.interconnect.boot_active = false;
