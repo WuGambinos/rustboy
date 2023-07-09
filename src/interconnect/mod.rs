@@ -9,7 +9,9 @@ mod serial;
 use log::debug;
 use log::warn;
 
-use crate::constants::*;
+use crate::constants::{
+    BOOT, EXTERNAL_RAM, HIGH_RAM, INTERRUPT_ENABLE, IO, LCD, OAM, ROM_BANK, TIMER, VRAM, WORK_RAM,
+};
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
@@ -88,7 +90,7 @@ impl Interconnect {
         } else if TIMER.contains(&addr) {
             self.timer.timer_write(addr, value);
         } else if LCD.contains(&addr) {
-            self.ppu.write_lcd(addr, value)
+            self.ppu.write_lcd(addr, value);
         } else if IO.contains(&addr) {
             self.mmu.write_io(addr - 0xFF00, value);
         } else if HIGH_RAM.contains(&addr) {

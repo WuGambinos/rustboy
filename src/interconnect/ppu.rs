@@ -4,6 +4,7 @@ use modular_bitfield::prelude::*;
 use sdl2::pixels::Color;
 use std::cmp::Ordering;
 
+#[derive(Clone, Copy)]
 pub enum PaletteType {
     Background,
     Sprite0,
@@ -236,7 +237,7 @@ impl Ppu {
     }
 
     pub fn set_ly(&mut self, value: u8) {
-        self.ly = value
+        self.ly = value;
     }
 
     pub fn ly(&self) -> u8 {
@@ -291,7 +292,7 @@ impl Ppu {
         self.control
     }
 
-    pub fn update_palette(&mut self, palette_type: PaletteType, palette_data: u8) {
+    pub fn update_palette(&mut self, palette_type: &PaletteType, palette_data: u8) {
         let (palette_colors, pal_data) = match palette_type {
             PaletteType::Background => (&mut self.bg_palette, &mut self.bg_palette_data),
             PaletteType::Sprite0 => (&mut self.sprite0_palette, &mut self.sprite0_palette_data),
@@ -365,13 +366,13 @@ impl Ppu {
                 self.dma_start(value);
             }
             0x7 => {
-                self.update_palette(PaletteType::Background, value);
+                self.update_palette(&PaletteType::Background, value);
             }
             0x8 => {
-                self.update_palette(PaletteType::Sprite0, value & 0b11111100);
+                self.update_palette(&PaletteType::Sprite0, value & 0b1111_1100);
             }
             0x9 => {
-                self.update_palette(PaletteType::Sprite1, value & 0b11111100);
+                self.update_palette(&PaletteType::Sprite1, value & 0b1111_1100);
             }
             0xA => self.window_y = value,
             0xB => self.window_x = value,
@@ -557,7 +558,7 @@ impl Ppu {
                     self.bg_tile_map_addr() + (u16::from(col)) + (u16::from(row) * 32);
                 let mut tile_data: u8 = self.vram[(tile_data_addr - 0x8000) as usize];
                 if self.bg_window_data_area() == 0x8800 {
-                    tile_data = tile_data.wrapping_add(128)
+                    tile_data = tile_data.wrapping_add(128);
                 }
 
                 let hi_addr: u16 =
@@ -599,7 +600,7 @@ impl Ppu {
                     self.window_map_area() + (u16::from(col)) + (u16::from(row) * 32);
                 let mut tile_data: u8 = self.vram[(tile_data_addr - 0x8000) as usize];
                 if self.bg_window_data_area() == 0x8800 {
-                    tile_data = tile_data.wrapping_add(128)
+                    tile_data = tile_data.wrapping_add(128);
                 }
 
                 let tile_number = (map_y % 8) * 2;

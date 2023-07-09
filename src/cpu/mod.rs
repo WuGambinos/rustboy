@@ -9,7 +9,7 @@ use crate::constants::{
     INTERRUPTS, INTERRUPT_ENABLE, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME, SERIAL_TRANSFER_CONTROL,
     SERIAL_TRASFER_DATA,
 };
-use crate::cpu::instructions::*;
+use crate::cpu::instructions::push_rr;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
 
@@ -319,8 +319,9 @@ impl Cpu {
                 interconnect.write_enabled = false;
                 interconnect.boot_active = false;
             }
+            let running = !self.halted;
 
-            if !self.halted {
+            if running {
                 self.execute_instruction(interconnect);
 
                 if interconnect.read_mem(SERIAL_TRANSFER_CONTROL) == 0x81 {
