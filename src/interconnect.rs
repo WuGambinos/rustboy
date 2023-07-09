@@ -187,11 +187,11 @@ impl Interconnect {
         }
     }
 
-    pub fn emu_tick(&mut self, cyc: u32) {
+    pub fn emu_tick(&mut self, m_cycles: u32) {
         // Convert M cycles to T cycles
-        let cycles = cyc * 4;
+        let t_cycles = m_cycles * 4;
 
-        for _ in 0..cyc {
+        for _ in 0..t_cycles {
             let interrupts = self.ppu.tick();
 
             for int in interrupts {
@@ -200,14 +200,14 @@ impl Interconnect {
         }
 
         // Used to get cycle count over in main loop
-        self.timer.set_internal_ticks(u64::from(cyc));
+        self.timer.set_internal_ticks(u64::from(t_cycles));
 
-        let div_value: u8 = self.timer.div_clock.next(cycles) as u8;
+        let div_value: u8 = self.timer.div_clock.next(t_cycles) as u8;
         self.timer.set_div(div_value);
 
         let timer_enabled: bool = (self.timer.tac() & 0x04) != 0x00;
         if timer_enabled {
-            let n = self.timer.tma_clock.next(cycles);
+            let n = self.timer.tma_clock.next(t_cycles);
 
             for _ in 0..n {
                 let tima_value = self.timer.tima().wrapping_add(1);
@@ -220,7 +220,7 @@ impl Interconnect {
             }
         }
 
-        let dma_cycles = cyc / 4;
+        let dma_cycles = m_cycles;
         for _ in 0..dma_cycles {
             self.dma_tick();
         }
@@ -246,12 +246,6 @@ impl Interconnect {
         self.ppu.set_dma_byte(byte_value);
 
         self.ppu.set_dma_active(self.ppu.dma_byte() < 0xA0);
-
-        if !self.ppu.dma_active() {
-            info!("DMA DONE!");
-            let secs = time::Duration::from_secs(1);
-            std::thread::sleep(secs);
-        }
     }
 }
 
