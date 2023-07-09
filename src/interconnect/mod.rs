@@ -1,16 +1,17 @@
 #![allow(clippy::must_use_candidate)]
-use core::time;
+
+pub mod mmu;
+pub mod ppu;
 
 use log::debug;
-use log::info;
 use log::warn;
 
 use crate::constants::*;
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
-use crate::mmu::Mmu;
-use crate::ppu::Ppu;
+use crate::interconnect::mmu::Mmu;
+use crate::interconnect::ppu::Ppu;
 use modular_bitfield::prelude::*;
 
 #[bitfield]

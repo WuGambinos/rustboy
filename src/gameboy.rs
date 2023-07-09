@@ -2,7 +2,7 @@ use crate::constants::{
     MAIN_SCREEN_HEIGHT, MAIN_SCREEN_WIDTH, PC_AFTER_BOOT, SCREEN_HEIGHT, SCREEN_WIDTH,
 };
 use crate::cpu::Cpu;
-use crate::frontend;
+use crate::gui;
 use crate::interconnect::Interconnect;
 
 use anyhow::Error;
@@ -56,11 +56,11 @@ impl GameBoy {
             }
         } else {
             let sdl_context = sdl2::init().expect("Failed to start SDL");
-            let mut debug_window = frontend::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
+            let mut debug_window = gui::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
             let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
 
             let mut main_window =
-                frontend::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
+                gui::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
 
             'running: loop {
                 self.cpu.run(&mut self.interconnect);
@@ -75,8 +75,8 @@ impl GameBoy {
                         _ => {}
                     }
                 }
-                frontend::debug_window(&mut debug_window, &self.interconnect);
-                frontend::main_window(&mut main_window, &self.interconnect);
+                gui::debug_window(&mut debug_window, &self.interconnect);
+                gui::main_window(&mut main_window, &self.interconnect);
             }
         }
         Ok(())
