@@ -3,6 +3,8 @@ use crate::constants::{
 };
 use crate::cpu::Cpu;
 use crate::gui;
+use crate::interconnect::cartridge::Cartridge;
+use crate::interconnect::cartridge_info::ram_size;
 use crate::interconnect::Interconnect;
 
 use anyhow::Error;
@@ -39,9 +41,22 @@ impl GameBoy {
         let game_rom: Vec<u8> = read_file(game_rom_path)?;
         let boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
+        let cart_type = game_rom[0x147];
+        let rom_size = game_rom[0x148];
+        let ram_s = game_rom[0x149];
+
+        let ram = vec![0x00; ram_size(ram_s) as usize];
+
+        self.interconnect.cartridge = Cartridge::new(&game_rom, &ram);
+        println!("CART TYPE: {:#X}", cart_type);
+        println!("ROM_SIZE: {:#X}", rom_size);
+        println!("RAM_SIZE: {:#X} KiB", ram_size(ram_s));
+        println!("CHECKSUM: {}", self.interconnect.cartridge.checksum());
+
         self.cpu.pc = if skip_boot {
-            self.interconnect.load_game_rom(&game_rom);
+            //self.interconnect.load_game_rom(&game_rom);
             self.interconnect.boot_active = false;
+
             PC_AFTER_BOOT
         } else {
             self.interconnect.load_game_rom(&game_rom);

@@ -1,7 +1,8 @@
 #![allow(clippy::must_use_candidate)]
 
+pub mod cartridge;
+pub mod cartridge_info;
 mod joypad;
-mod mbc1;
 mod mmu;
 mod ppu;
 mod serial;
@@ -20,11 +21,14 @@ use crate::interconnect::mmu::Mmu;
 use crate::interconnect::ppu::Ppu;
 use crate::interconnect::serial::SerialOutput;
 
+use self::cartridge::Cartridge;
+
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
 #[derive(Debug)]
 pub struct Interconnect {
+    pub cartridge: Cartridge,
     pub mmu: Mmu,
     pub timer: Timer,
     pub ppu: Ppu,
@@ -37,6 +41,7 @@ pub struct Interconnect {
 impl Interconnect {
     pub fn new() -> Self {
         Self {
+            cartridge: Cartridge::empty(),
             mmu: Mmu::new(),
             timer: Timer::new(),
             ppu: Ppu::new(),
@@ -73,13 +78,16 @@ impl Interconnect {
 
     pub fn write_mem(&mut self, addr: u16, value: u8) {
         if ROM_BANK.contains(&addr) {
+            /*
             if self.write_enabled {
                 self.mmu.write_rom_bank(addr, value);
             }
+            */
+            self.cartridge.mbc.write(addr, value);
         } else if VRAM.contains(&addr) {
             self.ppu.write_vram(addr, value);
         } else if EXTERNAL_RAM.contains(&addr) {
-            self.mmu.write_external_ram(addr - 0xA000, value);
+            self.cartridge.mbc.write(addr, value);
         } else if WORK_RAM.contains(&addr) {
             self.mmu.write_work_ram(addr - 0xC000, value);
         } else if OAM.contains(&addr) {
@@ -106,11 +114,11 @@ impl Interconnect {
         if self.boot_active && BOOT.contains(&addr) {
             self.mmu.read_boot(addr)
         } else if ROM_BANK.contains(&addr) {
-            self.mmu.read_rom_bank(addr)
+            self.cartridge.mbc.read(addr)
         } else if VRAM.contains(&addr) {
             self.ppu.read_vram(addr)
         } else if EXTERNAL_RAM.contains(&addr) {
-            self.mmu.read_external_ram(addr - 0xA000)
+            self.cartridge.mbc.read(addr)
         } else if WORK_RAM.contains(&addr) {
             self.mmu.read_work_ram(addr - 0xC000)
         } else if OAM.contains(&addr) {
@@ -125,8 +133,7 @@ impl Interconnect {
             self.ppu.read_lcd(addr)
         } else if IO.contains(&addr) {
             if addr == 0xFF00 {
-                //0x1F
-                0x1D
+                0xFF
             } else {
                 self.mmu.read_io(addr - 0xFF00)
             }
@@ -141,9 +148,12 @@ impl Interconnect {
     }
 
     pub fn load_game_rom(&mut self, rom: &[u8]) {
+        /*
         for (i, _) in rom.iter().enumerate() {
             self.write_mem(i as u16, rom[i]);
         }
+        */
+        self.cartridge.mbc.rom = rom.to_vec();
     }
 
     pub fn load_boot_rom(&mut self, rom: &[u8]) {

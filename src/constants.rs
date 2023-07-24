@@ -60,3 +60,6 @@ pub const TIMER: Range<u16> = 0xFF04..0xFF08;
 pub const LCD: Range<u16> = 0xFF40..0xFF4C;
 pub const IO: Range<u16> = 0xFF00..0xFF80;
 pub const HIGH_RAM: Range<u16> = 0xFF80..0xFFFF;
+
+pub const ROM_BANK_SIZE: usize = 0x4000;
+pub const RAM_BANK_SIZE: usize = 0x2000;

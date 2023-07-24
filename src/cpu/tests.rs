@@ -1058,7 +1058,7 @@ fn srl_hl_test() {
     let mut cpu = Cpu::new();
     let mut mmu = Interconnect::new();
 
-    let addr = 0xFFF;
+    let addr = 0xFFFF;
     let value = 0x8F;
 
     mmu.write_mem(addr, value);
