@@ -1,7 +1,8 @@
+rustboy-gui/roms
 /target
+/roms
 /.idea
 /.vscode
-/roms
 flamegraph.svg
 perf.data
 remove_comments.py

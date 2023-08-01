@@ -1,6 +1,4 @@
-use crate::constants::{
-    MAIN_SCREEN_HEIGHT, MAIN_SCREEN_WIDTH, PC_AFTER_BOOT, SCREEN_HEIGHT, SCREEN_WIDTH,
-};
+use crate::constants::PC_AFTER_BOOT;
 use crate::cpu::Cpu;
 use crate::interconnect::cartridge::Cartridge;
 use crate::interconnect::cartridge_info::ram_size;
@@ -11,12 +9,6 @@ use anyhow::Result;
 
 use std::fs;
 use std::path::Path;
-
-#[cfg(target_os = "linux")]
-use sdl2::event::Event;
-
-#[cfg(target_os = "linux")]
-use sdl2::keyboard::Keycode;
 
 /// Struct that represents the gameboy system
 ///
@@ -67,10 +59,6 @@ impl GameBoy {
         };
         Ok(())
     }
-
-
-    #[cfg(target_family = "wasm")]
-    fn run_wasm(&self) {}
 }
 
 fn read_file(path: &Path) -> Result<Vec<u8>, std::io::Error> {
