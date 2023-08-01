@@ -1,26 +1,13 @@
-[package]
-name = "rustboy"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+members = [
+    "rustboy-gb",
+    "rustboy-wasm",
+    "rustboy-gui",
+]
 
-[dependencies]
-sdl2 = {version="0.35.2", features=["gfx"]}
-anyhow = "1.0"
-log = "0.4.17"
-pretty_env_logger = "0.4.0"
-env_logger = "0.10.0"
-clap = { version = "4.3.0", features = ["derive"] }
-modular-bitfield = "0.11.2"
-
-[profile.release]
+[profile.release.package.rustboy-gb]
 #lto="fat"
 #codegen-units = 1
 #panic = "abort"
-debug= true
 overflow-checks = true
-
-[lib]
-name = "rustboy"
-path = "src/lib.rs"

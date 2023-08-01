@@ -1,0 +1,30 @@
+[package]
+name = "rustboy-gb"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[target.'cfg(target_os = "linux")'.dependencies]
+sdl2 = {version="0.35.2", features=["gfx"]}
+anyhow = "1.0"
+log = "0.4.17"
+pretty_env_logger = "0.4.0"
+env_logger = "0.10.0"
+clap = { version = "4.3.0", features = ["derive"] }
+modular-bitfield = "0.11.2"
+
+[target.'cfg(target_family="wasm")'.dependencies]
+wasm-bindgen = "0.2.83"
+log = "0.4.17"
+pretty_env_logger = "0.4.0"
+env_logger = "0.10.0"
+anyhow = "1.0"
+modular-bitfield = "0.11.2"
+
+
+[lib]
+name = "rustboy"
+path = "src/lib.rs"
