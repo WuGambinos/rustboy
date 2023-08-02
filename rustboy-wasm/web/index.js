@@ -42,11 +42,13 @@ async function start_wasm() {
         boot(contents);
         let gb = new WebGameBoy();
         gb.boot(contents);
+        game_loop();
 
-        for(let i = 0; i < 100; i++) { 
+        function game_loop() {
             gb.run();
+            gb.draw();
+            requestAnimationFrame(game_loop);
         }
-        gb.draw();
     }
 
     const readFileAsArrayBuffer = (file) => {
