@@ -1,0 +1,12 @@
+h1 {
+    width: 100%;
+    text-align: center;
+}
+body {
+    text-align: center;
+}
+
+canvas {
+    text-align: center;
+    /*background-color: #0000FF;*/
+}
