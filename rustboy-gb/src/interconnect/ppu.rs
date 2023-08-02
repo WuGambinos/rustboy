@@ -12,15 +12,15 @@ pub struct Rgb {
 
 impl Rgb {
     pub const fn new(r: u8, g: u8, b: u8) -> Rgb {
-        Rgb {
-            r,
-            g,
-            b
-        }
+        Rgb { r, g, b }
     }
 
     pub fn get_rgb(&self) -> (u8, u8, u8) {
         (self.r, self.g, self.b)
+    }
+
+    pub fn to_string(&self) -> String {
+        format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
     }
 }
 

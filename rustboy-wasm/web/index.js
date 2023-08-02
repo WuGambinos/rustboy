@@ -1,9 +1,8 @@
-import init, {start, boot, draw}  from './rustboy_wasm.js';
+import init, {boot, WebGameBoy}  from './rustboy_wasm.js';
 
 // start wasm
 async function start_wasm() {
     await init();
-
 
     // Load file button
     var button = document.getElementById('btn');
@@ -12,28 +11,42 @@ async function start_wasm() {
     })
 
     // Animation loop
+    //
+    /*
     function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         render_buffer();
         requestAnimationFrame(loop);
     }
-    //loop();
+    */
+    /*
+    function loop(gb) {
+        requestAnimationFrame(loop);
+    }
+    */
+
 
     async function loadFile() {
-            const inputElement = document.getElementById('fileInput');
-            const file = inputElement.files[0];
+        const inputElement = document.getElementById('fileInput');
+        const file = inputElement.files[0];
 
-            console.log("ATTEMPTING TO LOAD FILE");
-            if (!file) {
-                alert('Please select a file.');
-                //start();
-                draw();
-                return;
-            }
-            console.log("LOADING FILE");
-            const fileContents = await readFileAsArrayBuffer(file);
-            const contents = new Uint8Array(fileContents);
-            boot(contents);
+        console.log("ATTEMPTING TO LOAD FILE");
+        if (!file) {
+            alert('Please select a file.');
+            return;
+        }
+        console.log("LOADING FILE");
+        const fileContents = await readFileAsArrayBuffer(file);
+        const contents = new Uint8Array(fileContents);
+
+        boot(contents);
+        let gb = new WebGameBoy();
+        gb.boot(contents);
+
+        for(let i = 0; i < 100; i++) { 
+            gb.run();
+        }
+        gb.draw();
     }
 
     const readFileAsArrayBuffer = (file) => {
