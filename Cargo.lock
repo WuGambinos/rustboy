@@ -406,7 +406,6 @@ dependencies = [
 name = "rustboy-wasm"
 version = "0.1.0"
 dependencies = [
- "lazy_static",
  "rustboy-gb",
  "wasm-bindgen",
  "web-sys",

@@ -1,55 +1,15 @@
-use lazy_static::*;
 use rustboy::{
     gameboy::GameBoy,
     interconnect::{cartridge::Cartridge, cartridge_info::ram_size},
 };
 use std::f64;
-use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
-const PIXEL_SIZE: f64 = 4.;
-const SCREEN_WIDTH: u32 = 800;
-const SCREEN_HEIGHT: u32 = 640;
 
 const SCALE: i32 = 4;
 const Y_RESOLUTION: u8 = 144;
 const X_RESOLUTION: u8 = 160;
-
-lazy_static! {
-    static ref GB: Mutex<GameBoy> = {
-        let gb = GameBoy::new();
-        Mutex::new(gb)
-    };
-}
-
-#[wasm_bindgen]
-extern "C" {
-    fn draw_pixel(x: i32, y: i32, w: f64, h: f64, s: &str);
-}
-
-#[wasm_bindgen]
-pub fn load_rom(rom: &[u8]) {
-    GB.lock().unwrap().interconnect.load_game_rom(rom);
-}
-
-#[wasm_bindgen]
-pub fn boot(rom: &[u8]) {
-    let game_rom = rom.to_vec();
-
-    let cart_type = game_rom[0x147];
-    let rom_size = game_rom[0x148];
-    let ram_s = game_rom[0x149];
-    console::log_1(&"BOOTING".into());
-    console::log_2(&"CART TYPE: ".into(), &cart_type.into());
-    console::log_2(&"ROM SIZE: ".into(), &rom_size.into());
-    console::log_2(&"RAM SIZE: ".into(), &ram_s.into());
-    let ram = vec![0x00; ram_size(ram_s) as usize];
-
-    GB.lock().unwrap().interconnect.cartridge = Cartridge::new(&game_rom, &ram);
-    GB.lock().unwrap().cpu.pc = 0x100;
-    console::log_1(&"REACHED END BOOT".into());
-}
 
 #[wasm_bindgen]
 pub struct WebGameBoy {
