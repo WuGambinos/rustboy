@@ -31,7 +31,6 @@ impl Default for Mmu {
 }
 
 impl Mmu {
-    /// Constructor
     pub fn new() -> Self {
         Mmu {
             boot: [0; 0x100],

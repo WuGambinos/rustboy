@@ -1,7 +1,8 @@
 #![allow(clippy::must_use_candidate)]
 use log::warn;
 
-use super::{Cpu, Flags, Interconnect, RegisterPair};
+use crate::cpu::{Cpu, Flags, RegisterPair};
+use crate::interconnect::Interconnect;
 
 /************************************************************************
  * 8-bit Arithmetic instructions
@@ -9,446 +10,252 @@ use super::{Cpu, Flags, Interconnect, RegisterPair};
 
 /// Increments 8-bit register
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 H -      
 pub fn inc_8bit(flags: &mut Flags, register: &mut u8) {
     let mut value: u8 = *register;
 
-    //Update Half Carry
     flags.update_half_carry_flag_sum_8bit(value, 1);
-
-    //r = r + 1
     value = value.wrapping_add(1);
 
-    //Update Zero Flag
     flags.update_zero_flag(value);
-
-    //Clear Sub Flag
     flags.clear_sub_flag();
 
-    //Store value back in register
     *register = value;
 }
 
 /// Decrements 8-bit register
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Set
-///
-/// Half Carry: Dependent
+/// Flags:  Z N H C
+///         Z 1 H -      
 pub fn dec_8bit(flags: &mut Flags, register: &mut u8) {
     let mut value = *register;
 
-    //Update Half Carry
     flags.update_half_carry_flag_sub_8bit(value, 1);
-
-    //r = r - 1
     value = value.wrapping_sub(1);
 
-    //Update Zero Flag
     flags.update_zero_flag(value);
-
-    //Set Sub Flag
     flags.set_sub_flag();
 
-    //Store new value back in register
     *register = value;
 }
 
 /// Increments value in memory using HL pointer
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub Flag: Clear
-///
-/// Half Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 H -      
 pub fn inc_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     let hl = cpu.registers.hl();
-
-    // Grab value in memory
     let mut value = interconnect.read_mem(hl);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
-    // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(value, 1);
-
-    // Increments value
     value = value.wrapping_add(1);
-
-    // Write new incremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
-    // Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
-
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
 }
 
 /// Decrements value in memory using HL pointer
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Set
-///
-/// Half Carry: Dependent
+/// Flags:  Z N H C
+///         Z 1 H -
 pub fn dec_mem(cpu: &mut Cpu, interconnect: &mut Interconnect) {
-    // Grab value in memory
     let mut value: u8 = interconnect.read_mem(cpu.registers.hl());
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
-    // Check for Half Carry
     cpu.registers.f.update_half_carry_flag_sub_8bit(value, 1);
-
-    // Decrements Value
     value = value.wrapping_sub(1);
-
-    // Write new decremented value back into memory
     interconnect.write_mem(cpu.registers.hl(), value);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
-    // Update Zero Flag
     cpu.registers.f.update_zero_flag(value);
-
-    // Set sub flag
     cpu.registers.f.set_sub_flag();
 }
 
-///Adds Accumulator(register A) and another register together, storing result in the accumulator
+/// Adds Accumulator(register A) and another register together, storing result in the accumulator
 ///
 /// a = r + a
 ///
-/// Flags: Z0HC
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 H C
 pub fn add_a_r(cpu: &mut Cpu, operand: u8) {
     let mut a: u8 = cpu.registers.a;
-    // Update Half Carry
     cpu.registers.f.update_half_carry_flag_sum_8bit(a, operand);
-
-    // Update Carry Flag
     cpu.registers.f.update_carry_flag_sum_8bit(a, operand);
-
-    // a = r + a
     a = a.wrapping_add(operand);
 
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    // Update Zero Flag
     cpu.registers.f.update_zero_flag(a);
-
-    // Store new value in accumulator
     cpu.registers.a = a;
 }
 
 /// Adds Accumulator(register A), another register, and carry all together, storing result in the accumulator
 ///
-/// a = a + r + c
+/// a = a + r + carry
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 H C
 pub fn adc_a_r(cpu: &mut Cpu, operand: u8) {
-    // Accumulator
-    let a: u8 = cpu.registers.a;
+    let accumulator: u8 = cpu.registers.a;
+    let result: u16 =
+        (accumulator as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
+    let half_carry: bool =
+        ((accumulator & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F;
 
-    // Result
-    let c: u16 = (a as u16) + (operand as u16) + (cpu.registers.f.carry_flag() as u16);
-
-    // Calculate Half Carry
-    let half_carry: bool = ((a & 0x0F) + (operand & 0x0F) + cpu.registers.f.carry_flag()) > 0x0F;
-
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    // Update Half Carry Flag
     if half_carry {
         cpu.registers.f.set_half_carry_flag();
     } else {
         cpu.registers.f.clear_half_carry_flag();
     }
 
-    // Update Carry Flag
-    if c > 0xFF {
+    if result > 0xFF {
         cpu.registers.f.set_carry_flag();
     } else {
         cpu.registers.f.clear_carry_flag();
     }
 
-    // Update Zero Flag
-    cpu.registers.f.update_zero_flag(c as u8);
-
-    // Store new value in accumulator
-    cpu.registers.a = c as u8;
+    cpu.registers.f.update_zero_flag(result as u8);
+    cpu.registers.a = result as u8;
 }
 
 /// Subtracts register from the accumulator, storing the result in the accumulator
 ///
 /// a = a - r
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Set
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 1 H C
 pub fn sub_a_r(cpu: &mut Cpu, operand: u8) {
-    let mut a: u8 = cpu.registers.a;
+    let mut accumulator: u8 = cpu.registers.a;
 
-    // Update Half Carry
-    cpu.registers.f.update_half_carry_flag_sub_8bit(a, operand);
+    cpu.registers
+        .f
+        .update_half_carry_flag_sub_8bit(accumulator, operand);
+    cpu.registers
+        .f
+        .update_carry_flag_sub_8bit(accumulator, operand);
+    accumulator = accumulator.wrapping_sub(operand);
 
-    // Update Carry(Borrow) Flag
-    cpu.registers.f.update_carry_flag_sub_8bit(a, operand);
-
-    // a = a - r
-    a = a.wrapping_sub(operand);
-
-    // Set Sub flag
     cpu.registers.f.set_sub_flag();
-
-    // Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
-
-    // Store new value in accumulator
-    cpu.registers.a = a;
+    cpu.registers.f.update_zero_flag(accumulator);
+    cpu.registers.a = accumulator;
 }
 
 /// Subtracts another register and carry from the accumulator, storing the result in the accumulator
 ///
 /// a = a - r - c
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Set
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 1 H C
 pub fn sbc_a_r(cpu: &mut Cpu, operand: u8) {
-    // Accumulator
-    let a = cpu.registers.a as i16;
-
-    // Operand
+    let accumulator = cpu.registers.a as i16;
     let b = operand as i16;
-
-    // Result
-    let c = a
+    let result: i16 = accumulator
         .wrapping_sub(b)
         .wrapping_sub(cpu.registers.f.carry_flag() as i16);
 
-    // Calculate Half Carry
-    let half_carry = ((a & 0x0F) - (b & 0x0F) - (cpu.registers.f.carry_flag() as i16)) < 0;
+    let half_carry: bool =
+        ((accumulator & 0x0F) - (b & 0x0F) - (cpu.registers.f.carry_flag() as i16)) < 0;
 
-    // Set Sub Flag
     cpu.registers.f.set_sub_flag();
 
-    // Update Half Carry Flag
     if half_carry {
         cpu.registers.f.set_half_carry_flag();
     } else {
         cpu.registers.f.clear_half_carry_flag();
     }
 
-    // Update Carry(Borrow) Flag
-    if c < 0 {
+    if result < 0 {
         cpu.registers.f.set_carry_flag();
     } else {
         cpu.registers.f.clear_carry_flag();
     }
 
-    // Update Zero Flag
-    cpu.registers.f.update_zero_flag(c as u8);
-
-    // Store new value in accumulator
-    cpu.registers.a = c as u8;
+    cpu.registers.f.update_zero_flag(result as u8);
+    cpu.registers.a = result as u8;
 }
 
 /// Stores the logical "and" of accumulator and register in accumluator
 ///
 /// a = a & r
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Set
-///
-/// Carry: Clear
+/// Flags:  Z N H C
+///         Z 0 1 0
 pub fn and_a_r(cpu: &mut Cpu, operand: u8) {
-    let mut a: u8 = cpu.registers.a;
+    let mut accumulator: u8 = cpu.registers.a;
+    accumulator &= operand;
 
-    // and
-    a &= operand;
-
-    // Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
-
-    // Clear Sub Flag
+    cpu.registers.f.update_zero_flag(accumulator);
     cpu.registers.f.clear_sub_flag();
-
-    // Set Half Carry
     cpu.registers.f.set_half_carry_flag();
-
-    // Clear Carry Flag
     cpu.registers.f.clear_carry_flag();
-
-    // Store new value in accumulator
-    cpu.registers.a = a;
+    cpu.registers.a = accumulator;
 }
 
 /// Stores logical xor of accumulator and register in accumulator
 ///
 /// a = a ^ r
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Clear
+/// Flags:  Z N H C
+///         Z 0 0 0
 pub fn xor_a_r(cpu: &mut Cpu, operand: u8) {
-    let mut a: u8 = cpu.registers.a;
+    let mut accumulator: u8 = cpu.registers.a;
+    accumulator ^= operand;
 
-    // xor
-    a ^= operand;
-
-    // Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
-
-    // Clear Sub Flag
+    cpu.registers.f.update_zero_flag(accumulator);
     cpu.registers.f.clear_sub_flag();
-
-    // Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
-
-    // Clear Carry
     cpu.registers.f.clear_carry_flag();
-
-    // Set actual accumualtor equal to resulting value
-    cpu.registers.a = a;
+    cpu.registers.a = accumulator;
 }
 
 /// Stores logical or of accumulator and register in accumulator
 ///
 /// a = a | r
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Clear
-///
+/// Flags:  Z N H C
+///         Z 0 0 0
 pub fn or_a_r(cpu: &mut Cpu, operand: u8) {
-    let mut a: u8 = cpu.registers.a;
+    let mut accumulator: u8 = cpu.registers.a;
+    accumulator |= operand;
 
-    //or
-    a |= operand;
-
-    //Update Zero Flag
-    cpu.registers.f.update_zero_flag(a);
-
-    //Clear Sub Flag
+    cpu.registers.f.update_zero_flag(accumulator);
     cpu.registers.f.clear_sub_flag();
-
-    //Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
-
-    //Clear Carry Flag
     cpu.registers.f.clear_carry_flag();
-
-    //Set actual accumualtor equal to resulting value
-    cpu.registers.a = a;
+    cpu.registers.a = accumulator;
 }
 
 /// Compares accumulator with register via subtraction
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Set
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 1 H C
 pub fn cp_a_r(cpu: &mut Cpu, operand: u8) {
-    let a: u8 = cpu.registers.a;
+    let accumulator: u8 = cpu.registers.a;
+    let res = accumulator.wrapping_sub(operand);
 
-    //a - r
-    let res = a.wrapping_sub(operand);
-
-    //Update Zero Flag
     cpu.registers.f.update_zero_flag(res);
-
-    //Set Sub Flag
     cpu.registers.f.set_sub_flag();
-
-    //Update Half Carry
-    cpu.registers.f.update_half_carry_flag_sub_8bit(a, operand);
-
-    //Update Carry(Borrow) Flag
-    cpu.registers.f.update_carry_flag_sub_8bit(a, operand);
+    cpu.registers
+        .f
+        .update_half_carry_flag_sub_8bit(accumulator, operand);
+    cpu.registers
+        .f
+        .update_carry_flag_sub_8bit(accumulator, operand);
 }
 
 /// Adjusts results of binary addition or subtratction to retroactively
 /// turn it into a BCD addition or subtraction
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z - 0 C
 pub fn daa(cpu: &mut Cpu) {
     if cpu.registers.f.sub_flag() == 0 {
         if cpu.registers.f.carry_flag() == 1 || cpu.registers.a > 0x99 {
@@ -469,10 +276,7 @@ pub fn daa(cpu: &mut Cpu) {
         }
     }
 
-    //Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
-
-    //Update Zero Flag
     cpu.registers.f.update_zero_flag(cpu.registers.a);
 }
 
@@ -485,39 +289,23 @@ pub fn daa(cpu: &mut Cpu) {
 /// 7th bit of Accumulator is copied into carry
 /// and into the 0th bit of A
 ///
-/// Flags:
-///
-/// Zero: Clear
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         0 0 0 C
 pub fn rlca(cpu: &mut Cpu) {
-    // 7th bit
-    let lmb: u8 = (cpu.registers.a & 0x80) >> 7;
+    let old_msb: u8 = (cpu.registers.a & 0x80) >> 7;
 
-    // Rotate accumulator to left
     cpu.registers.a <<= 1;
-
     // Store previous 7th bit in 0th position
-    cpu.registers.a |= (1 << 0) & lmb;
+    cpu.registers.a |= (1 << 0) & old_msb;
 
-    // Store original 7th bit in carry
-    if lmb == 0 {
+    if old_msb == 0 {
         cpu.registers.f.clear_carry_flag();
     } else {
         cpu.registers.f.set_carry_flag();
     }
 
-    // Clear Zero Flag
     cpu.registers.f.clear_zero_flag();
-
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    // Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
 }
 
@@ -525,39 +313,22 @@ pub fn rlca(cpu: &mut Cpu) {
 ///
 /// 0th Bit of Accumulator is copied into the carry and into 7th bit of Accumulator
 ///
-/// Flags:
-///
-/// Zero: Clear
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         0 0 0 C
 pub fn rrca(cpu: &mut Cpu) {
-    // 0th bit
-    let rmb: u8 = cpu.registers.a & 0x01;
-
-    // Rotate accumulator to right
+    let old_lsb: u8 = cpu.registers.a & 0x01;
     cpu.registers.a >>= 1;
-
     // Store previous 0th bit in 7th bit of A
-    cpu.registers.a |= (1 << 7) & (rmb << 7);
+    cpu.registers.a |= (1 << 7) & (old_lsb << 7);
 
-    // Store original 0th bit in carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         cpu.registers.f.clear_carry_flag();
     } else {
         cpu.registers.f.set_carry_flag();
     }
 
-    // Clear Zero Flag
     cpu.registers.f.clear_zero_flag();
-
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    // Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
 }
 
@@ -565,39 +336,23 @@ pub fn rrca(cpu: &mut Cpu) {
 ///
 /// 7th bit is moved into carry, and the carry is moved into the 0th bit
 ///
-/// Flags:
-///
-/// Zero: Clear
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         0 0 0 C
 pub fn rla(cpu: &mut Cpu) {
-    let lmb: u8 = cpu.registers.a & 0x80;
-
-    //Rotate Accumulator Left
+    let old_msb: u8 = cpu.registers.a & 0x80;
     cpu.registers.a <<= 1;
 
-    //Store carry into 0th bit of Accumulator
+    // Store carry in 0th bit of A
     cpu.registers.a |= (1 << 0) & (cpu.registers.f.carry_flag());
 
-    //Move 7th bit into carry
-
-    if lmb == 0 {
+    if old_msb == 0 {
         cpu.registers.f.clear_carry_flag();
     } else {
         cpu.registers.f.set_carry_flag();
     }
 
-    //Clear Zero Flag
     cpu.registers.f.clear_zero_flag();
-
-    //Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    //Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
 }
 
@@ -605,39 +360,23 @@ pub fn rla(cpu: &mut Cpu) {
 ///
 /// 0th bit of A is moved into the carry, and the carry is moved into the 7th bit of A
 ///
-/// Flags:
-///
-/// Zero: Clear
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         0 0 0 C
 pub fn rra(cpu: &mut Cpu) {
-    // 0th bit
-    let rmb: u8 = cpu.registers.a & 0x01;
-
-    // Rotate Accumulator to right
+    let old_lsb: u8 = cpu.registers.a & 0x01;
     cpu.registers.a >>= 1;
 
     // Store carry in 7th bit of A
     cpu.registers.a |= (1 << 7) & (cpu.registers.f.carry_flag() << 7);
 
-    // Store original 0th bit in carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         cpu.registers.f.clear_carry_flag();
     } else {
         cpu.registers.f.set_carry_flag();
     }
 
-    // Clear Zero Flag
     cpu.registers.f.clear_zero_flag();
-
-    // Clear Sub Flag
     cpu.registers.f.clear_sub_flag();
-
-    // Clear Half Carry
     cpu.registers.f.clear_half_carry_flag();
 }
 
@@ -647,46 +386,27 @@ pub fn rra(cpu: &mut Cpu) {
 ///
 /// Contents of 7th bit are into carry and also to 0th bit
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rlc(f: &mut Flags, r: &mut u8) {
-    // Register
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
-    // Content of 7th bit
-    let lmb: u8 = (reg & 0x80) >> 7;
-
-    // Rotate register left
-    reg <<= 1;
+    let old_msb: u8 = (value & 0x80) >> 7;
+    value <<= 1;
 
     // Store 7th bit into 0th bit of register
-    reg |= (1 << 0) & (lmb);
+    value |= (1 << 0) & (old_msb);
 
-    // Move 7th bit into carry
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
-    f.update_zero_flag(reg);
-
-    // Clear Sub Flag
+    f.update_zero_flag(value);
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
-    *r = reg;
+    *r = value;
 }
 
 /// Rotates (mem[HL]) to the left(Circular)
@@ -695,52 +415,31 @@ pub fn rlc(f: &mut Flags, r: &mut u8) {
 ///
 /// Contents of 7th bit are into carry and also to 0th bit
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
-    // Value in memory at addr
     let mut value = interconnect.read_mem(addr);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
-    // Conent of 7th bit
-    let lmb: u8 = (value & 0x80) >> 7;
-
-    // Rotate mem[HL] left
+    let old_msb: u8 = (value & 0x80) >> 7;
     value <<= 1;
 
     // Store 7th bit in 0th bit of mem[HL]
-    value |= (1 << 0) & (lmb);
+    value |= (1 << 0) & (old_msb);
 
-    // Move 7th bit into carry
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Write new value into memroy
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Rotates register to the right (Circular)
@@ -749,45 +448,26 @@ pub fn rlc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 ///
 /// Contents of Bit 0 are copied to Carry Flag and also to bit 7.
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rrc(f: &mut Flags, r: &mut u8) {
-    // Register
-    let mut reg: u8 = *r;
-
-    // Content of 0th bit
-    let rmb: u8 = reg & 0x01;
-
-    // Rotate register right
-    reg >>= 1;
+    let mut value: u8 = *r;
+    let old_lsb: u8 = value & 0x01;
+    value >>= 1;
 
     // Store 0th bit into 7th bit of register
-    reg |= (1 << 7) & (rmb << 7);
+    value |= (1 << 7) & (old_lsb << 7);
 
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
-    f.update_zero_flag(reg);
-
-    // Clear Sub Flag
+    f.update_zero_flag(value);
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
-    *r = reg;
+    *r = value;
 }
 
 /// Rotates (mem[HL]) to the right(Circular)
@@ -796,51 +476,30 @@ pub fn rrc(f: &mut Flags, r: &mut u8) {
 ///
 /// Contents of Bit 0 are copied to Carry Flag and also to bit 7.
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Depedent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // Content of 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // Rotate mem[HL] right
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // Store 0th bit in 7th bit
-    value |= (1 << 7) & (rmb << 7);
+    value |= (1 << 7) & (old_lsb << 7);
 
-    // Update Carry Flag
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Write new value into memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Rotates register to the left
@@ -849,46 +508,27 @@ pub fn rrc_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 ///
 /// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rl(f: &mut Flags, r: &mut u8) {
-    // Register
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
-    // Contents of 7th bit
-    let lmb: u8 = (reg & 0x80) >> 7;
-
-    // Rotate Regiter Left
-    reg <<= 1;
+    let old_msb: u8 = (value & 0x80) >> 7;
+    value <<= 1;
 
     // Copy carry to 0th bit
-    reg |= (1 << 0) & f.carry_flag();
+    value |= (1 << 0) & f.carry_flag();
 
-    // Update Carry Flag
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
-    f.update_zero_flag(reg);
-
-    // Clear Sub Flag
+    f.update_zero_flag(value);
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
-    *r = reg;
+    *r = value;
 }
 
 /// Rotates mem[HL] to the left
@@ -897,51 +537,30 @@ pub fn rl(f: &mut Flags, r: &mut u8) {
 ///
 /// Contents of bit 7 are copied to Carry Flag. Previous contents of Carry Flag are copied to bit 0
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // 7th bit
-    let lmb: u8 = (value & 0x80) >> 7;
-
-    // Rotate Left
+    let old_msb: u8 = (value & 0x80) >> 7;
     value <<= 1;
 
     // Copy carry to 0th bit
     value |= (1 << 0) & f.carry_flag();
 
-    // Update Carry
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Write new value into memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Rotates register to the right
@@ -951,44 +570,25 @@ pub fn rl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 /// Conents of bit 0 are copied to carry flag and previoius contents of carry flag
 /// are copied to bit 7
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rr(f: &mut Flags, r: &mut u8) {
     let mut value: u8 = *r;
-
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // Rotate Right
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // Copy carry to 0th bit
     value |= (1 << 7) & (f.carry_flag() << 7);
 
-    // Update Carry Flag
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
     *r = value;
 }
 
@@ -999,51 +599,30 @@ pub fn rr(f: &mut Flags, r: &mut u8) {
 /// Conents of bit 0 are copied to carry flag and previoius contents of carry flag
 /// are copied to bit 7
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // Rotate Right
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // Copy carry to 0th bit
     value |= (1 << 7) & (f.carry_flag() << 7);
 
-    // Update Carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Write new value to memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Shifts register to the left arithmetically
@@ -1052,41 +631,22 @@ pub fn rr_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 ///
 /// Contents of bit 7 are copied to carry flag
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn sla(f: &mut Flags, r: &mut u8) {
     let mut value: u8 = *r;
-
-    // 7th bit
-    let lmb: u8 = (value & 0x80) >> 7;
-
-    // shift left one bit position
+    let old_msb: u8 = (value & 0x80) >> 7;
     value <<= 1;
 
-    // Update Carry
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
     *r = value;
 }
 
@@ -1096,175 +656,103 @@ pub fn sla(f: &mut Flags, r: &mut u8) {
 ///
 /// Contents of bit 7 are copied to carry flag
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn sla_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // 7th bit
-    let lmb: u8 = (value & 0x80) >> 7;
-
-    // shift left one bit position
+    let old_msb: u8 = (value & 0x80) >> 7;
     value <<= 1;
 
-    // Update Carry
-    if lmb == 0 {
+    if old_msb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Write new value into memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Shifts register to the right arithmetically
 ///    
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn sra(f: &mut Flags, r: &mut u8) {
     let mut value: u8 = *r;
 
-    // 7th bit
-    let lmb: u8 = value & 0x80;
-
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // shift right one bit position
+    let old_msb: u8 = value & 0x80;
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // put 7th bit back in
-    value |= (1 << 7) & (lmb);
+    value |= (1 << 7) & (old_msb);
 
     // Update Carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
     *r = value;
 }
 
 /// Shift mem[HL] to the right arithmetically
+///
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn sra_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // 7th bit
-    let lmb: u8 = value & 0x80;
-
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // shift right one bit position
+    let old_msb: u8 = value & 0x80;
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // put 7th bit back in
-    value |= (1 << 7) & (lmb);
+    value |= (1 << 7) & (old_msb);
 
-    // Update Carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
 
-    // Store new value in memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Swaps r
 ///
 /// Exchange lower and higher nibbles
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Clear
+/// Flags:  Z N H C
+///         Z 0 0 0
 pub fn swap(f: &mut Flags, r: &mut u8) {
     let mut value: u8 = *r;
-
-    // Lower Nibble
-    let low: u8 = value & 0x0F;
-    // Upper Nibble
-    let up: u8 = value & 0xF0;
+    let lower_nibble: u8 = value & 0x0F;
+    let upper_nibble: u8 = value & 0xF0;
 
     // Swap
-    value = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
+    value = (((lower_nibble as u16) << 4) | ((upper_nibble as u16) >> 4)) as u8;
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Carry Flag
     f.clear_carry_flag();
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry Flag
     f.clear_half_carry_flag();
-
-    // Store new value in register
     *r = value;
 }
 
@@ -1272,47 +760,25 @@ pub fn swap(f: &mut Flags, r: &mut u8) {
 ///
 /// Exchange lower and higher nibbles
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Clear
+/// Flags:  Z N H C
+///         Z 0 0 0
 pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // Lower Nibble
-    let low: u8 = value & 0x0F;
-
-    // Upper Nibble
-    let up: u8 = value & 0xF0;
+    let lower_nibble: u8 = value & 0x0F;
+    let upper_nibble: u8 = value & 0xF0;
 
     // Swap
-    value = (((low as u16) << 4) | ((up as u16) >> 4)) as u8;
+    value = (((lower_nibble as u16) << 4) | ((upper_nibble as u16) >> 4)) as u8;
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Carry Flag
     f.clear_carry_flag();
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry Flag
     f.clear_half_carry_flag();
 
-    // Write new value into memory
     interconnect.write_mem(addr, value);
-
-    // Increase Iimer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Shifts register to the right logically
@@ -1321,45 +787,26 @@ pub fn swap_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
 ///
 /// 7th bit is cleared
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn srl(f: &mut Flags, r: &mut u8) {
-    // Register
     let mut value: u8 = *r;
 
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // Perform shift
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // Clear 7th bit
     value &= !(1 << 7);
 
-    // Copy 0th bit into carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry
     f.clear_half_carry_flag();
-
-    // Store new value in register
     *r = value;
 }
 
@@ -1369,51 +816,30 @@ pub fn srl(f: &mut Flags, r: &mut u8) {
 ///
 /// 7th bit is cleared
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Clear
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z 0 0 C
 pub fn srl_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16) {
     let mut value: u8 = interconnect.read_mem(addr);
+    interconnect.emu_tick(1);
 
-    // Increase Timer
-    interconnect.emu_cycles(1);
-
-    // 0th bit
-    let rmb: u8 = value & 0x01;
-
-    // Perform shift
+    let old_lsb: u8 = value & 0x01;
     value >>= 1;
 
     // Clear 7th bit
     value &= !(1 << 7);
 
-    // Copy 0th bit into carry
-    if rmb == 0 {
+    if old_lsb == 0 {
         f.clear_carry_flag();
     } else {
         f.set_carry_flag();
     }
 
-    // Update Zero Flag
     f.update_zero_flag(value);
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Clear Half Carry Flag
     f.clear_half_carry_flag();
 
-    // Write new value to memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /************************************************************************
@@ -1467,95 +893,63 @@ pub fn dec_16bit(cpu: &mut Cpu, register_pair: RegisterPair) {
 
 /// Sum of HL and register pair RR stored in HL
 ///
-/// Flags:
-///
-/// Sub Flag: Clear
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         - 0 H C
 pub fn add_rr_hl(cpu: &mut Cpu, register_pair: RegisterPair) {
     match register_pair {
         RegisterPair::BC => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.bc() as u32;
 
-            // HL + BC
-            let c = a + b;
+            let result = a + b;
 
-            // Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
-
-            // Update Half Carry
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
-
-            // Calculate Carry
             cpu.registers
                 .f
                 .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.bc());
-
-            cpu.registers.set_hl(c as u16);
+            cpu.registers.set_hl(result as u16);
         }
         RegisterPair::DE => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.de() as u32;
 
-            // HL + DE
-            let c = a + b;
+            let result = a + b;
 
-            // Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
-
-            // Update Half Carry
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
-
-            // Calculate Carry
             cpu.registers
                 .f
                 .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.de());
-
-            cpu.registers.set_hl(c as u16);
+            cpu.registers.set_hl(result as u16);
         }
         RegisterPair::HL => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.registers.hl() as u32;
 
-            // HL + HL
-            let c = a + b;
+            let result = a + b;
 
-            // Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
-
-            // Update Half Carry;
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
-
-            // Calculate Carry
             cpu.registers
                 .f
                 .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.registers.hl());
 
-            cpu.registers.set_hl(c as u16);
+            cpu.registers.set_hl(result as u16);
         }
 
         RegisterPair::SP => {
             let a = cpu.registers.hl() as u32;
             let b = cpu.sp as u32;
 
-            // HL + HL
-            let c = a + b;
+            let result = a + b;
 
-            // Clear Sub Flag
             cpu.registers.f.clear_sub_flag();
-
-            // Update Half Carry;
             cpu.registers.f.update_half_carry_flag_sum_16bit(a, b);
-
-            // Calculate Carry
             cpu.registers
                 .f
                 .update_carry_flag_sum_16bit(cpu.registers.hl(), cpu.sp);
-
-            cpu.registers.set_hl(c as u16);
+            cpu.registers.set_hl(result as u16);
         }
         _ => warn!("{:?}, Not a register PAIR", register_pair),
     }
@@ -1572,7 +966,6 @@ pub fn add_rr_hl(cpu: &mut Cpu, register_pair: RegisterPair) {
 /// Flags: None
 pub fn jr(cpu: &mut Cpu, dd: u8) {
     let offset = dd as i8;
-
     cpu.pc = cpu.pc.wrapping_add(offset as u16).wrapping_add(2);
 }
 
@@ -1582,10 +975,10 @@ pub fn jr(cpu: &mut Cpu, dd: u8) {
 pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.zero_flag() == 1 {
         jr(cpu, dd);
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     } else {
         cpu.pc += 2;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1595,10 +988,10 @@ pub fn jr_z(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.zero_flag() == 0 {
         jr(cpu, dd);
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     } else {
         cpu.pc += 2;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1608,10 +1001,10 @@ pub fn jr_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.carry_flag() == 1 {
         jr(cpu, dd);
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     } else {
         cpu.pc += 2;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1621,10 +1014,10 @@ pub fn jr_c(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
 pub fn jr_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, dd: u8) {
     if cpu.registers.f.carry_flag() == 0 {
         jr(cpu, dd);
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     } else {
         cpu.pc += 2;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1641,10 +1034,10 @@ pub fn jp(cpu: &mut Cpu, nn: u16) {
 pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         jp(cpu, nn);
-        interconnect.emu_cycles(4);
+        interconnect.emu_tick(4);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1654,10 +1047,10 @@ pub fn jp_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         jp(cpu, nn);
-        interconnect.emu_cycles(4);
+        interconnect.emu_tick(4);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1667,10 +1060,10 @@ pub fn jp_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         jp(cpu, nn);
-        interconnect.emu_cycles(4);
+        interconnect.emu_tick(4);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1680,10 +1073,10 @@ pub fn jp_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn jp_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         jp(cpu, nn);
-        interconnect.emu_cycles(4);
+        interconnect.emu_tick(4);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1692,21 +1085,13 @@ pub fn jp_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 /// Flags: None
 pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     let mut stack_pointer: u16 = cpu.sp;
-
-    // SP = SP - 2
     stack_pointer -= 2;
-
-    // Increments PC by 3 before push
     cpu.pc += 3;
 
-    // mem[sp] = pc
     interconnect.write_mem(stack_pointer, (cpu.pc & 0x00FF) as u8);
     interconnect.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
-    // PC = nn
     cpu.pc = nn;
-
-    // Store new value into stack pointer
     cpu.sp = stack_pointer;
 }
 
@@ -1716,10 +1101,10 @@ pub fn call(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 1 {
         call(cpu, interconnect, nn);
-        interconnect.emu_cycles(6);
+        interconnect.emu_tick(6);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1729,10 +1114,10 @@ pub fn call_z(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.zero_flag() == 0 {
         call(cpu, interconnect, nn);
-        interconnect.emu_cycles(6);
+        interconnect.emu_tick(6);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1742,10 +1127,10 @@ pub fn call_nz(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 1 {
         call(cpu, interconnect, nn);
-        interconnect.emu_cycles(6);
+        interconnect.emu_tick(6);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1755,10 +1140,10 @@ pub fn call_c(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
     if cpu.registers.f.carry_flag() == 0 {
         call(cpu, interconnect, nn);
-        interconnect.emu_cycles(6);
+        interconnect.emu_tick(6);
     } else {
         cpu.pc += 3;
-        interconnect.emu_cycles(3);
+        interconnect.emu_tick(3);
     }
 }
 
@@ -1768,10 +1153,7 @@ pub fn call_nc(cpu: &mut Cpu, interconnect: &mut Interconnect, nn: u16) {
 pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
     let mut stack_pointer: u16 = cpu.sp;
 
-    // SP = SP - 2
     stack_pointer = stack_pointer.wrapping_sub(2);
-
-    // Increments PC before push
     cpu.pc += 1;
 
     // mem[SP] = lower byte of program counter
@@ -1780,10 +1162,7 @@ pub fn rst(cpu: &mut Cpu, interconnect: &mut Interconnect, n: u8) {
     // mem[SP+1] = upper byte of program counter (its + 1 below because we already moved the stack pointer)
     interconnect.write_mem(stack_pointer + 1, ((cpu.pc & 0xFF00) >> 8) as u8);
 
-    // PC = n
     cpu.pc = n as u16;
-
-    // Store new value into stack pointer
     cpu.sp = stack_pointer;
 }
 
@@ -1799,13 +1178,8 @@ pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
         interconnect.read_mem(sp),
     ]);
 
-    // Store new program counter value
     cpu.pc = pc;
-
-    // SP = SP + 2
     sp = sp.wrapping_add(2);
-
-    // Store new value in stack pointer
     cpu.sp = sp;
 }
 
@@ -1815,10 +1189,10 @@ pub fn ret(cpu: &mut Cpu, interconnect: &Interconnect) {
 pub fn ret_z(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.zero_flag() == 1 {
         ret(cpu, interconnect);
-        interconnect.emu_cycles(5);
+        interconnect.emu_tick(5);
     } else {
         cpu.pc += 1;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1828,10 +1202,10 @@ pub fn ret_z(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 pub fn ret_nz(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.zero_flag() == 0 {
         ret(cpu, interconnect);
-        interconnect.emu_cycles(5);
+        interconnect.emu_tick(5);
     } else {
         cpu.pc += 1;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1841,10 +1215,10 @@ pub fn ret_nz(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 pub fn ret_c(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.carry_flag() == 1 {
         ret(cpu, interconnect);
-        interconnect.emu_cycles(5);
+        interconnect.emu_tick(5);
     } else {
         cpu.pc += 1;
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1854,11 +1228,11 @@ pub fn ret_c(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 pub fn ret_nc(cpu: &mut Cpu, interconnect: &mut Interconnect) {
     if cpu.registers.f.carry_flag() == 0 {
         ret(cpu, interconnect);
-        interconnect.emu_cycles(5);
+        interconnect.emu_tick(5);
     } else {
         cpu.pc += 1;
 
-        interconnect.emu_cycles(2);
+        interconnect.emu_tick(2);
     }
 }
 
@@ -1870,7 +1244,6 @@ pub fn ret_nc(cpu: &mut Cpu, interconnect: &mut Interconnect) {
 ///
 /// Flags: None
 pub fn ld_8bit(r: &mut u8, data: u8) {
-    // Store data in register
     *r = data;
 }
 
@@ -1879,8 +1252,6 @@ pub fn ld_8bit(r: &mut u8, data: u8) {
 /// Flags: None
 pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
     let addr: u16 = 0xFF00 + (n as u16);
-
-    // Store io-port 'n' value in accumulator
     cpu.registers.a = interconnect.read_mem(addr);
 }
 
@@ -1889,8 +1260,6 @@ pub fn ld_a_from_io(cpu: &mut Cpu, interconnect: &Interconnect, n: u8) {
 /// Flags: None
 pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
     let addr: u16 = 0xFF00 + (n as u16);
-
-    // Write accumlulator value to io port 'n'
     interconnect.write_mem(addr, cpu.registers.a);
 }
 
@@ -1899,8 +1268,6 @@ pub fn ld_io_from_a(cpu: &Cpu, interconnect: &mut Interconnect, n: u8) {
 /// Flags: None
 pub fn ld_a_from_io_c(cpu: &mut Cpu, interconnect: &Interconnect) {
     let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
-
-    // Store mem[$FF00 + register C] value in accumulator
     cpu.registers.a = interconnect.read_mem(addr);
 }
 
@@ -1909,8 +1276,6 @@ pub fn ld_a_from_io_c(cpu: &mut Cpu, interconnect: &Interconnect) {
 /// Flags: None
 pub fn ld_io_c_from_a(cpu: &Cpu, interconnect: &mut Interconnect) {
     let addr: u16 = 0xFF00 + (cpu.registers.c as u16);
-
-    // Store accumulator value in mem[$FF00 + register C]
     interconnect.write_mem(addr, cpu.registers.a);
 }
 
@@ -1922,32 +1287,22 @@ pub fn ld_io_c_from_a(cpu: &Cpu, interconnect: &mut Interconnect) {
 ///
 /// Flags: None
 ///
-/// Unless it if POP AF then
+/// Unless it is POP AF then
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Dependent
-///
-/// Half Carry: Dependent
-///
-/// Carry: Dependent
+/// Flags:  Z N H C
+///         Z N H C
 pub fn pop_rr(interconnect: &Interconnect, upper: &mut u8, lower: &mut u8, sp: &mut u16) {
     let mut stack_pointer = *sp;
 
     // Value in memory (mem[sp])
-    let low: u8 = interconnect.read_mem(stack_pointer);
-    let up: u8 = interconnect.read_mem(stack_pointer.wrapping_add(1));
+    let lower_byte: u8 = interconnect.read_mem(stack_pointer);
+    let upper_byte: u8 = interconnect.read_mem(stack_pointer.wrapping_add(1));
 
     // rr = mem[sp]
-    *lower = low;
-    *upper = up;
+    *lower = lower_byte;
+    *upper = upper_byte;
 
-    // SP = SP + 2
     stack_pointer = stack_pointer.wrapping_add(2);
-
-    // Store new value in stack pointer
     *sp = stack_pointer;
 }
 
@@ -1956,15 +1311,12 @@ pub fn pop_rr(interconnect: &Interconnect, upper: &mut u8, lower: &mut u8, sp: &
 /// Flags: None
 pub fn push_rr(interconnect: &mut Interconnect, upper: u8, lower: u8, sp: &mut u16) {
     let mut stack_pointer = *sp;
-
-    // SP = SP - 2
     stack_pointer = stack_pointer.wrapping_sub(2);
 
     // mem[sp] = rr
     interconnect.write_mem(stack_pointer, lower);
     interconnect.write_mem(stack_pointer + 1, upper);
 
-    // Store new value in stack pointer
     *sp = stack_pointer;
 }
 
@@ -1974,59 +1326,38 @@ pub fn push_rr(interconnect: &mut Interconnect, upper: u8, lower: u8, sp: &mut u
 
 /// Checks the nth bit of r and stores the inverse in the zero flag.
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Set
+/// Flags:  Z N H C
+///         Z 0 1 -
 pub fn bit_n_r(f: &mut Flags, r: &mut u8, n: u8) {
-    let reg: u8 = *r;
+    let value: u8 = *r;
+    let nth_bit = (value >> n) & 0x01;
 
-    // Check nth bit
-    let res = (reg >> n) & 0x01;
-
-    // Update Zero Flag
-    if res == 0 {
+    if nth_bit == 0 {
         f.set_zero_flag();
     } else {
         f.clear_zero_flag();
     }
-
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Set Half CArry
     f.set_half_carry_flag();
 }
 
 /// Checks the nth bit of mem[hl] and stores the inverse in the zero flag.
 ///
-/// Flags:
-///
-/// Zero: Dependent
-///
-/// Sub: Clear
-///
-/// Half Carry: Set
+/// Flags:  Z N H C
+///         Z 0 1 -
 pub fn bit_n_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16, n: u8) {
-    let mut value: u8 = interconnect.read_mem(addr);
+    let value: u8 = interconnect.read_mem(addr);
 
-    // Check nth bit
-    value = (value >> n) & 0x01;
+    let nth_bit = (value >> n) & 0x01;
 
     // Update Zero Flag
-    if value == 0 {
+    if nth_bit == 0 {
         f.set_zero_flag();
     } else {
         f.clear_zero_flag();
     }
 
-    // Clear Sub Flag
     f.clear_sub_flag();
-
-    // Set Half Carry
     f.set_half_carry_flag();
 }
 
@@ -2034,13 +1365,11 @@ pub fn bit_n_hl(f: &mut Flags, interconnect: &mut Interconnect, addr: u16, n: u8
 ///
 /// Flags: None
 pub fn set_n_r(r: &mut u8, n: u8) {
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
     // Set the nth bit
-    reg |= 1 << n;
-
-    // Store new value in register
-    *r = reg;
+    value |= 1 << n;
+    *r = value;
 }
 
 /// Sets the nth bit of mem[HL].
@@ -2048,31 +1377,25 @@ pub fn set_n_r(r: &mut u8, n: u8) {
 /// Flags: None
 pub fn set_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
     let mut value: u8 = interconnect.read_mem(addr);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
     // Set the nth bit
     value |= 1 << n;
 
-    // Write new value to memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /// Clears the nth bit of r
 ///
 /// Flags: None
 pub fn res_n_r(r: &mut u8, n: u8) {
-    let mut reg: u8 = *r;
+    let mut value: u8 = *r;
 
     // Clear the nth bit
-    reg &= !(1 << n);
+    value &= !(1 << n);
 
-    // Store new value in register
-    *r = reg;
+    *r = value;
 }
 
 /// Clears the nth bit of mem[HL]
@@ -2080,18 +1403,13 @@ pub fn res_n_r(r: &mut u8, n: u8) {
 /// Flags: None
 pub fn res_n_hl(interconnect: &mut Interconnect, addr: u16, n: u8) {
     let mut value: u8 = interconnect.read_mem(addr);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 
     // Clear the nth bit
     value &= !(1 << n);
 
-    // Write new value to memory
     interconnect.write_mem(addr, value);
-
-    // Increase Timer
-    interconnect.emu_cycles(1);
+    interconnect.emu_tick(1);
 }
 
 /************************************************************************
