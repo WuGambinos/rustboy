@@ -1,13 +1,13 @@
-mod gui;
 mod constants;
+mod gui;
 
 use constants::*;
 
 use anyhow::Result;
 use clap::*;
 use env_logger::*;
-use rustboy::gameboy::*;
-use sdl2::event::*;
+use rustboy::{gameboy::*, interconnect::joypad::Key};
+use sdl2::{event::*, keyboard::Keycode, sys::KeyCode};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -41,10 +41,21 @@ fn main() -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-#[cfg(target_os = "linux")]
-pub fn run_sdl(gb: &mut GameBoy, headless: bool) -> Result<(), Error> {
-    use sdl2::keyboard::Keycode;
+fn keycode_to_key(keycode: Keycode) -> Option<Key> {
+    match keycode {
+        Keycode::Right | Keycode::D => Some(Key::Right),
+        Keycode::Left | Keycode::A => Some(Key::Left),
+        Keycode::Up | Keycode::W => Some(Key::Up),
+        Keycode::Down | Keycode::S => Some(Key::Down),
+        Keycode::Z => Some(Key::A),
+        Keycode::X => Some(Key::B),
+        Keycode::Space => Some(Key::Select),
+        Keycode::Return => Some(Key::Start),
+        _ => None,
+    }
+}
 
+pub fn run_sdl(gb: &mut GameBoy, headless: bool) -> Result<(), Error> {
     if headless {
         loop {
             gb.cpu.run(&mut gb.interconnect);
@@ -66,6 +77,18 @@ pub fn run_sdl(gb: &mut GameBoy, headless: bool) -> Result<(), Error> {
                         keycode: Some(Keycode::Escape),
                         ..
                     } => break 'running,
+                    Event::KeyUp { keycode, .. } => {
+                        if let Some(key) = keycode.and_then(keycode_to_key) {
+                            gb.interconnect.key_up(key)
+                        }
+                    }
+
+                    Event::KeyDown { keycode, .. } => {
+                        if let Some(key) = keycode.and_then(keycode_to_key) {
+                            gb.interconnect.key_down(key)
+                        }
+                    }
+
                     _ => {}
                 }
             }
