@@ -182,23 +182,6 @@ function passArray8ToWasm0(arg, malloc) {
     WASM_VECTOR_LEN = arg.length;
     return ptr;
 }
-/**
-* @param {Uint8Array} rom
-*/
-export function load_rom(rom) {
-    const ptr0 = passArray8ToWasm0(rom, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    wasm.load_rom(ptr0, len0);
-}
-
-/**
-* @param {Uint8Array} rom
-*/
-export function boot(rom) {
-    const ptr0 = passArray8ToWasm0(rom, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    wasm.boot(ptr0, len0);
-}
 
 function isLikeNone(x) {
     return x === undefined || x === null;
@@ -239,11 +222,6 @@ export class WebGameBoy {
     constructor() {
         const ret = wasm.webgameboy_new();
         return WebGameBoy.__wrap(ret);
-    }
-    /**
-    */
-    emu_loop() {
-        wasm.webgameboy_emu_loop(this.__wbg_ptr);
     }
     /**
     * @param {Uint8Array} rom

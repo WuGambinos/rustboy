@@ -1,4 +1,4 @@
-import init, {boot, WebGameBoy}  from './rustboy_wasm.js';
+import init,  {WebGameBoy}  from './rustboy_wasm.js';
 
 // start wasm
 async function start_wasm() {
@@ -39,7 +39,6 @@ async function start_wasm() {
         const fileContents = await readFileAsArrayBuffer(file);
         const contents = new Uint8Array(fileContents);
 
-        boot(contents);
         let gb = new WebGameBoy();
         gb.boot(contents);
         game_loop();

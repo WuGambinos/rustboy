@@ -1,6 +1,6 @@
 use rustboy::{
     gameboy::GameBoy,
-    interconnect::{cartridge::Cartridge, cartridge_info::ram_size},
+    interconnect::{cartridge::Cartridge, cartridge_info::{ram_size, u8_to_cart_type}},
 };
 use std::f64;
 use wasm_bindgen::prelude::*;
@@ -26,16 +26,18 @@ impl WebGameBoy {
     pub fn boot(&mut self, rom: &[u8]) {
         let game_rom = rom.to_vec();
 
-        let cart_type = game_rom[0x147];
+        let cart_type_value = game_rom[0x147];
         let rom_size = game_rom[0x148];
         let ram_s = game_rom[0x149];
+
+        let cart_type = u8_to_cart_type(cart_type_value);
         console::log_1(&"BOOTING".into());
-        console::log_2(&"CART TYPE: ".into(), &cart_type.into());
+        console::log_2(&"CART TYPE: ".into(), &cart_type_value.into());
         console::log_2(&"ROM SIZE: ".into(), &rom_size.into());
         console::log_2(&"RAM SIZE: ".into(), &ram_s.into());
         let ram = vec![0x00; ram_size(ram_s) as usize];
 
-        self.gb.interconnect.cartridge = Cartridge::new(&game_rom, &ram);
+        self.gb.interconnect.cartridge = Cartridge::new(&game_rom, &ram, &cart_type);
         self.gb.cpu.pc = 0x100;
         console::log_1(&"REACHED END BOOT".into());
     }
