@@ -1,6 +1,7 @@
 use crate::interconnect::cartridge_info::CartridgeType;
 use crate::interconnect::mbc1::Mbc1;
 
+use super::mbc2::Mbc2;
 use super::nombc::NoMbc;
 
 pub struct Cartridge {
@@ -26,6 +27,8 @@ impl Cartridge {
             CartridgeType::MBC1 => Box::new(Mbc1::new(rom, ram)),
             CartridgeType::MBC1RAM => Box::new(Mbc1::new(rom, ram)),
             CartridgeType::MBC1RAMBattery => Box::new(Mbc1::new(rom, ram)),
+            CartridgeType::MBC2 => Box::new(Mbc2::new(rom)),
+            CartridgeType::MBC2Battery => Box::new(Mbc2::new(rom)),
             _ => Box::new(NoMbc::new(&[])),
         };
 

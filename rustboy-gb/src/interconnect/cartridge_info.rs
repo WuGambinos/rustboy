@@ -55,6 +55,8 @@ pub fn u8_to_cart_type(value: u8) -> CartridgeType {
         0x01 => CartridgeType::MBC1,
         0x02 => CartridgeType::MBC1RAM,
         0x03 => CartridgeType::MBC1RAMBattery,
+        0x05 => CartridgeType::MBC2,
+        0x06 => CartridgeType::MBC2Battery,
         _ => panic!("CARTYPE TYPE NOT IMPLEMENTED: {:#X}", value),
     }
 }

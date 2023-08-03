@@ -3,15 +3,15 @@
 pub mod cartridge;
 pub mod cartridge_info;
 pub mod joypad;
-pub mod nombc;
-pub mod mbc1;
-mod mmu;
 pub mod ppu;
+mod nombc;
+mod mbc1;
+mod mbc2;
+mod mmu;
 mod serial;
 
 use log::debug;
 use log::warn;
-use cartridge::Mbc;
 
 use crate::constants::{
     BOOT, EXTERNAL_RAM, HIGH_RAM, INTERRUPT_ENABLE, IO, LCD, OAM, ROM_BANK, TIMER, VRAM, WORK_RAM,
