@@ -7,6 +7,7 @@ pub mod ppu;
 mod nombc;
 mod mbc1;
 mod mbc2;
+mod mbc3;
 mod mmu;
 mod serial;
 
