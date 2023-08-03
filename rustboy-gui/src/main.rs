@@ -6,7 +6,7 @@ use constants::*;
 use anyhow::Result;
 use clap::*;
 use env_logger::*;
-use rustboy::{gameboy::*, interconnect::joypad::Key};
+use rustboy::{gameboy::*, interconnect::{joypad::Key, Interconnect}, cpu::Cpu};
 use sdl2::{event::*, keyboard::Keycode, sys::KeyCode};
 
 #[derive(Parser, Debug)]
@@ -38,6 +38,19 @@ fn main() -> Result<(), anyhow::Error> {
     let mut gameboy = GameBoy::new();
     gameboy.boot(args.rom.as_str(), args.skip_boot)?;
     run_sdl(&mut gameboy, args.headless)?;
+
+    /*
+    let mut cpu = Cpu::new();
+    let mut interconnect = Interconnect::new();
+    cpu.registers.set_hl(0x1000);
+    interconnect.write_mem(cpu.registers.hl(), 0xFF);
+
+    let read = interconnect.read_mem(cpu.registers.hl());
+
+    println!("READ: {:?}", read);
+    */
+
+
     Ok(())
 }
 

@@ -28,6 +28,7 @@ pub fn ram_size(value: u8) -> usize {
     }
 }
 
+
 #[derive(Debug)]
 pub enum CartridgeType {
     ROMOnly,
@@ -46,4 +47,14 @@ pub enum CartridgeType {
     MBC3,
     MBC3RAM2,
     MBC3RAMBattery2,
+}
+
+pub fn u8_to_cart_type(value: u8) -> CartridgeType {
+    match value {
+        0x00 => CartridgeType::ROMOnly,
+        0x01 => CartridgeType::MBC1,
+        0x02 => CartridgeType::MBC1RAM,
+        0x03 => CartridgeType::MBC1RAMBattery,
+        _ => panic!("CARTYPE TYPE NOT IMPLEMENTED: {:#X}", value),
+    }
 }

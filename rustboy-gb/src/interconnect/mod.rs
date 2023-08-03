@@ -3,12 +3,15 @@
 pub mod cartridge;
 pub mod cartridge_info;
 pub mod joypad;
+pub mod nombc;
+pub mod mbc1;
 mod mmu;
 pub mod ppu;
 mod serial;
 
 use log::debug;
 use log::warn;
+use cartridge::Mbc;
 
 use crate::constants::{
     BOOT, EXTERNAL_RAM, HIGH_RAM, INTERRUPT_ENABLE, IO, LCD, OAM, ROM_BANK, TIMER, VRAM, WORK_RAM,
@@ -27,7 +30,6 @@ use self::joypad::Key;
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
-#[derive(Debug)]
 pub struct Interconnect {
     pub cartridge: Cartridge,
     pub mmu: Mmu,
@@ -168,7 +170,7 @@ impl Interconnect {
             self.write_mem(i as u16, rom[i]);
         }
         */
-        self.cartridge.mbc.rom = rom.to_vec();
+        //self.cartridge.mbc.read(addr) = rom.to_vec();
     }
 
     pub fn load_boot_rom(&mut self, rom: &[u8]) {
