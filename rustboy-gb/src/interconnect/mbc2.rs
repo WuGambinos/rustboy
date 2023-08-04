@@ -25,7 +25,7 @@ impl Mbc for Mbc2 {
         match addr {
             0x0000..=0x3FFF => self.rom[addr as usize],
 
-            04000..=0x7FFF => {
+            0x4000..=0x7FFF => {
                 let new_addr = ROM_BANK_SIZE * self.rom_bank_number + (addr & 0x3FFF )as usize;
                 let new_addr = new_addr & (self.rom.len() - 1);
                 self.rom[new_addr]

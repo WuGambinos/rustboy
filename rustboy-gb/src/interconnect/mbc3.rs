@@ -1,13 +1,5 @@
 use crate::constants::{ROM_BANK_SIZE, RAM_BANK_SIZE};
-
 use super::cartridge::Mbc;
-
-
-#[derive(Debug)]
-pub enum BankingMode {
-    Rom,
-    Ram,
-}
 
 #[derive(Debug)]
 pub struct Mbc3 {
@@ -16,7 +8,6 @@ pub struct Mbc3 {
     rom_bank_number: usize,
     ram_bank_number: usize,
     ram_enabled: bool,
-    banking_mode: BankingMode,
 }
 
 impl Mbc3 {
@@ -27,11 +18,8 @@ impl Mbc3 {
             rom_bank_number: 1,
             ram_bank_number: 0,
             ram_enabled: false,
-            banking_mode: BankingMode::Rom,
         }
-        
     }
-
 }
 
 impl Mbc for Mbc3 {
@@ -53,6 +41,9 @@ impl Mbc for Mbc3 {
                     return 0xFF;
                 }
 
+                let new_addr = (RAM_BANK_SIZE * self.ram_bank_number) + (addr & 0x1FFF) as usize & (self.ram.len() - 1);
+                return self.ram[new_addr];
+                /*
                 match addr {
                     0x00..=0x03 => {
                         let new_addr = (RAM_BANK_SIZE * self.ram_bank_number) + (addr & 0x1FFF) as usize & (self.ram.len() - 1);
@@ -60,6 +51,7 @@ impl Mbc for Mbc3 {
                     }
                     _ => return 0xFF,
                 }
+                */
 
             }
 
@@ -80,7 +72,7 @@ impl Mbc for Mbc3 {
                     1
                 }
                 else {
-                    value as usize
+                    value  as usize
                 }
             }
 

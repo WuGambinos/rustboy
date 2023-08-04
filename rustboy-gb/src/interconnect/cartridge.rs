@@ -31,10 +31,10 @@ impl Cartridge {
             CartridgeType::MBC2 => Box::new(Mbc2::new(rom)),
             CartridgeType::MBC2Battery => Box::new(Mbc2::new(rom)),
             CartridgeType::MBC3 => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3RAM2 => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3RAMBattery2 => Box::new(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3RAM => Box::new(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3RAMBattery => Box::new(Mbc3::new(rom, ram)),
             CartridgeType::MBC3TimerBattery => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3TimerRAMBattery2 => Box::new(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3TimerRAMBattery => Box::new(Mbc3::new(rom, ram)),
             _ => Box::new(NoMbc::new(&[])),
         };
 

@@ -40,6 +40,7 @@ pub struct Interconnect {
     pub joypad: Joypad,
     pub boot_active: bool,
     pub write_enabled: bool,
+    pub ticks: u64,
 }
 
 impl Interconnect {
@@ -53,6 +54,7 @@ impl Interconnect {
             joypad: Joypad::init(),
             boot_active: true,
             write_enabled: true,
+            ticks: 0,
         }
     }
 
@@ -193,7 +195,7 @@ impl Interconnect {
         }
 
         // Used to get cycle count over in main loop
-        self.timer.set_internal_ticks(u64::from(t_cycles));
+        self.ticks = u64::from(t_cycles);
 
         let div_value: u8 = self.timer.div_clock.next(t_cycles) as u8;
         self.timer.set_div(div_value);

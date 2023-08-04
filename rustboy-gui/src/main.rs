@@ -6,8 +6,8 @@ use constants::*;
 use anyhow::Result;
 use clap::*;
 use env_logger::*;
-use rustboy::{gameboy::*, interconnect::{joypad::Key, Interconnect}, cpu::Cpu};
-use sdl2::{event::*, keyboard::Keycode, sys::KeyCode};
+use rustboy::{gameboy::*, interconnect::joypad::Key};
+use sdl2::{event::*, keyboard::Keycode};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]

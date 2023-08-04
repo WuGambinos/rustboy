@@ -28,7 +28,7 @@ pub struct Timer {
     /// resets it to 0x00
     div: u8,
 
-    /// Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
+    /// Internal Timer Counter(R/W) - Incremented by clock frequency specified by the TAC register
     /// When the value overflows then it will be reset to value specified in TMA and interrupt
     /// will be request
     tima: u8,
@@ -39,11 +39,9 @@ pub struct Timer {
     /// Timer Control (R/W)
     tac: u8,
 
-    /// Internal Ticks
-    internal_ticks: u64,
+    counter: u64,
 
     pub div_clock: Clock,
-
     pub tma_clock: Clock,
 }
 
@@ -54,7 +52,7 @@ impl Timer {
             tima: 0,
             tma: 0,
             tac: 0,
-            internal_ticks: 0,
+            counter: 0,
             div_clock: Clock::power_up(256),
             tma_clock: Clock::power_up(1024),
         }
@@ -91,12 +89,12 @@ impl Timer {
         self.tac
     }
 
-    pub fn set_internal_ticks(&mut self, value: u64) {
-        self.internal_ticks = value;
+    pub fn set_counter(&mut self, value: u64) {
+        self.counter = value;
     }
 
-    pub fn internal_ticks(&self) -> u64 {
-        self.internal_ticks
+    pub fn counter(&self) -> u64 {
+        self.counter
     }
 
     pub fn div_clock(&self) -> Clock {
@@ -109,8 +107,8 @@ impl Timer {
 
     pub fn log_timer(&self) {
         debug!(
-            "Ticks: {:#X} DIV: {} TIMA: {} TMA: {} TAC: {}",
-            self.internal_ticks, self.div, self.tima, self.tma, self.tac
+            "DIV: {} TIMA: {} TMA: {} TAC: {}",
+            self.div, self.tima, self.tma, self.tac
         );
     }
 
@@ -129,6 +127,7 @@ impl Timer {
             DIV => {
                 self.div = 0x00;
                 self.div_clock.n = 0x00;
+                self.tima = 0x00;
             }
             TIMA => self.tima = value,
             TMA => self.tma = value,

@@ -78,7 +78,6 @@ pub fn debug_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
     canvas.present();
 }
 
-#[cfg(target_os = "linux")]
 fn display_tile(
     canvas: &mut WindowCanvas,
     interconnect: &Interconnect,

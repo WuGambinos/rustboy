@@ -43,10 +43,10 @@ pub enum CartridgeType {
     MMM01RAM,
     MMM01RAMBattery,
     MBC3TimerBattery,
-    MBC3TimerRAMBattery2,
+    MBC3TimerRAMBattery,
     MBC3,
-    MBC3RAM2,
-    MBC3RAMBattery2,
+    MBC3RAM,
+    MBC3RAMBattery,
 }
 
 pub fn u8_to_cart_type(value: u8) -> CartridgeType {
@@ -58,10 +58,10 @@ pub fn u8_to_cart_type(value: u8) -> CartridgeType {
         0x05 => CartridgeType::MBC2,
         0x06 => CartridgeType::MBC2Battery,
         0x0F => CartridgeType::MBC3TimerBattery,
-        0x10 => CartridgeType::MBC3TimerRAMBattery2,
+        0x10 => CartridgeType::MBC3TimerRAMBattery,
         0x11 => CartridgeType::MBC3,
-        0x12 => CartridgeType::MBC3RAM2,
-        0x13 => CartridgeType::MBC3RAMBattery2,
+        0x12 => CartridgeType::MBC3RAM,
+        0x13 => CartridgeType::MBC3RAMBattery,
         _ => panic!("CARTYPE TYPE NOT IMPLEMENTED: {:#X}", value),
     }
 }
