@@ -1,6 +1,6 @@
-use crate::constants::{RAM_BANK_SIZE, ROM_BANK_SIZE};
-
+use crate::constants::ROM_BANK_SIZE;
 use super::cartridge::Mbc;
+
 #[derive(Debug)]
 pub struct Mbc2 {
     pub rom: Vec<u8>,

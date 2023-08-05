@@ -3,6 +3,7 @@ use crate::interconnect::mbc1::Mbc1;
 
 use super::mbc2::Mbc2;
 use super::mbc3::Mbc3;
+use super::mbc5::Mbc5;
 use super::nombc::NoMbc;
 
 pub struct Cartridge {
@@ -35,6 +36,12 @@ impl Cartridge {
             CartridgeType::MBC3RAMBattery => Box::new(Mbc3::new(rom, ram)),
             CartridgeType::MBC3TimerBattery => Box::new(Mbc3::new(rom, ram)),
             CartridgeType::MBC3TimerRAMBattery => Box::new(Mbc3::new(rom, ram)),
+            CartridgeType::MBC5 => Box::new(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RAM => Box::new(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RAMBattery => Box::new(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5Rumble => Box::new(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RumbleRAM => Box::new(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RumbleRAMBattery => Box::new(Mbc5::new(rom, ram)),
             _ => Box::new(NoMbc::new(&[])),
         };
 
