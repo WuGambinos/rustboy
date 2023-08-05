@@ -199,7 +199,7 @@ impl Interconnect {
         self.ticks = u64::from(t_cycles);
 
         let div_value: u8 = self.timer.div_clock.next(t_cycles) as u8;
-        self.timer.set_div(div_value);
+        self.timer.set_div(self.timer.div().wrapping_add(div_value));
 
         let timer_enabled: bool = (self.timer.tac() & 0x04) != 0x00;
         if timer_enabled {
