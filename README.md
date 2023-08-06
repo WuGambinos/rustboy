@@ -4,11 +4,11 @@
 
 | Test              | passed/failed/NA |
 | ----------------- | ---------------- |
-| cpu_instrs        | ✅           |
+| cpu_instrs        | ✅        |
 | dmg_sound         | NA               |
-| instr_timing      | ✅               |
+| instr_timing      | ✅             |
 | interrupt_time    | Failed               |
-| mem_timing        | ✅         |
+| mem_timing        | ✅        |
 | mem_timing-2      | ✅           |
 | oam_bug           | Failed               |
 | dmg-acid2         | ✅ (1 bug)   |
