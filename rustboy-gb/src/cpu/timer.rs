@@ -42,7 +42,7 @@ pub struct Timer {
     counter: u64,
 
     pub div_clock: Clock,
-    pub tma_clock: Clock,
+    pub tima_clock: Clock,
 }
 
 impl Timer {
@@ -54,7 +54,7 @@ impl Timer {
             tac: 0,
             counter: 0,
             div_clock: Clock::power_up(256),
-            tma_clock: Clock::power_up(1024),
+            tima_clock: Clock::power_up(1024),
         }
     }
 
@@ -101,8 +101,8 @@ impl Timer {
         self.div_clock
     }
 
-    pub fn tma_clock(&self) -> Clock {
-        self.tma_clock
+    pub fn tima_clock(&self) -> Clock {
+        self.tima_clock
     }
 
     pub fn log_timer(&self) {
@@ -134,9 +134,9 @@ impl Timer {
             TAC => {
                 let clocked_enabled: bool = (self.tac & 0x03) != (value & 0x03);
                 if clocked_enabled {
-                    self.tma_clock.n = 0x00;
+                    self.tima_clock.n = 0x00;
                     let clock_select = value & 0x03;
-                    self.tma_clock.period = match clock_select {
+                    self.tima_clock.period = match clock_select {
                         0x00 => 1024,
                         0x01 => 16,
                         0x02 => 64,

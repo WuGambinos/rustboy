@@ -203,7 +203,7 @@ impl Interconnect {
 
         let timer_enabled: bool = (self.timer.tac() & 0x04) != 0x00;
         if timer_enabled {
-            let n = self.timer.tma_clock.next(t_cycles);
+            let n = self.timer.tima_clock.next(t_cycles);
 
             for _ in 0..n {
                 let tima_value = self.timer.tima().wrapping_add(1);
