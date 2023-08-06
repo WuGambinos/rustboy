@@ -1,6 +1,27 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
+* @param {any} value
+* @returns {number | undefined}
+*/
+export function js_value_to_joypad_key(value: any): number | undefined;
+/**
+* @param {any} value
+*/
+export function on_key_down(value: any): void;
+/**
+*/
+export enum Key {
+  Right = 0,
+  Left = 1,
+  Up = 2,
+  Down = 3,
+  A = 4,
+  B = 5,
+  Start = 6,
+  Select = 7,
+}
+/**
 */
 export class WebGameBoy {
   free(): void;
@@ -12,9 +33,13 @@ export class WebGameBoy {
 */
   boot(rom: Uint8Array): void;
 /**
-* @returns {number}
+* @param {any} value
 */
-  get_bc(): number;
+  on_key_down(value: any): void;
+/**
+* @param {any} value
+*/
+  on_key_up(value: any): void;
 /**
 */
   run(): void;
@@ -27,10 +52,13 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
+  readonly js_value_to_joypad_key: (a: number) => number;
+  readonly on_key_down: (a: number) => void;
   readonly __wbg_webgameboy_free: (a: number) => void;
   readonly webgameboy_new: () => number;
   readonly webgameboy_boot: (a: number, b: number, c: number) => void;
-  readonly webgameboy_get_bc: (a: number) => number;
+  readonly webgameboy_on_key_down: (a: number, b: number) => void;
+  readonly webgameboy_on_key_up: (a: number, b: number) => void;
   readonly webgameboy_run: (a: number) => void;
   readonly webgameboy_draw: (a: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;

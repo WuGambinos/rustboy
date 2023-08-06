@@ -1,3 +1,5 @@
+use core::fmt;
+
 fn rom_size_as_str(value: u8) -> &'static str {
     match value {
         0x00 => "32 KiB",
@@ -28,7 +30,6 @@ pub fn ram_size(value: u8) -> usize {
     }
 }
 
-
 #[derive(Debug)]
 pub enum CartridgeType {
     ROMOnly,
@@ -53,6 +54,12 @@ pub enum CartridgeType {
     MBC5Rumble,
     MBC5RumbleRAM,
     MBC5RumbleRAMBattery,
+}
+
+impl std::fmt::Display for CartridgeType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 pub fn u8_to_cart_type(value: u8) -> CartridgeType {

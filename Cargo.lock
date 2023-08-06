@@ -387,6 +387,7 @@ dependencies = [
  "log",
  "modular-bitfield",
  "pretty_env_logger",
+ "wasm-bindgen",
 ]
 
 [[package]]
