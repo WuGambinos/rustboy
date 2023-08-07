@@ -1,4 +1,4 @@
-import init,  {WebGameBoy, on_key_down}  from './rustboy_wasm.js';
+import init,  {WebGameBoy}  from './rustboy_wasm.js';
 
 // start wasm
 async function start_wasm() {
@@ -63,17 +63,14 @@ async function start_wasm() {
             gb.draw();
 
             if (keyPressed != null) {
-                console.log("YOU PRESSED: " + keyPressed);
                 gb.on_key_down(keyPressed);
                 keyPressed = null;
             }
 
             if (keyReleased != null) {
-                console.log("YOU RELEASED: " + keyReleased + "\n");
                 gb.on_key_up(keyReleased);
                 keyReleased = null;
             }
-
             requestAnimationFrame(game_loop);
         }
     }

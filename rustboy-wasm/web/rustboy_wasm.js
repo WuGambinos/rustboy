@@ -188,13 +188,6 @@ export function js_value_to_joypad_key(value) {
     return ret === 8 ? undefined : ret;
 }
 
-/**
-* @param {any} value
-*/
-export function on_key_down(value) {
-    wasm.on_key_down(addHeapObject(value));
-}
-
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8Memory0().set(arg, ptr / 1);
@@ -339,9 +332,6 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_document_f7ace2b956f30a4f = function(arg0) {
         const ret = getObject(arg0).document;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__wbg_log_576ca876af0d4a77 = function(arg0, arg1) {
-        console.log(getObject(arg0), getObject(arg1));
     };
     imports.wbg.__wbg_instanceof_CanvasRenderingContext2d_bc0a6635c96eca9b = function(arg0) {
         let result;

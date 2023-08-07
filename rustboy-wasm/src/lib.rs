@@ -28,10 +28,6 @@ pub fn js_value_to_joypad_key(value: JsValue)  -> Option<Key> {
         _ => None,
     }
 }
-#[wasm_bindgen]
-pub fn on_key_down( value: JsValue) {
-    console::log_2(&"KEYPRESSED: ".into(), &value);
-}
 
 #[wasm_bindgen]
 pub struct WebGameBoy {
@@ -69,7 +65,6 @@ impl WebGameBoy {
     }
 
     pub fn on_key_down(&mut self, value: JsValue) {
-        console::log_2(&"KEYPRESSED: ".into(), &value);
         let key_pressed = js_value_to_joypad_key(value).unwrap();
         self.gb.interconnect.key_down(key_pressed);
     }

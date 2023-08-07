@@ -6,10 +6,6 @@
 */
 export function js_value_to_joypad_key(value: any): number | undefined;
 /**
-* @param {any} value
-*/
-export function on_key_down(value: any): void;
-/**
 */
 export enum Key {
   Right = 0,
@@ -53,7 +49,6 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly js_value_to_joypad_key: (a: number) => number;
-  readonly on_key_down: (a: number) => void;
   readonly __wbg_webgameboy_free: (a: number) => void;
   readonly webgameboy_new: () => number;
   readonly webgameboy_boot: (a: number, b: number, c: number) => void;
