@@ -19,11 +19,19 @@ export enum Key {
 }
 /**
 */
+export class Rgb {
+  free(): void;
+}
+/**
+*/
 export class WebGameBoy {
   free(): void;
 /**
 */
   constructor();
+/**
+*/
+  reset(): void;
 /**
 * @param {Uint8Array} rom
 */
@@ -51,11 +59,13 @@ export interface InitOutput {
   readonly js_value_to_joypad_key: (a: number) => number;
   readonly __wbg_webgameboy_free: (a: number) => void;
   readonly webgameboy_new: () => number;
+  readonly webgameboy_reset: (a: number) => void;
   readonly webgameboy_boot: (a: number, b: number, c: number) => void;
   readonly webgameboy_on_key_down: (a: number, b: number) => void;
   readonly webgameboy_on_key_up: (a: number, b: number) => void;
   readonly webgameboy_run: (a: number) => void;
   readonly webgameboy_draw: (a: number) => void;
+  readonly __wbg_rgb_free: (a: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;

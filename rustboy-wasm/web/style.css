@@ -27,3 +27,8 @@ input {
     background-color: #0000FF;
 }
 */
+
+    #fps {
+        white-space: pre;
+        font-family: monospace;
+    }

@@ -2,8 +2,10 @@
 use crate::{constants::*, cpu::interrupts::InterruptType};
 use modular_bitfield::prelude::*;
 use std::cmp::Ordering;
+use wasm_bindgen::prelude::wasm_bindgen;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[wasm_bindgen]
 pub struct Rgb {
     r: u8,
     g: u8,
