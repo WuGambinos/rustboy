@@ -37,10 +37,10 @@ impl<'a> Drop for Timer<'a> {
 #[wasm_bindgen]
 pub fn js_value_to_joypad_key(value: JsValue) -> Option<Key> {
     match value.as_string().unwrap().as_str() {
-        "ArrowLeft" => Some(Key::Left),
-        "ArrowRight" => Some(Key::Right),
-        "ArrowUp" => Some(Key::Up),
-        "ArrowDown" => Some(Key::Down),
+        "ArrowLeft" | "a" => Some(Key::Left),
+        "ArrowRight" | "d" => Some(Key::Right),
+        "ArrowUp" | "w" => Some(Key::Up),
+        "ArrowDown" | "s" => Some(Key::Down),
         "z" => Some(Key::B),
         "x" => Some(Key::A),
         " " => Some(Key::Select),

@@ -32,51 +32,56 @@ const fps = new class {
 
            // Render the statistics.
         this.fps.textContent = ` Frames per Second:
-     latest = ${Math.round(fps)}
+            latest = ${Math.round(fps)}
             avg of last 100 = ${Math.round(mean)}
             min of last 100 = ${Math.round(min)}
-            max of last 100 = ${Math.round(max)}
-        `.trim();
+            max of last 100 = ${Math.round(max)}`.trim();
     }
 }
 
-// start wasm
-async function start_wasm() {
+async function startWasm() {
     await init();
 
-    // Load file button
-    let button = document.getElementById('btn');
-    button.addEventListener('click', () => {
+    let load_button = document.getElementById('load');
+    load_button.addEventListener('click', () => {
         loadFile();
-    })
+    });
 
     let resetPressed = false;
     let resetButton = document.getElementById('reset');
     resetButton.addEventListener('click', () => {
         resetPressed = true;
-    })
+    });
 
+    // Handle Keys
     let keyPressed = null;
     let keyReleased = null;
-
     window.addEventListener('keydown', function (e) {
+        if (e.key === "Space" || e.key === "ArrowDown"
+        || e.key === "ArrowUp" || e.key === "ArrowLeft"
+        || e.key === "ArrowRight"){
+            e.preventDefault();
+        }
+        console.log("YOU PRESED: " + e.key);
         keyPressed = e.key;
     }, false);
 
     window.addEventListener("keyup", (e) => {
-          if (e.isComposing || e.keyCode === 229) {
+        if (e.isComposing || e.keyCode === 229) {
             return;
-          }
+        }
+        if (e.key === "Space" || e.key === "ArrowDown"
+        || e.key === "ArrowUp" || e.key === "ArrowLeft"
+        || e.key === "ArrowRight") {
+            e.preventDefault();
+        }
         keyReleased = e.key;
     });
-
-
 
     async function loadFile() {
         const inputElement = document.getElementById('fileInput');
         const file = inputElement.files[0];
 
-        console.log("ATTEMPTING TO LOAD FILE");
         if (!file) {
             alert('Please select a file.');
             return;
@@ -93,7 +98,6 @@ async function start_wasm() {
         game_loop();
 
         function game_loop() {
-            console.log("RUNNING " + inputElement.value);
             fps.render();
             gb.run();
             gb.draw();
@@ -119,7 +123,7 @@ async function start_wasm() {
         }
     }
 
-    const readFileAsArrayBuffer = (file) => {
+    function readFileAsArrayBuffer(file) {
         return new Promise((resolve, reject) => {
         const reader = new FileReader();
             reader.onload = (event) => {
@@ -132,4 +136,4 @@ async function start_wasm() {
       });
     };
 }
-start_wasm();
+startWasm();
