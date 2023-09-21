@@ -8,7 +8,6 @@ use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use sdl2::Sdl;
 
-
 pub fn init_window(sdl_context: &Sdl, screen_width: u32, screen_height: u32) -> WindowCanvas {
     let video_subsystem = sdl_context.video().expect("failed to access subsystem");
     let window = video_subsystem
@@ -36,7 +35,7 @@ pub fn main_window(canvas: &mut WindowCanvas, interconnect: &Interconnect) {
 
             let index = (u32::from(x) + (u32::from(line_num) * u32::from(X_RESOLUTION))) as usize;
             let color = video_buffer[index];
-            let (r, g,b) = color.get_rgb();
+            let (r, g, b) = color.get_rgb();
             canvas.set_draw_color(Color::RGB(r, g, b));
             canvas
                 .fill_rect(Rect::new(new_x, new_y, w, h))
@@ -112,6 +111,8 @@ fn display_tile(
                 color = 3;
             }
 
+            println!("X: {} Y: {}", x, y);
+
             let new_x = x + ((7 - bit) * SCALE);
             let new_y = y + ((i32::from(tile_y)) / 2 * SCALE);
 
@@ -119,10 +120,23 @@ fn display_tile(
             let h = SCALE as u32;
 
             let (r, g, b) = TILE_COLORS[color as usize].get_rgb();
+            let rect = Rect::new(new_x, new_y, w, h);
+            /*
+            println!(
+                "TOP_LEFT: {:?} BOTTOM_RIGHT: {:?} X: {} Y: {} ",
+                rect.top_left(),
+                rect.bottom_right(),
+                new_x,
+                new_y
+            );
+            */
+
             canvas.set_draw_color(Color::RGB(r, g, b));
             canvas
                 .fill_rect(sdl2::rect::Rect::new(new_x, new_y, w, h))
                 .expect("Rectangle could not be filled");
         }
+        println!();
+        println!();
     }
 }

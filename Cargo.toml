@@ -7,7 +7,7 @@ members = [
 ]
 
 [profile.release]
-lto = true
+#lto = true
 
 [profile.release.package.rustboy-gb]
 #lto="fat"
