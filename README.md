@@ -8,6 +8,13 @@ Gameboy emulator written in Rust using imgui-rs for GUI
     cargo build --release
 ```
 
+## :joystick Run
+```bash 
+    cd rustboy
+    cd rustboy-gui
+    cargo run --release -- --rom /path/to/rom
+```
+
 ## Tests
 
 ### Blargg's

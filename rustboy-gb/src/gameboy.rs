@@ -1,10 +1,10 @@
 use crate::constants::PC_AFTER_BOOT;
 use crate::cpu::Cpu;
 use crate::interconnect::cartridge::Cartridge;
-use crate::interconnect::cartridge_info::CartridgeType;
 use crate::interconnect::cartridge_info::ram_size;
-use crate::interconnect::Interconnect;
 use crate::interconnect::cartridge_info::u8_to_cart_type;
+use crate::interconnect::cartridge_info::CartridgeType;
+use crate::interconnect::Interconnect;
 
 use anyhow::Error;
 use anyhow::Result;
@@ -30,12 +30,16 @@ impl GameBoy {
     }
 
     pub fn boot(&mut self, game: &str, skip_boot: bool) -> Result<(), Error> {
-        let boot_rom = "roms/bootix_dmg.bin";
-        let game_rom_path: &Path = Path::new(game);
-        let boot_rom_path: &Path = Path::new(boot_rom);
+        let boot_rom = if !skip_boot {
+            let boot_rom = "roms/bootix_dmg.bin";
+            let boot_rom_path: &Path = Path::new(boot_rom);
+            read_file(boot_rom_path)?
+        } else {
+            Vec::new()
+        };
 
+        let game_rom_path: &Path = Path::new(game);
         let game_rom: Vec<u8> = read_file(game_rom_path)?;
-        let boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
         let cart_type_value: u8 = game_rom[0x147];
         let rom_size: u8 = game_rom[0x148];
