@@ -1,3 +1,13 @@
+# Rustboy
+Gameboy emulator written in Rust using imgui-rs for GUI
+
+## Build
+```bash
+    git clone https://github.com/WuGambinos/rustboy.git
+    cd rustboy
+    cargo build --release
+```
+
 ## Tests
 
 ### Blargg's
