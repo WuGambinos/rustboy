@@ -1,3 +1,5 @@
+use core::fmt;
+
 fn rom_size_as_str(value: u8) -> &'static str {
     match value {
         0x00 => "32 KiB",
@@ -42,8 +44,43 @@ pub enum CartridgeType {
     MMM01RAM,
     MMM01RAMBattery,
     MBC3TimerBattery,
-    MBC3TimerRAMBattery2,
+    MBC3TimerRAMBattery,
     MBC3,
-    MBC3RAM2,
-    MBC3RAMBattery2,
+    MBC3RAM,
+    MBC3RAMBattery,
+    MBC5,
+    MBC5RAM,
+    MBC5RAMBattery,
+    MBC5Rumble,
+    MBC5RumbleRAM,
+    MBC5RumbleRAMBattery,
+}
+
+impl std::fmt::Display for CartridgeType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+pub fn u8_to_cart_type(value: u8) -> CartridgeType {
+    match value {
+        0x00 => CartridgeType::ROMOnly,
+        0x01 => CartridgeType::MBC1,
+        0x02 => CartridgeType::MBC1RAM,
+        0x03 => CartridgeType::MBC1RAMBattery,
+        0x05 => CartridgeType::MBC2,
+        0x06 => CartridgeType::MBC2Battery,
+        0x0F => CartridgeType::MBC3TimerBattery,
+        0x10 => CartridgeType::MBC3TimerRAMBattery,
+        0x11 => CartridgeType::MBC3,
+        0x12 => CartridgeType::MBC3RAM,
+        0x13 => CartridgeType::MBC3RAMBattery,
+        0x19 => CartridgeType::MBC5,
+        0x1A => CartridgeType::MBC5RAM,
+        0x1B => CartridgeType::MBC5RAMBattery,
+        0x1C => CartridgeType::MBC5Rumble,
+        0x1D => CartridgeType::MBC5RumbleRAM,
+        0x1E => CartridgeType::MBC5RumbleRAMBattery,
+        _ => panic!("CARTYPE TYPE NOT IMPLEMENTED: {:#X}", value),
+    }
 }

@@ -8,5 +8,27 @@ body {
 
 canvas {
     text-align: center;
-    /*background-color: #0000FF;*/
 }
+
+button {
+    background: radial-gradient( #360094 0%, #000000 100%);
+    /*border-radius: 25px;*/
+    border: none;
+    /*width: 15%;*/
+    color: #FFFFFF;
+    width: 100px;
+    height: 50px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+/*
+input {
+    background-color: #0000FF;
+}
+*/
+
+    #fps {
+        white-space: pre;
+        font-family: monospace;
+    }

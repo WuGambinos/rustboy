@@ -2,6 +2,8 @@ use crate::constants::PC_AFTER_BOOT;
 use crate::cpu::Cpu;
 use crate::interconnect::cartridge::Cartridge;
 use crate::interconnect::cartridge_info::ram_size;
+use crate::interconnect::cartridge_info::u8_to_cart_type;
+use crate::interconnect::cartridge_info::CartridgeType;
 use crate::interconnect::Interconnect;
 
 use anyhow::Error;
@@ -28,21 +30,26 @@ impl GameBoy {
     }
 
     pub fn boot(&mut self, game: &str, skip_boot: bool) -> Result<(), Error> {
-        let boot_rom = "roms/bootix_dmg.bin";
+        let boot_rom = if !skip_boot {
+            let boot_rom = "roms/bootix_dmg.bin";
+            let boot_rom_path: &Path = Path::new(boot_rom);
+            read_file(boot_rom_path)?
+        } else {
+            Vec::new()
+        };
+
         let game_rom_path: &Path = Path::new(game);
-        let boot_rom_path: &Path = Path::new(boot_rom);
-
         let game_rom: Vec<u8> = read_file(game_rom_path)?;
-        let boot_rom: Vec<u8> = read_file(boot_rom_path)?;
 
-        let cart_type = game_rom[0x147];
-        let rom_size = game_rom[0x148];
-        let ram_s = game_rom[0x149];
+        let cart_type_value: u8 = game_rom[0x147];
+        let rom_size: u8 = game_rom[0x148];
+        let ram_s: u8 = game_rom[0x149];
 
         let ram = vec![0x00; ram_size(ram_s) as usize];
+        let cart_type: CartridgeType = u8_to_cart_type(cart_type_value);
 
-        self.interconnect.cartridge = Cartridge::new(&game_rom, &ram);
-        println!("CART TYPE: {:#X}", cart_type);
+        self.interconnect.cartridge = Cartridge::new(&game_rom, &ram, &cart_type);
+        println!("CART TYPE: {:?}", cart_type);
         println!("ROM_SIZE: {:#X}", rom_size);
         println!("RAM_SIZE: {:#X} KiB", ram_size(ram_s));
         println!("CHECKSUM: {}", self.interconnect.cartridge.checksum());

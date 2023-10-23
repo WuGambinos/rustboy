@@ -373,7 +373,7 @@ impl Cpu {
                     InterruptType::LcdStat => 0x48,
                     InterruptType::Timer => 0x50,
                     InterruptType::Serial => 0x58,
-                    _ => panic!("NOT AN ENUM"),
+                    InterruptType::Joypad => 0x58,
                 };
 
                 // Clean up the interrupt

@@ -2,9 +2,14 @@
 
 pub mod cartridge;
 pub mod cartridge_info;
-pub mod ppu;
-mod joypad;
+pub mod joypad;
+mod mbc1;
+mod mbc2;
+mod mbc3;
+mod mbc5;
 mod mmu;
+mod nombc;
+pub mod ppu;
 mod serial;
 
 use log::debug;
@@ -16,26 +21,27 @@ use crate::constants::{
 use crate::cpu::interrupts::request_interrupt;
 use crate::cpu::interrupts::InterruptType;
 use crate::cpu::timer::Timer;
-use crate::interconnect::joypad::JoypadInput;
+use crate::interconnect::joypad::Joypad;
 use crate::interconnect::mmu::Mmu;
 use crate::interconnect::ppu::Ppu;
 use crate::interconnect::serial::SerialOutput;
 
 use self::cartridge::Cartridge;
+use self::joypad::Key;
 
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
-#[derive(Debug)]
 pub struct Interconnect {
     pub cartridge: Cartridge,
     pub mmu: Mmu,
     pub timer: Timer,
     pub ppu: Ppu,
     pub serial: SerialOutput,
-    pub joypad: JoypadInput,
+    pub joypad: Joypad,
     pub boot_active: bool,
     pub write_enabled: bool,
+    pub ticks: u64,
 }
 
 impl Interconnect {
@@ -46,10 +52,21 @@ impl Interconnect {
             timer: Timer::new(),
             ppu: Ppu::new(),
             serial: SerialOutput::new(),
-            joypad: JoypadInput::new(),
+            joypad: Joypad::init(),
             boot_active: true,
             write_enabled: true,
+            ticks: 0,
         }
+    }
+
+    pub fn key_down(&mut self, key: Key) {
+        self.joypad.key_down(key);
+        request_interrupt(self, InterruptType::Joypad);
+    }
+
+    pub fn key_up(&mut self, key: Key) {
+        self.joypad.key_up(key);
+        request_interrupt(self, InterruptType::Joypad);
     }
 
     pub fn log_timer(&self) {
@@ -100,7 +117,11 @@ impl Interconnect {
         } else if LCD.contains(&addr) {
             self.ppu.write_lcd(addr, value);
         } else if IO.contains(&addr) {
-            self.mmu.write_io(addr - 0xFF00, value);
+            if addr == 0xFF00 {
+                self.joypad.write(value);
+            } else {
+                self.mmu.write_io(addr - 0xFF00, value);
+            }
         } else if HIGH_RAM.contains(&addr) {
             self.mmu.write_hram(addr - 0xFF80, value);
         } else if addr == INTERRUPT_ENABLE {
@@ -133,7 +154,7 @@ impl Interconnect {
             self.ppu.read_lcd(addr)
         } else if IO.contains(&addr) {
             if addr == 0xFF00 {
-                0xFF
+                self.joypad.read()
             } else {
                 self.mmu.read_io(addr - 0xFF00)
             }
@@ -153,7 +174,7 @@ impl Interconnect {
             self.write_mem(i as u16, rom[i]);
         }
         */
-        self.cartridge.mbc.rom = rom.to_vec();
+        //self.cartridge.mbc.read(addr) = rom.to_vec();
     }
 
     pub fn load_boot_rom(&mut self, rom: &[u8]) {
@@ -175,14 +196,14 @@ impl Interconnect {
         }
 
         // Used to get cycle count over in main loop
-        self.timer.set_internal_ticks(u64::from(t_cycles));
+        self.ticks = u64::from(t_cycles);
 
         let div_value: u8 = self.timer.div_clock.next(t_cycles) as u8;
-        self.timer.set_div(div_value);
+        self.timer.set_div(self.timer.div().wrapping_add(div_value));
 
         let timer_enabled: bool = (self.timer.tac() & 0x04) != 0x00;
         if timer_enabled {
-            let n = self.timer.tma_clock.next(t_cycles);
+            let n = self.timer.tima_clock.next(t_cycles);
 
             for _ in 0..n {
                 let tima_value = self.timer.tima().wrapping_add(1);

@@ -9,10 +9,14 @@
     <body>
         <script src="bootstrap.js"></script>
         <h1>Rustboy</h1>
-        <canvas id="canvas" width="640" height="560" style="border:1px solid"></canvas>
+        <canvas id="canvas" width="640" height="600" style="border:1px solid"></canvas>
         <div>
-            <input type="file" id="fileInput"/>
-            <button id="btn">Load File </button>
+            <input type="file" id="fileInput" accept=".gb,.gbc"/>
+            <button id="load">Load File </button>
         </div>
+        <div>
+            <button id="reset"> Reset </button>
+        </div>
+        <div id="fps"></div>
     </body>
 </html>

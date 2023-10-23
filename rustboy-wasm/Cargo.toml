@@ -17,4 +17,3 @@ web-sys = {version = "0.3.64", features = ["console",
 
 [lib]
 crate-type = ["rlib", "cdylib"]
-

@@ -10,7 +10,7 @@ impl Cpu {
         }
 
         self.handle_interrupt(interconnect);
-        self.last_cycle = interconnect.timer.internal_ticks();
+        self.last_cycle = interconnect.ticks;
         self.fetch_opcode(interconnect);
 
         #[allow(clippy::match_same_arms)]

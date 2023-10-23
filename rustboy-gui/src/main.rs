@@ -1,13 +1,20 @@
-mod gui;
 mod constants;
+mod gui;
+mod support;
 
 use constants::*;
 
 use anyhow::Result;
 use clap::*;
 use env_logger::*;
-use rustboy::gameboy::*;
-use sdl2::event::*;
+use imgui::{Condition, DrawListMut, ImColor32, Ui};
+use rustboy::constants::TILE_COLORS;
+use rustboy::interconnect::joypad::Key;
+use rustboy::interconnect::Interconnect;
+use rustboy::{
+    constants::{X_RESOLUTION, Y_RESOLUTION},
+    gameboy::*,
+};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -24,6 +31,31 @@ struct Args {
     skip_boot: bool,
 }
 
+fn imgui_key_to_gb_key(keycode: imgui::Key) -> Option<Key> {
+    match keycode {
+        imgui::Key::RightArrow | imgui::Key::D => Some(Key::Right),
+        imgui::Key::LeftArrow | imgui::Key::A => Some(Key::Left),
+        imgui::Key::UpArrow | imgui::Key::W => Some(Key::Up),
+        imgui::Key::DownArrow | imgui::Key::S => Some(Key::Down),
+        imgui::Key::Z => Some(Key::A),
+        imgui::Key::X => Some(Key::B),
+        imgui::Key::Space => Some(Key::Select),
+        imgui::Key::Enter => Some(Key::Start),
+        _ => None,
+    }
+}
+
+const keys: [imgui::Key; 8] = [
+    imgui::Key::RightArrow,
+    imgui::Key::LeftArrow,
+    imgui::Key::UpArrow,
+    imgui::Key::DownArrow,
+    imgui::Key::Z,
+    imgui::Key::X,
+    imgui::Key::Space,
+    imgui::Key::Enter,
+];
+
 fn main() -> Result<(), anyhow::Error> {
     // Command Line Arguments
     let args = Args::parse();
@@ -37,41 +69,28 @@ fn main() -> Result<(), anyhow::Error> {
 
     let mut gameboy = GameBoy::new();
     gameboy.boot(args.rom.as_str(), args.skip_boot)?;
-    run_sdl(&mut gameboy, args.headless)?;
-    Ok(())
-}
 
-#[cfg(target_os = "linux")]
-pub fn run_sdl(gb: &mut GameBoy, headless: bool) -> Result<(), Error> {
-    use sdl2::keyboard::Keycode;
-
-    if headless {
-        loop {
-            gb.cpu.run(&mut gb.interconnect);
-        }
-    } else {
-        let sdl_context = sdl2::init().expect("Failed to start SDL");
-        let mut debug_window = gui::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
-        let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
-
-        let mut main_window = gui::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
-
-        'running: loop {
-            gb.cpu.run(&mut gb.interconnect);
-
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    _ => {}
+    let system = support::init(file!());
+    system.main_loop(move |_, ui| {
+        for key in keys {
+            if ui.is_key_down(key) {
+                if let Some(gb_key) = imgui_key_to_gb_key(key) {
+                    gameboy.interconnect.key_down(gb_key);
+                }
+            } else if ui.is_key_released(key) {
+                if let Some(gb_key) = imgui_key_to_gb_key(key) {
+                    gameboy.interconnect.key_up(gb_key);
                 }
             }
-            gui::debug_window(&mut debug_window, &gb.interconnect);
-            gui::main_window(&mut main_window, &gb.interconnect);
         }
-    }
+
+        gameboy.cpu.run(&mut gameboy.interconnect);
+        //gui::memory_viewer(ui, &gameboy);
+        gui::display_info(ui, &gameboy);
+        gui::draw_tiles(ui, &gameboy.interconnect);
+        gui::display_emulator(ui, &gameboy);
+        gui::debug_window(ui, &gameboy);
+    });
+
     Ok(())
 }
