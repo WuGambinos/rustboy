@@ -1,6 +1,5 @@
 use crate::constants::RAM_BANK_SIZE;
 use crate::constants::ROM_BANK_SIZE;
-use crate::interconnect::cartridge::Mbc;
 #[derive(Debug)]
 pub enum BankingMode {
     Rom,
@@ -8,7 +7,7 @@ pub enum BankingMode {
 }
 
 #[derive(Debug)]
-pub struct Mbc1 {
+pub struct Mbc1State {
     pub rom: Vec<u8>,
     pub ram: Vec<u8>,
     rom_bank_number: usize,
@@ -17,9 +16,9 @@ pub struct Mbc1 {
     banking_mode: BankingMode,
 }
 
-impl Mbc1 {
-    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc1 {
-        Mbc1 {
+impl Mbc1State {
+    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc1State {
+        Mbc1State {
             rom: rom.to_vec(),
             ram: ram.to_vec(),
             ram_enabled: false,
@@ -29,8 +28,8 @@ impl Mbc1 {
         }
     }
 
-    pub fn empty() -> Mbc1 {
-        Mbc1 {
+    pub fn empty() -> Mbc1State {
+        Mbc1State {
             rom: vec![0; 0xFFFF],
             ram: vec![0; 0x8000],
             ram_enabled: false,
@@ -69,10 +68,8 @@ impl Mbc1 {
             BankingMode::Ram => self.ram_bank_number as usize,
         }
     }
-}
 
-impl Mbc for Mbc1 {
-    fn read(&self, addr: u16) -> u8 {
+    pub fn read(&self, addr: u16) -> u8 {
         match addr {
             0x0000..=0x3FFF => {
                 let bank = self.get_lower_rom_bank();
@@ -107,7 +104,7 @@ impl Mbc for Mbc1 {
         }
     }
 
-    fn write(&mut self, addr: u16, value: u8) {
+    pub fn write(&mut self, addr: u16, value: u8) {
         match addr {
             0x000..=0x1FFF => self.ram_enabled = value == 0xA,
             0x2000..=0x3FFF => {

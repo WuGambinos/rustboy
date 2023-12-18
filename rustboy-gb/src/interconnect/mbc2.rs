@@ -1,5 +1,4 @@
 use crate::constants::ROM_BANK_SIZE;
-use super::cartridge::Mbc;
 
 #[derive(Debug)]
 pub struct Mbc2 {
@@ -18,10 +17,8 @@ impl Mbc2 {
             ram_enabled: false,
         }
     }
-}
 
-impl Mbc for Mbc2 {
-    fn read(&self, addr: u16) -> u8 {
+    pub fn read(&self, addr: u16) -> u8 {
         match addr {
             0x0000..=0x3FFF => self.rom[addr as usize],
 
@@ -42,7 +39,7 @@ impl Mbc for Mbc2 {
         }
     }
 
-    fn write(&mut self, addr: u16, value: u8) {
+    pub fn write(&mut self, addr: u16, value: u8) {
         match addr {
             0x0000..=0x3FFF => {
                 let bit_8_set = (addr & 0x100) > 0;

@@ -1,5 +1,4 @@
-use crate::constants::{ROM_BANK_SIZE, RAM_BANK_SIZE};
-use super::cartridge::Mbc;
+use crate::constants::{RAM_BANK_SIZE, ROM_BANK_SIZE};
 
 #[derive(Debug)]
 pub struct Mbc3 {
@@ -20,28 +19,24 @@ impl Mbc3 {
             ram_enabled: false,
         }
     }
-}
 
-impl Mbc for Mbc3 {
-
-    fn read(&self, addr: u16) -> u8 {
+    pub fn read(&self, addr: u16) -> u8 {
         match addr {
-            0x0000..=0x3FFF => {
-                self.rom[addr as usize]
-            }
+            0x0000..=0x3FFF => self.rom[addr as usize],
 
             0x4000..=0x7FFF => {
-                let new_addr = ROM_BANK_SIZE * self.rom_bank_number + (addr & 0x3FFF )as usize;
+                let new_addr = ROM_BANK_SIZE * self.rom_bank_number + (addr & 0x3FFF) as usize;
                 let new_addr = new_addr & (self.rom.len() - 1);
                 self.rom[new_addr as usize]
             }
 
-            0xA000..=0xBFFF =>  {
+            0xA000..=0xBFFF => {
                 if !self.ram_enabled {
                     return 0xFF;
                 }
 
-                let new_addr = (RAM_BANK_SIZE * self.ram_bank_number) + (addr & 0x1FFF) as usize & (self.ram.len() - 1);
+                let new_addr = (RAM_BANK_SIZE * self.ram_bank_number) + (addr & 0x1FFF) as usize
+                    & (self.ram.len() - 1);
                 return self.ram[new_addr];
                 /*
                 match addr {
@@ -52,43 +47,28 @@ impl Mbc for Mbc3 {
                     _ => return 0xFF,
                 }
                 */
-
             }
 
             _ => panic!("NOT REACHABLE MBC3 {:#X}", addr),
         }
-        
     }
 
-    fn write(&mut self, addr: u16, value: u8) {
-
+    pub fn write(&mut self, addr: u16, value: u8) {
         match addr {
             0x0000..=0x1FFF => {
                 self.ram_enabled = (value & 0xF) == 0x0A;
             }
 
-            0x2000..=0x3FFF => {
-                self.rom_bank_number = if value == 0 {
-                    1
+            0x2000..=0x3FFF => self.rom_bank_number = if value == 0 { 1 } else { value as usize },
+
+            0x4000..=0x5FFF => match value {
+                0x00..=0x03 => {
+                    self.ram_bank_number = value as usize;
                 }
-                else {
-                    value  as usize
-                }
-            }
-
-            0x4000..=0x5FFF => {
-                match value {
-                    0x00..=0x03 => {
-                        self.ram_bank_number = value as usize;
-                    }
-                    _ => (),
-                }
-
-            }
-
-            0x6000..=0x7FFF => {
-
+                _ => (),
             },
+
+            0x6000..=0x7FFF => {}
 
             0xA000..=0xBFFF => {
                 if !self.ram_enabled {
@@ -97,19 +77,17 @@ impl Mbc for Mbc3 {
 
                 match self.ram_bank_number {
                     0x00..=0x03 => {
-                        let new_addr = (RAM_BANK_SIZE * self.ram_bank_number) + (addr & 0x1FFF) as usize & (self.ram.len() - 1);
+                        let new_addr = (RAM_BANK_SIZE * self.ram_bank_number)
+                            + (addr & 0x1FFF) as usize
+                            & (self.ram.len() - 1);
                         self.ram[new_addr] = value;
                     }
 
-                    _ => ()
+                    _ => (),
                 }
-
             }
 
             _ => panic!("NOT REACHABLE MBC3 {:#X}", addr),
-
         }
-        
     }
 }
-

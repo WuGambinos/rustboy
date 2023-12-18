@@ -1,16 +1,46 @@
 use crate::interconnect::cartridge_info::CartridgeType;
-use crate::interconnect::mbc1::Mbc1;
 
+use super::mbc1::Mbc1State;
 use super::mbc2::Mbc2;
 use super::mbc3::Mbc3;
 use super::mbc5::Mbc5;
 use super::nombc::NoMbc;
 
+pub enum TestMbc {
+    NoMbc(NoMbc),
+    Mbc1(Mbc1State),
+    Mbc2(Mbc2),
+    Mbc3(Mbc3),
+    Mbc5(Mbc5),
+}
+
+impl TestMbc {
+    pub fn read(&self, addr: u16) -> u8 {
+        match self {
+            TestMbc::NoMbc(mbc) => mbc.read(addr),
+            TestMbc::Mbc1(mbc) => mbc.read(addr),
+            TestMbc::Mbc2(mbc) => mbc.read(addr),
+            TestMbc::Mbc3(mbc) => mbc.read(addr),
+            TestMbc::Mbc5(mbc) => mbc.read(addr),
+        }
+    }
+
+    pub fn write(&mut self, addr: u16, value: u8) {
+        match self {
+            TestMbc::NoMbc(mbc) => mbc.write(addr, value),
+            TestMbc::Mbc1(mbc) => mbc.write(addr, value),
+            TestMbc::Mbc2(mbc) => mbc.write(addr, value),
+            TestMbc::Mbc3(mbc) => mbc.write(addr, value),
+            TestMbc::Mbc5(mbc) => mbc.write(addr, value),
+        }
+    }
+}
+
 pub struct Cartridge {
     pub title: String,
     pub cartridge_type: CartridgeType,
     pub valid_checksum: bool,
-    pub mbc: Box<dyn Mbc>,
+    pub mbc: TestMbc,
 }
 
 impl Cartridge {
@@ -19,37 +49,37 @@ impl Cartridge {
             title: String::new(),
             cartridge_type: CartridgeType::ROMOnly,
             valid_checksum: false,
-            mbc: Box::new(NoMbc::new(&[])),
+            mbc: TestMbc::NoMbc(NoMbc::new(&[])),
         }
     }
 
     pub fn new(rom: &Vec<u8>, ram: &Vec<u8>, cart_type: &CartridgeType) -> Cartridge {
-        let mbc: Box<dyn Mbc> = match cart_type {
-            CartridgeType::ROMOnly => Box::new(NoMbc::new(rom)),
-            CartridgeType::MBC1 => Box::new(Mbc1::new(rom, ram)),
-            CartridgeType::MBC1RAM => Box::new(Mbc1::new(rom, ram)),
-            CartridgeType::MBC1RAMBattery => Box::new(Mbc1::new(rom, ram)),
-            CartridgeType::MBC2 => Box::new(Mbc2::new(rom)),
-            CartridgeType::MBC2Battery => Box::new(Mbc2::new(rom)),
-            CartridgeType::MBC3 => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3RAM => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3RAMBattery => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3TimerBattery => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC3TimerRAMBattery => Box::new(Mbc3::new(rom, ram)),
-            CartridgeType::MBC5 => Box::new(Mbc5::new(rom, ram)),
-            CartridgeType::MBC5RAM => Box::new(Mbc5::new(rom, ram)),
-            CartridgeType::MBC5RAMBattery => Box::new(Mbc5::new(rom, ram)),
-            CartridgeType::MBC5Rumble => Box::new(Mbc5::new(rom, ram)),
-            CartridgeType::MBC5RumbleRAM => Box::new(Mbc5::new(rom, ram)),
-            CartridgeType::MBC5RumbleRAMBattery => Box::new(Mbc5::new(rom, ram)),
-            _ => Box::new(NoMbc::new(&[])),
+        let mbc_test: TestMbc = match cart_type {
+            CartridgeType::ROMOnly => TestMbc::NoMbc(NoMbc::new(rom)),
+            CartridgeType::MBC1 => TestMbc::Mbc1(Mbc1State::new(rom, ram)),
+            CartridgeType::MBC1RAM => TestMbc::Mbc1(Mbc1State::new(rom, ram)),
+            CartridgeType::MBC1RAMBattery => TestMbc::Mbc1(Mbc1State::new(rom, ram)),
+            CartridgeType::MBC2 => TestMbc::Mbc2(Mbc2::new(rom)),
+            CartridgeType::MBC2Battery => TestMbc::Mbc2(Mbc2::new(rom)),
+            CartridgeType::MBC3 => TestMbc::Mbc3(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3RAM => TestMbc::Mbc3(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3RAMBattery => TestMbc::Mbc3(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3TimerBattery => TestMbc::Mbc3(Mbc3::new(rom, ram)),
+            CartridgeType::MBC3TimerRAMBattery => TestMbc::Mbc3(Mbc3::new(rom, ram)),
+            CartridgeType::MBC5 => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RAM => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RAMBattery => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5Rumble => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RumbleRAM => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            CartridgeType::MBC5RumbleRAMBattery => TestMbc::Mbc5(Mbc5::new(rom, ram)),
+            _ => TestMbc::NoMbc(NoMbc::new(rom)),
         };
 
         Cartridge {
             title: String::new(),
             cartridge_type: CartridgeType::ROMOnly,
             valid_checksum: false,
-            mbc,
+            mbc: mbc_test,
         }
     }
 
@@ -67,7 +97,9 @@ impl Cartridge {
     }
 }
 
+/*
 pub trait Mbc {
     fn read(&self, addr: u16) -> u8;
     fn write(&mut self, addr: u16, value: u8);
 }
+*/
