@@ -4,8 +4,8 @@ use rustboy::interconnect::ppu::Rgb;
 use rustboy::{
     gameboy::GameBoy,
     interconnect::{
+        cartridge::cartridge_info::{ram_size, u8_to_cart_type},
         cartridge::Cartridge,
-        cartridge_info::{ram_size, u8_to_cart_type},
     },
 };
 use std::f64;
@@ -65,7 +65,7 @@ impl WebGameBoy {
         }
     }
 
-    pub fn reset(&mut self)  {
+    pub fn reset(&mut self) {
         self.gb = GameBoy::new();
         self.prev_buffer = None;
     }

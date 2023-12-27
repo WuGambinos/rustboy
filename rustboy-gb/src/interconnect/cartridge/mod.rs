@@ -1,10 +1,16 @@
-use crate::interconnect::cartridge_info::CartridgeType;
+pub mod cartridge_info;
+mod mbc1;
+mod mbc2;
+mod mbc3;
+mod mbc5;
+mod nombc;
 
-use super::mbc1::Mbc1State;
-use super::mbc2::Mbc2State;
-use super::mbc3::Mbc3State;
-use super::mbc5::Mbc5State;
-use super::nombc::NoMbcState;
+use cartridge_info::CartridgeType;
+use mbc1::Mbc1State;
+use mbc2::Mbc2State;
+use mbc3::Mbc3State;
+use mbc5::Mbc5State;
+use nombc::NoMbcState;
 
 pub enum Mbc {
     NoMbc(NoMbcState),

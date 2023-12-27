@@ -1,3 +1,4 @@
+mod sweep;
 use modular_bitfield::{bitfield, specifiers::*};
 
 use crate::nth_bit;
@@ -48,8 +49,6 @@ pub struct Nr2 {
     envelope_dir: B1,
     inital_volume: B4,
 }
-
-
 
 struct VolumeEnvelope {
     finished: bool,

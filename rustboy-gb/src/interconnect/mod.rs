@@ -1,17 +1,10 @@
 #![allow(clippy::must_use_candidate)]
 
-pub mod cartridge;
-pub mod cartridge_info;
-pub mod joypad;
 pub mod apu;
-pub mod ppu;
-mod sweep;
-mod nombc;
-mod mbc1;
-mod mbc2;
-mod mbc3;
-mod mbc5;
+pub mod cartridge;
+pub mod joypad;
 mod mmu;
+pub mod ppu;
 mod serial;
 
 use log::debug;

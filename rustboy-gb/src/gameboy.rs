@@ -1,9 +1,9 @@
 use crate::constants::PC_AFTER_BOOT;
 use crate::cpu::Cpu;
+use crate::interconnect::cartridge::cartridge_info::ram_size;
+use crate::interconnect::cartridge::cartridge_info::u8_to_cart_type;
+use crate::interconnect::cartridge::cartridge_info::CartridgeType;
 use crate::interconnect::cartridge::Cartridge;
-use crate::interconnect::cartridge_info::ram_size;
-use crate::interconnect::cartridge_info::u8_to_cart_type;
-use crate::interconnect::cartridge_info::CartridgeType;
 use crate::interconnect::Interconnect;
 
 use anyhow::Error;
