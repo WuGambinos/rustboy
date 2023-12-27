@@ -1,11 +1,11 @@
 #[derive(Debug)]
-pub struct NoMbc {
+pub struct NoMbcState {
     pub rom: Vec<u8>,
 }
 
-impl NoMbc {
-    pub fn new(rom: &[u8]) -> NoMbc {
-        NoMbc { rom: rom.to_vec() }
+impl NoMbcState {
+    pub fn new(rom: &[u8]) -> NoMbcState {
+        NoMbcState { rom: rom.to_vec() }
     }
 
     pub fn read(&self, addr: u16) -> u8 {

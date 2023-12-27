@@ -1,16 +1,16 @@
 use crate::constants::ROM_BANK_SIZE;
 
 #[derive(Debug)]
-pub struct Mbc2 {
+pub struct Mbc2State {
     pub rom: Vec<u8>,
     pub ram: Vec<u8>,
     rom_bank_number: usize,
     ram_enabled: bool,
 }
 
-impl Mbc2 {
-    pub fn new(rom: &[u8]) -> Mbc2 {
-        Mbc2 {
+impl Mbc2State {
+    pub fn new(rom: &[u8]) -> Mbc2State {
+        Mbc2State {
             rom: rom.to_vec(),
             ram: vec![0; 512],
             rom_bank_number: 1,

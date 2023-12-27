@@ -1,7 +1,7 @@
 use crate::constants::{RAM_BANK_SIZE, ROM_BANK_SIZE};
 
 #[derive(Debug)]
-pub struct Mbc5 {
+pub struct Mbc5State {
     pub rom: Vec<u8>,
     pub ram: Vec<u8>,
     rom_bank_number: usize,
@@ -9,9 +9,9 @@ pub struct Mbc5 {
     ram_enabled: bool,
 }
 
-impl Mbc5 {
-    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc5 {
-        Mbc5 {
+impl Mbc5State {
+    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc5State {
+        Mbc5State {
             rom: rom.to_vec(),
             ram: ram.to_vec(),
             rom_bank_number: 1,
