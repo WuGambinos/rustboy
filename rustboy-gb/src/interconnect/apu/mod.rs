@@ -1,9 +1,16 @@
-mod sweep;
-use modular_bitfield::{bitfield, specifiers::*};
-
 use crate::nth_bit;
 
-const DUTY_CYCLES: [[bool; 8]; 4] = [
+use self::{noise::Noise, square1::Square1, square2::Square2, wave::Wave};
+
+mod envelope;
+mod length_counter;
+mod noise;
+mod square1;
+mod square2;
+mod sweep;
+mod wave;
+
+pub const DUTY_CYCLES: [[bool; 8]; 4] = [
     [false, false, false, false, false, false, false, true],
     [true, false, false, false, false, false, false, true],
     [true, false, false, false, false, true, true, true],
@@ -13,239 +20,306 @@ const DUTY_CYCLES: [[bool; 8]; 4] = [
 pub trait Channel {
     fn read(&self, addr: u16) -> u8;
     fn write(&mut self, addr: u16, value: u8);
+    fn length_clock(&mut self);
+    fn enabled(&self) -> bool;
 }
 
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr10 {
-    step: B3,
-    direction: B1,
-    pace: B3,
-    empty: B1,
+#[derive(Clone, Copy)]
+enum FrameSequencer {
+    Step0,
+    Step1,
+    Step2,
+    Step3,
+    Step4,
+    Step5,
+    Step6,
+    Step7,
 }
 
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr14 {
-    period: B3,
-    empty: B3,
-    length_en: B1,
-    trigger: B1,
-}
-
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr0 {
-    shift: B3,
-    sweep_direction: B1,
-    period: B3,
-    empty: B1,
-}
-
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr2 {
-    sweep_pace: B3,
-    envelope_dir: B1,
-    inital_volume: B4,
-}
-
-struct VolumeEnvelope {
-    finished: bool,
-    timer: i32,
-    starting_volume: i8,
-    add_mode: bool,
-    period: i8,
-    volume: i8,
-}
-
-impl VolumeEnvelope {
-    fn new() -> VolumeEnvelope {
-        VolumeEnvelope {
-            finished: false,
-            timer: 0,
-            starting_volume: 0,
-            add_mode: false,
-            period: 0,
-            volume: 0,
-        }
-    }
-    fn _tick(&mut self) {
-        if self.finished {
-            return;
-        }
-
-        if self.timer <= 0 {
-            self.timer = if self.period != 0 {
-                self.period as i32
-            } else {
-                8
-            };
-
-            if self.add_mode && self.volume < 15 {
-                self.volume += 1;
-            } else if !self.add_mode && self.volume > 0 {
-                self.volume += 1;
-            }
-
-            if self.volume == 0 || self.volume == 15 {
-                self.finished = true;
-            }
-        }
-    }
-
-    fn turn_off(&mut self) {
-        self.finished = true;
-        self.timer = 0;
-
-        self.starting_volume = 0;
-        self.add_mode = false;
-        self.period = 0;
-
-        self.volume = 0;
-    }
-
-    fn set_nr2(&mut self, value: i8) {
-        self.starting_volume = value >> 4;
-        self.add_mode = nth_bit!(value, 3) != 0;
-        self.period = value & 0b111;
-    }
-
-    fn nr2(&self) -> i8 {
-        let add_m = (self.add_mode as i8) << 3;
-
-        (self.starting_volume << 4) | (add_m) | self.period
-    }
-
-    fn volume(&self) -> i8 {
-        if self.period > 0 {
-            return self.volume;
-        } else {
-            return self.starting_volume;
-        }
-    }
-
-    fn trigger(&mut self) {
-        self.volume = self.starting_volume;
-        self.finished = false;
-
-        self.timer = if self.period != 0 {
-            self.period as i32
-        } else {
-            8
-        };
+fn int_to_frame_sequencer(fs: i32) -> FrameSequencer {
+    match fs {
+        0 => FrameSequencer::Step0,
+        1 => FrameSequencer::Step1,
+        2 => FrameSequencer::Step2,
+        3 => FrameSequencer::Step3,
+        4 => FrameSequencer::Step4,
+        5 => FrameSequencer::Step5,
+        6 => FrameSequencer::Step6,
+        7 => FrameSequencer::Step7,
+        _ => FrameSequencer::Step0,
     }
 }
 
-struct LengthCounter {
+fn frame_sequencer_to_int(fs: FrameSequencer) -> i32 {
+    match fs {
+        FrameSequencer::Step0 => 0,
+        FrameSequencer::Step1 => 1,
+        FrameSequencer::Step2 => 2,
+        FrameSequencer::Step3 => 3,
+        FrameSequencer::Step4 => 4,
+        FrameSequencer::Step5 => 5,
+        FrameSequencer::Step6 => 6,
+        FrameSequencer::Step7 => 7,
+    }
+}
+
+pub struct Apu {
+    channel_1: Square1,
+    channel_2: Square2,
+    channel_3: Wave,
+    channel_4: Noise,
     enabled: bool,
-    full_length: i32,
-    length: i32,
-    frame_sequencer: i32,
+    vin_left_enable: bool,
+    vin_right_enable: bool,
+    left_volume: u8,
+    right_volume: u8,
+    volume: [f32; 4],
+    left_enables: [bool; 4],
+    right_enables: [bool; 4],
+
+    frequency_counter: i32,
+    frame_sequencer_counter: i32,
+    frame_sequencer: FrameSequencer,
 }
 
-impl LengthCounter {
-    fn new() -> LengthCounter {
-        LengthCounter {
+impl Apu {
+    fn new() -> Apu {
+        Apu {
+            channel_1: Square1::new(),
+            channel_2: Square2::new(),
+            channel_3: Wave::new(),
+            channel_4: Noise::new(),
             enabled: false,
-            full_length: 0,
-            length: 0,
-            frame_sequencer: 0,
+            vin_left_enable: false,
+            vin_right_enable: false,
+            left_volume: 0,
+            right_volume: 0,
+            volume: [0.; 4],
+            left_enables: [false; 4],
+            right_enables: [false; 4],
+            frequency_counter: 0,
+            frame_sequencer_counter: 0,
+            frame_sequencer: FrameSequencer::Step0,
+        }
+    }
+
+    fn clear_regs(&mut self) {
+        self.vin_left_enable = false;
+        self.vin_right_enable = false;
+        self.left_volume = 0;
+        self.right_volume = 0;
+
+        self.enabled = false;
+
+        self.channel_1.power_off();
+        self.channel_2.power_off();
+        self.channel_3.power_off();
+        self.channel_4.power_off();
+
+        for i in 0..4 {
+            self.left_enables[i] = false;
+            self.right_enables[i] = false;
         }
     }
 
     fn tick(&mut self) {
-        if self.enabled && self.length > 0 {
-            self.length = self.length - 1;
+        if self.frame_sequencer_counter <= 0 {
+            self.frame_sequencer_counter = 8192;
+
+            match self.frame_sequencer {
+                FrameSequencer::Step0 => {
+                    self.channel_1.length_clock();
+                    self.channel_2.length_clock();
+                    self.channel_3.length_clock();
+                    self.channel_4.length_clock();
+                }
+                FrameSequencer::Step2 => {
+                    self.channel_1.sweep_clock();
+                    self.channel_1.length_clock();
+                    self.channel_2.length_clock();
+                    self.channel_3.length_clock();
+                    self.channel_4.length_clock();
+                }
+                FrameSequencer::Step4 => {
+                    self.channel_1.length_clock();
+                    self.channel_2.length_clock();
+                    self.channel_3.length_clock();
+                    self.channel_4.length_clock();
+                }
+                FrameSequencer::Step6 => {
+                    self.channel_1.sweep_clock();
+                    self.channel_1.length_clock();
+                    self.channel_2.length_clock();
+                    self.channel_3.length_clock();
+                    self.channel_4.length_clock();
+                }
+                FrameSequencer::Step7 => {
+                    self.channel_1.envelope_clock();
+                    self.channel_2.envelope_clock();
+                    self.channel_4.envelope_clock();
+                }
+
+                _ => (),
+            }
+
+            let new_frame_sequencer = (self.frame_sequencer as i32 + 1) & 7;
+            self.frame_sequencer = int_to_frame_sequencer(new_frame_sequencer);
+
+            self.channel_1
+                .length_counter
+                .set_frame_sequencer(new_frame_sequencer);
+            self.channel_2
+                .length_counter
+                .set_frame_sequencer(new_frame_sequencer);
+            self.channel_3
+                .length_counter
+                .set_frame_sequencer(new_frame_sequencer);
+            self.channel_4
+                .length_counter
+                .set_frame_sequencer(new_frame_sequencer);
+        }
+
+        self.channel_1.tick();
+        self.channel_2.tick();
+        self.channel_3.tick();
+        self.channel_4.tick();
+
+        if self.frequency_counter <= 0 {
+            self.frequency_counter = 95;
+
+            let mut left = 0;
+            let mut right = 0;
+
+            let mut output = 0;
+
+            for i in 0..4 {
+                output = match i {
+                    0 => self.channel_1.output * self.volume[i] as u8,
+                    1 => self.channel_2.output * self.volume[i] as u8,
+                    2 => self.channel_3.output * self.volume[i] as u8,
+                    3 => self.channel_4.output * self.volume[i] as u8,
+                    _ => 0,
+                };
+                if self.left_enables[i] {
+                    left += output;
+                }
+
+                if self.right_enables[i] {
+                    right += output
+                }
+            }
         }
     }
 
-    fn turn_of(&mut self) {
-        self.enabled = false;
-        self.frame_sequencer = 0;
-    }
-
-    fn set_nr4(&mut self, value: i8) {
-        let enable = nth_bit!(value, 6) != 0;
-        let trigger = nth_bit!(value, 7) != 0;
-
-        if self.enabled {
-            if trigger && self.length == 0 {
-                self.length = self.full_length - 1;
-            } else {
-                self.length = self.full_length;
-            }
-        } else if enable {
-            if (self.frame_sequencer & 1) == 0 {
-                if self.length != 0 {
-                    self.length = self.length - 1;
-                }
-
-                if trigger && self.length == 0 {
-                    self.length = self.full_length - 1;
-                }
-            }
-        } else {
-            if trigger && self.length == 0 {
-                self.length = self.full_length;
-            }
-        }
-
-        self.enabled = enable;
-    }
-}
-
-pub struct Square1 {
-    nr11: u8,
-    nr12: u8,
-    nr13: u8,
-    nr14: u8,
-}
-
-pub struct Square2 {
-    nr21: u8,
-    nr22: u8,
-    nr23: u8,
-    nr24: u8,
-}
-
-/*
-impl Channel for Square {
     fn read(&self, addr: u16) -> u8 {
+        if (0xFF10..=0xFF14).contains(&addr) {
+            return self.channel_1.read(addr);
+        } else if (0xFF15..=0xFF19).contains(&addr) {
+            return self.channel_2.read(addr);
+        } else if (0xFF1A..=0xFF1E).contains(&addr) {
+            return self.channel_3.read(addr);
+        } else if (0xFF1F..=0xFF23).contains(&addr) {
+            return self.channel_4.read(addr);
+        }
+
+        let mut result = 0;
+
         match addr {
-            0xFF10 => (),
-            0xFF11 => (self.duty << 6) | 0x3F,
-            0xFF12 => self.volume_envolpe,
-            0xFF13 => 0xFF,
-            0xFF14 => (),
+            0xFF24 => {
+                ((self.vin_left_enable as u8) << 7)
+                    | (self.left_volume << 4)
+                    | ((self.vin_right_enable as u8) << 3)
+                    | self.right_volume
+            }
+            0xFF25 => {
+                for i in 0..4 {
+                    result |= (self.right_enables[i] as u8) << i;
+                    result |= (self.left_enables[i] as u8) << i;
+                }
+
+                result
+            }
+            0xFF26 => {
+                result = (self.enabled as u8) << 7;
+                for i in 0..4 {
+                    let channel: Box<dyn Channel> = match i {
+                        0 => Box::new(self.channel_1),
+                        1 => Box::new(self.channel_2),
+                        2 => Box::new(self.channel_3),
+                        3 => Box::new(self.channel_4),
+                        _ => Box::new(self.channel_1),
+                    };
+                    result |= (channel.enabled() as u8) << i;
+                }
+                result | 0x70
+            }
             _ => 0,
         }
     }
 
-    fn write(&mut self, addr: u16, value: u8) {}
+    fn write(&mut self, addr: u16, value: u8) {
+        if addr == 0xFF26 {
+            let enable = nth_bit!(value, 7) != 0;
+
+            if self.enabled && !enable {
+                self.clear_regs();
+            } else if !self.enabled && enable {
+                self.frame_sequencer = int_to_frame_sequencer(0);
+            }
+
+            self.enabled = enable;
+            return;
+        } else if (0xFF30..=0xFF3F).contains(&addr) {
+            self.channel_3.write(addr, value);
+            return;
+        }
+
+        if !self.enabled {
+            match addr {
+                0xFF11 => self.channel_1.write(addr, value & 0x3F),
+                0xFF16 => self.channel_2.write(addr, value & 0x3F),
+                0xFF1B => self.channel_3.write(addr, value & 0x3F),
+                0xFF20 => self.channel_4.write(addr, value & 0x3F),
+                _ => (),
+            }
+
+            return;
+        }
+
+        if (0xFF10..=0xFF14).contains(&addr) {
+            self.channel_1.write(addr, value);
+            return;
+        } else if (0xFF15..=0xFF19).contains(&addr) {
+            self.channel_2.write(addr, value);
+            return;
+        } else if (0xFF1A..=0xFF1E).contains(&addr) {
+            self.channel_3.write(addr, value);
+            return;
+        } else if (0xFF1F..=0xFF23).contains(&addr) {
+            self.channel_4.write(addr, value);
+            return;
+        }
+
+        if (0xFF27..=0xFF2F).contains(&addr) {
+            return;
+        }
+
+        match addr {
+            0xFF24 => {
+                self.right_volume = value & 0b111;
+                self.vin_right_enable = nth_bit!(value, 3) != 0;
+                self.left_volume = (value >> 4) & 0b111;
+                self.vin_left_enable = nth_bit!(value, 7) != 0;
+            }
+
+            0xFF25 => {
+                for i in 0..4 {
+                    self.right_enables[i] = ((value >> i) & 1) != 0;
+                    self.left_enables[i] = ((value >> (i + 4)) & 1) != 0;
+                }
+            }
+
+            _ => (),
+        }
+    }
 }
-*/
-
-/*
-pub struct Wave {}
-impl Channel for Wave {}
-
-pub struct Noise {}
-impl Channel for Noise {}
-
-pub struct Control {}
-
-impl Channel for Control {}
-*/
-
-/*
-pub struct Channel {
-    sequence: u8,
-    duty: u8,
-    length: u8,
-}
-*/
-
-pub struct Apu {}
-
-impl Apu {}

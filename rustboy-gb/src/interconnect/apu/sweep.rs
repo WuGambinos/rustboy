@@ -1,44 +1,59 @@
-use modular_bitfield::bitfield;
-use modular_bitfield::prelude::*;
+use crate::nth_bit;
 
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr0 {
-    shift: B3,
-    sweep_direction: B1,
-    period: B3,
-    empty: B1,
-}
-
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr3 {
-    frequency: B8,
-}
-
-#[bitfield]
-#[derive(Debug, Clone, Copy)]
-pub struct Nr4 {
-    period: B3,
-    empty: B3,
-    length_enable: B1,
-    trigger: B1,
-}
-
-struct FrequencySweep {
-    nr0: Nr0,
-    nr3: Nr3,
-    nr4: Nr4,
+#[derive(Clone, Copy)]
+pub struct FrequencySweep {
     freq: i32,
     shadow_freq: i32,
-    enabled: bool,
     timer: i32,
+
+    period: u8,
+    negative_direction: u8,
+    shift: u8,
+
+    enabled: bool,
     overflow: bool,
-    period_load: u8,
 }
 
 impl FrequencySweep {
-    fn power_off(&mut self) {
+    pub fn new() -> FrequencySweep {
+        FrequencySweep {
+            freq: 0,
+            shadow_freq: 0,
+            timer: 0,
+            period: 0,
+            negative_direction: 0,
+            shift: 0,
+            enabled: false,
+            overflow: false,
+        }
+    }
+    pub fn enabled(&self) -> bool {
+        !self.overflow
+    }
+
+    pub fn frequency(&self) -> i32 {
+        self.freq
+    }
+
+    pub fn write_nr10(&mut self, value: u8) {
+        self.period = (value >> 4) & 0b111;
+        self.negative_direction = nth_bit!(value, 3);
+        self.shift = value & 0b111;
+    }
+
+    pub fn read_nr10(&self) -> u8 {
+        (self.period << 4) | ((self.negative_direction as u8) << 3) | self.shift
+    }
+
+    pub fn write_nr13(&mut self, value: u8) {
+        self.freq = (self.freq & 0x700) | value as i32;
+    }
+
+    pub fn write_nr14(&mut self, value: u8) {
+        self.freq = (self.freq & 0xFF) | ((value as i32 & 0b111) << 8);
+    }
+
+    pub fn power_off(&mut self) {
         self.enabled = false;
         self.overflow = false;
 
@@ -46,27 +61,29 @@ impl FrequencySweep {
         self.freq = 0;
         self.shadow_freq = 0;
 
-        self.nr0.bytes = [0];
+        self.period = 0;
+        self.negative_direction = 0;
+        self.shift = 0;
     }
 
-    fn trigger(&mut self) {
-        let period = self.nr0.period();
+    pub fn trigger(&mut self) {
+        let period = self.period;
         self.overflow = false;
         self.shadow_freq = self.freq;
 
         self.timer = if period != 0 { period as i32 } else { 8 };
 
-        self.enabled = period != 0 || self.nr0.shift() != 0;
+        self.enabled = period != 0 || self.shift != 0;
 
-        if self.nr0.shift() > 0 {
+        if self.shift > 0 {
             self.calc_freq();
         }
     }
 
-    fn calc_freq(&mut self) -> i32 {
-        let mut new_frequency = self.shadow_freq >> self.nr0.shift();
+    pub fn calc_freq(&mut self) -> i32 {
+        let mut new_frequency = self.shadow_freq >> self.shift;
 
-        let is_decreasing = self.nr0.sweep_direction() == 1;
+        let is_decreasing = self.negative_direction == 1;
         if is_decreasing {
             new_frequency = self.shadow_freq - new_frequency;
         } else {
@@ -80,22 +97,22 @@ impl FrequencySweep {
         return new_frequency;
     }
 
-    fn tick(&mut self) {
+    pub fn step(&mut self) {
         if !self.enabled {
             return;
         }
 
         if self.timer <= 0 {
-            self.timer = if self.nr0.period() != 0 {
-                self.nr0.period() as i32
+            self.timer = if self.period != 0 {
+                self.period as i32
             } else {
                 8
             };
 
-            if self.nr0.period() != 0 {
+            if self.period != 0 {
                 let new_freq = self.calc_freq();
 
-                if !self.overflow && self.nr0.shift() != 0 {
+                if !self.overflow && self.shift != 0 {
                     self.shadow_freq = new_freq;
                     self.freq = new_freq;
                     self.calc_freq();
