@@ -57,9 +57,10 @@ async function startWasm() {
     let keyPressed = null;
     let keyReleased = null;
     window.addEventListener('keydown', function (e) {
-        if (e.key === "Space" || e.key === "ArrowDown"
-        || e.key === "ArrowUp" || e.key === "ArrowLeft"
-        || e.key === "ArrowRight"){
+        if (e.key === "Space"       || e.key === "ArrowDown"
+        || e.key === "ArrowUp"      || e.key === "ArrowLeft"
+        || e.key === "ArrowRight"   || e.key === "z"
+        || e.key === "x") {
             e.preventDefault();
         }
         console.log("YOU PRESED: " + e.key);
@@ -70,9 +71,10 @@ async function startWasm() {
         if (e.isComposing || e.keyCode === 229) {
             return;
         }
-        if (e.key === "Space" || e.key === "ArrowDown"
-        || e.key === "ArrowUp" || e.key === "ArrowLeft"
-        || e.key === "ArrowRight") {
+        if (e.key === "Space"       || e.key === "ArrowDown"
+        || e.key === "ArrowUp"      || e.key === "ArrowLeft"
+        || e.key === "ArrowRight"   || e.key === "z"
+        || e.key === "x") {
             e.preventDefault();
         }
         keyReleased = e.key;
