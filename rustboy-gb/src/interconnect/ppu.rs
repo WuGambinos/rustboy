@@ -4,7 +4,10 @@ use modular_bitfield::prelude::*;
 use std::cmp::Ordering;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+use serde::{Serialize, Deserialize};
+use serde_big_array::BigArray;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub struct Rgb {
     r: u8,
@@ -42,7 +45,7 @@ pub enum LcdMode {
 }
 
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct SpriteFlags {
     palette_number_cgb: B3,
     tile_vram_bank: B1,
@@ -52,7 +55,7 @@ pub struct SpriteFlags {
     bg_window: B1,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct SpriteEntry {
     y: u8,
     x: u8,
@@ -71,7 +74,7 @@ impl SpriteEntry {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 pub struct Dma {
     pub active: bool,
     pub byte: u8,
@@ -91,7 +94,7 @@ impl Dma {
 }
 
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Control {
     bg_window: B1,
     sprite_enable: B1,
@@ -104,7 +107,7 @@ pub struct Control {
 }
 
 #[bitfield]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Stat {
     mode: B2,
     lyc_ly_compare: B1,
@@ -118,17 +121,21 @@ pub struct Stat {
 /// Pixel Processing Unit
 ///
 /// Used to display graphics
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Ppu {
     // Video RAM
+    #[serde(with = "BigArray")]
     vram: [u8; 0x2000],
 
     // OAM
+    #[serde(with = "BigArray")]
     oam: [SpriteEntry; 40],
 
     line_ticks: u32,
 
     pub dma: Dma,
+
+    #[serde(with = "BigArray")]
     pub video_buffer: [Rgb; BUFFER_SIZE],
 
     // LCD status
@@ -166,6 +173,7 @@ pub struct Ppu {
     pub sprite1_palette: [Rgb; 4],
     pub sprite1_palette_data: u8,
 
+    #[serde(with = "BigArray")]
     pub bg_prio: [bool; X_RESOLUTION as usize],
 }
 

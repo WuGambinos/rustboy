@@ -12,9 +12,10 @@ use anyhow::Result;
 use std::fs;
 use std::path::Path;
 
+use serde::{Deserialize, Serialize};
+
 /// Struct that represents the gameboy system
-///
-/// Contains the CPU and Interconnect
+#[derive(Serialize, Deserialize)]
 pub struct GameBoy {
     pub cpu: Cpu,
     pub interconnect: Interconnect,
@@ -27,6 +28,17 @@ impl GameBoy {
             cpu: Cpu::new(),
             interconnect: Interconnect::new(),
         }
+    }
+
+    pub fn save_state(&self, name: &str) {
+        let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
+        //let decoded: GameBoy = bincode::deserialize(&encoded[..]).unwrap();
+        let _ = std::fs::write(name, &encoded).unwrap();
+    }
+
+    pub fn load_state(&mut self, state: Vec<u8>) {
+        let decoded: GameBoy = bincode::deserialize(&state[..]).unwrap();
+        *self = decoded;
     }
 
     pub fn boot(&mut self, game: &str, skip_boot: bool) -> Result<(), Error> {

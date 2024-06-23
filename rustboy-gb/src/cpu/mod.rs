@@ -4,6 +4,7 @@ mod instructions;
 pub mod interrupts;
 
 use log::debug;
+use serde::{Deserialize, Serialize};
 
 use crate::constants::{
     INTERRUPTS, INTERRUPT_ENABLE, INTERRUPT_FLAG, MAX_CYCLES_PER_FRAME, SERIAL_TRANSFER_CONTROL,
@@ -14,7 +15,7 @@ use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
 
 /// Struct that represents flags of the Gameboy CPU
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Flags {
     pub data: u8,
 }
@@ -163,7 +164,7 @@ impl Flags {
 }
 
 /// Struct that represents registers for the Gameboy CPU
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Registers {
     /// Accumulator
     pub a: u8,
@@ -261,7 +262,7 @@ pub enum RegisterPair {
 }
 
 /// Struct that represents the gameboy cpu
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Cpu {
     /// Registers
     pub registers: Registers,

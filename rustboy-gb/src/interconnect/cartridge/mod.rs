@@ -12,6 +12,9 @@ use mbc3::Mbc3State;
 use mbc5::Mbc5State;
 use nombc::NoMbcState;
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
 pub enum Mbc {
     NoMbc(NoMbcState),
     Mbc1(Mbc1State),
@@ -42,6 +45,7 @@ impl Mbc {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Cartridge {
     pub title: String,
     pub cartridge_type: CartridgeType,

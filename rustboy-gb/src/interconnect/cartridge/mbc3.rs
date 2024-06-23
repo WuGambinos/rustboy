@@ -1,6 +1,8 @@
 use crate::constants::{RAM_BANK_SIZE, ROM_BANK_SIZE};
 
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Mbc3State {
     pub rom: Vec<u8>,
     pub ram: Vec<u8>,

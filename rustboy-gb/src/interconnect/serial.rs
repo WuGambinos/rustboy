@@ -1,4 +1,5 @@
-#[derive(Debug)]
+use serde::{Serialize, Deserialize};
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SerialOutput {
     buffer: Vec<u8>,
 }

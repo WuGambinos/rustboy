@@ -1,4 +1,5 @@
 use modular_bitfield::prelude::*;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
@@ -24,7 +25,7 @@ pub fn key_to_u8(key: &Key) -> u8 {
 }
 
 #[bitfield]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Joypad {
     buttons: B4,
     directions: B4,
@@ -76,7 +77,7 @@ impl Joypad {
         }
 
         if self.select_action() == 0 {
-            return self.buttons() ;
+            return self.buttons();
         }
 
         0xFF

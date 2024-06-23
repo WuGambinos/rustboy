@@ -1,4 +1,5 @@
 use core::fmt;
+use serde::{Serialize, Deserialize};
 
 fn rom_size_as_str(value: u8) -> &'static str {
     match value {
@@ -30,7 +31,7 @@ pub fn ram_size(value: u8) -> usize {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum CartridgeType {
     ROMOnly,
     MBC1,

@@ -24,9 +24,12 @@ use crate::interconnect::serial::SerialOutput;
 use self::cartridge::Cartridge;
 use self::joypad::Key;
 
+use serde::{Deserialize, Serialize};
+
 /// Struct used to link CPU to other components of system
 ///
 /// Contains MMU and Timer (so far)
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Interconnect {
     pub cartridge: Cartridge,
     pub mmu: Mmu,

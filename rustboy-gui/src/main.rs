@@ -1,7 +1,6 @@
 mod constants;
 mod gui;
 mod sdl_support;
-//mod support;
 
 use glow::HasContext;
 use imgui::Context;
@@ -12,7 +11,6 @@ use sdl2::{
 };
 use sdl_support::SdlPlatform;
 
-//use clap::*;
 use env_logger::*;
 use rustboy::gameboy::*;
 use rustboy::interconnect::joypad::Key;
@@ -96,6 +94,7 @@ fn main() {
     let path = std::env::current_dir().unwrap();
     let mut picker = rfd::FileDialog::new()
         .add_filter("gameboy", &["gb"])
+        .add_filter("gameboy saves", &["sav"])
         .set_directory(&path);
 
     let mut gameboy = GameBoy::new();
@@ -141,6 +140,8 @@ fn main() {
             let file_menu = ui.begin_menu("File");
             if let Some(f_menu) = file_menu {
                 let select_rom = ui.menu_item("Open Rom");
+                let save = ui.menu_item("Save State");
+                let load = ui.menu_item("Load State");
                 if select_rom {
                     if !booted {
                         let pick = picker.clone().pick_files().unwrap();
@@ -148,6 +149,18 @@ fn main() {
                         gameboy.boot(&rom_path, true).unwrap();
                         booted = true;
                     }
+                }
+
+                if load {
+                    let pick = picker.clone().pick_files().unwrap();
+                    let state_path = pick[0].clone().into_os_string().into_string().unwrap();
+                    let data: Vec<u8> = std::fs::read(state_path).unwrap();
+                    gameboy.load_state(data);
+                    booted = true;
+                }
+
+                if save {
+                    gameboy.save_state("TEST_SAVE.sav");
                 }
             }
         }
@@ -165,45 +178,3 @@ fn main() {
         window.gl_swap_window();
     }
 }
-
-/*
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Path to rom file
-    #[arg(short, long)]
-    rom: String,
-
-    /// Determines whether GUI will be run or not
-    #[arg(long, default_value = "false")]
-    headless: bool,
-
-    #[arg(long, default_value = "false")]
-    skip_boot: bool,
-}
-
-fn imgui_key_to_gb_key(keycode: imgui::Key) -> Option<Key> {
-    match keycode {
-        imgui::Key::RightArrow | imgui::Key::D => Some(Key::Right),
-        imgui::Key::LeftArrow | imgui::Key::A => Some(Key::Left),
-        imgui::Key::UpArrow | imgui::Key::W => Some(Key::Up),
-        imgui::Key::DownArrow | imgui::Key::S => Some(Key::Down),
-        imgui::Key::Z => Some(Key::A),
-        imgui::Key::X => Some(Key::B),
-        imgui::Key::Space => Some(Key::Select),
-        imgui::Key::Enter => Some(Key::Start),
-        _ => None,
-    }
-}
-
-const keys: [imgui::Key; 8] = [
-    imgui::Key::RightArrow,
-    imgui::Key::LeftArrow,
-    imgui::Key::UpArrow,
-    imgui::Key::DownArrow,
-    imgui::Key::Z,
-    imgui::Key::X,
-    imgui::Key::Space,
-    imgui::Key::Enter,
-];
-*/

@@ -1,23 +1,32 @@
 #![allow(clippy::must_use_candidate)]
 /// Memory Mapped Unit
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Mmu {
     /// BOOT ROM
+    #[serde(with = "BigArray")]
     boot: [u8; 0x100],
 
     /// ROM Bank
+    #[serde(with = "BigArray")]
     rom_bank: [u8; 0x8000],
 
     /// IO Registers
+    #[serde(with = "BigArray")]
     io: [u8; 0x80],
 
     /// High RAM (HRAM)
+    #[serde(with = "BigArray")]
     hram: [u8; 0x7F],
 
     /// External RAM
+    #[serde(with = "BigArray")]
     external_ram: [u8; 0x2000],
 
     /// Work RAM
+    #[serde(with = "BigArray")]
     work_ram: [u8; 0x2000],
 
     // interrupt_enable
