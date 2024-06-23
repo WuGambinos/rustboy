@@ -14,6 +14,8 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+use yazi::*;
+
 /// Struct that represents the gameboy system
 #[derive(Serialize, Deserialize)]
 pub struct GameBoy {
@@ -32,12 +34,13 @@ impl GameBoy {
 
     pub fn save_state(&self, name: &str) {
         let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
-        //let decoded: GameBoy = bincode::deserialize(&encoded[..]).unwrap();
-        let _ = std::fs::write(name, &encoded).unwrap();
+        let compressed = compress(&encoded, Format::Zlib, CompressionLevel::Default).unwrap();
+        let _ = std::fs::write(name, &compressed).unwrap();
     }
 
-    pub fn load_state(&mut self, state: Vec<u8>) {
-        let decoded: GameBoy = bincode::deserialize(&state[..]).unwrap();
+    pub fn load_state(&mut self, compressed_state: Vec<u8>) {
+        let (decompressed, checksum) = decompress(&compressed_state, Format::Zlib).unwrap();
+        let decoded: GameBoy = bincode::deserialize(&decompressed[..]).unwrap();
         *self = decoded;
     }
 

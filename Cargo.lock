@@ -745,6 +745,7 @@ dependencies = [
  "serde",
  "serde-big-array",
  "wasm-bindgen",
+ "yazi",
 ]
 
 [[package]]
@@ -1247,3 +1248,9 @@ checksum = "59b5e5f6c299a3c7890b876a2a587f3115162487e704907d9b6cd29473052ba1"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "yazi"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7773623574268945095a9008f1583f7feac95bf1c4c406de5c98d02e0c0eb98"
