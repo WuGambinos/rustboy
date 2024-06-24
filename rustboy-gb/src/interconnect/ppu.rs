@@ -108,7 +108,7 @@ pub struct Control {
 
 #[bitfield]
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct Stat {
+pub struct Status {
     mode: B2,
     lyc_ly_compare: B1,
     hblank_interrupt_soruce: B1,
@@ -118,16 +118,11 @@ pub struct Stat {
     empty: B1,
 }
 
-/// Pixel Processing Unit
-///
-/// Used to display graphics
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Ppu {
-    // Video RAM
     #[serde(with = "BigArray")]
     vram: [u8; 0x2000],
 
-    // OAM
     #[serde(with = "BigArray")]
     oam: [SpriteEntry; 40],
 
@@ -138,10 +133,7 @@ pub struct Ppu {
     #[serde(with = "BigArray")]
     pub video_buffer: [Rgb; BUFFER_SIZE],
 
-    // LCD status
-    stat: Stat,
-
-    // LCD control
+    status: Status,
     control: Control,
 
     // Viewport X position
@@ -174,7 +166,7 @@ pub struct Ppu {
     pub sprite1_palette_data: u8,
 
     #[serde(with = "BigArray")]
-    pub bg_prio: [bool; X_RESOLUTION as usize],
+    pub bg_priority: [bool; X_RESOLUTION as usize],
 }
 
 impl Ppu {
@@ -186,7 +178,7 @@ impl Ppu {
             line_ticks: 0,
             video_buffer: [Rgb::new(0, 0, 0); BUFFER_SIZE],
 
-            stat: Stat::new(),
+            status: Status::new(),
             control: Control::from_bytes([0x91]),
 
             scroll_x: 0,
@@ -204,7 +196,7 @@ impl Ppu {
 
             sprite1_palette: TILE_COLORS,
             sprite1_palette_data: 0,
-            bg_prio: [false; X_RESOLUTION as usize],
+            bg_priority: [false; X_RESOLUTION as usize],
         };
 
         ppu.set_stat_mode(LcdMode::Oam);
@@ -314,8 +306,8 @@ impl Ppu {
         self.window_y
     }
 
-    pub fn stat(&self) -> Stat {
-        self.stat
+    pub fn stat(&self) -> Status {
+        self.status
     }
 
     pub fn control(&self) -> Control {
@@ -386,7 +378,7 @@ impl Ppu {
 
         match index {
             0x0 => self.control = Control::from_bytes([value]),
-            0x1 => self.stat = Stat::from_bytes([value]),
+            0x1 => self.status = Status::from_bytes([value]),
             0x2 => self.scroll_y = value,
             0x3 => self.scroll_x = value,
             0x4 => self.ly = value,
@@ -415,7 +407,7 @@ impl Ppu {
 
         match index {
             0x0 => self.control.bytes[0],
-            0x1 => self.stat.bytes[0],
+            0x1 => self.status.bytes[0],
             0x2 => self.scroll_y,
             0x3 => self.scroll_x,
             0x4 => self.ly,
@@ -470,9 +462,9 @@ impl Ppu {
     }
 
     pub fn set_stat_mode(&mut self, mode: LcdMode) {
-        let bits = self.stat.bytes[0] & !0b11;
+        let bits = self.status.bytes[0] & !0b11;
         let value = bits | mode as u8;
-        self.stat = Stat::from_bytes([value]);
+        self.status = Status::from_bytes([value]);
     }
 
     pub fn increment_ly(&mut self) -> Vec<InterruptType> {
@@ -481,22 +473,22 @@ impl Ppu {
         self.set_ly(value);
 
         if self.ly() == self.lyc() {
-            self.stat.set_lyc_ly_compare(1);
+            self.status.set_lyc_ly_compare(1);
 
             if self.stat().lyc_ly_interrupt_source() == 1 {
                 vec.push(InterruptType::LcdStat);
             }
         } else {
-            self.stat.set_lyc_ly_compare(0);
+            self.status.set_lyc_ly_compare(0);
         }
 
         vec
     }
 
-    /// Search OAM for Sprites whose Y coordinate
-    /// overlaps this line
-    ///
-    /// Duration: 80 "dots"
+    // Search OAM for Sprites whose Y coordinate
+    // overlaps this line
+    //
+    // Duration: 80 "dots"
     pub fn oam_mode(&mut self) {
         let oam_is_over = self.line_ticks() >= 80;
         if oam_is_over {
@@ -504,10 +496,10 @@ impl Ppu {
         }
     }
 
-    /// Reading OAM and VRAM to generate picture
-    ///
-    /// Duration: 168-291 "dots", depends on sprite count
-    ///
+    // Reading OAM and VRAM to generate picture
+    //
+    // Duration: 168-291 "dots", depends on sprite count
+    //
     pub fn transfer_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
         self.draw_line();
         self.set_stat_mode(LcdMode::HBlank);
@@ -516,7 +508,7 @@ impl Ppu {
         }
     }
 
-    /// Duration: 4560 "dots" (10 scanlines)
+    // Duration: 4560 "dots" (10 scanlines)
     pub fn vblank_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
         let end_of_scanline = self.line_ticks() >= TICKS_PER_LINE;
         if end_of_scanline {
@@ -533,7 +525,7 @@ impl Ppu {
         }
     }
 
-    /// Duration: 87-204 "dots"
+    // Duration: 87-204 "dots"
     pub fn hblank_mode(&mut self, interrupts: &mut Vec<InterruptType>) {
         let end_of_scanline = self.line_ticks() >= TICKS_PER_LINE;
         if end_of_scanline {
@@ -603,7 +595,7 @@ impl Ppu {
                 let low_bit = ((low >> bit) & 1) << 1;
                 let color_value = (hi_bit | low_bit) as usize;
                 let color = self.bg_palette[color_value];
-                self.bg_prio[x_pos as usize] = color_value != 0;
+                self.bg_priority[x_pos as usize] = color_value != 0;
 
                 let pixels = &mut self.video_buffer[slice_start..slice_end];
                 pixels[x_pos as usize] = color;
@@ -648,7 +640,7 @@ impl Ppu {
                 let low_bit = ((low >> bit) & 1) << 1;
                 let color_value = (hi_bit | low_bit) as usize;
                 let color = self.bg_palette[color_value];
-                self.bg_prio[i] = color_value != 0;
+                self.bg_priority[i] = color_value != 0;
 
                 let pixels = &mut self.video_buffer[slice_start..slice_end];
                 pixels[i] = color;
@@ -733,7 +725,7 @@ impl Ppu {
                     let color = palette[color_value];
                     let target_x = sprite.x.wrapping_add(7 - x);
                     if target_x < X_RESOLUTION && color_value != 0 {
-                        if sprite.flags.bg_window() == 0 || !self.bg_prio[target_x as usize] {
+                        if sprite.flags.bg_window() == 0 || !self.bg_priority[target_x as usize] {
                             let pixels = &mut self.video_buffer[slice_start..slice_end];
                             pixels[target_x as usize] = color;
                         }

@@ -7,12 +7,6 @@ pub const MAX_CYCLES_PER_FRAME: usize = (CLOCK_SPEED as f32 / 59.7275) as usize;
 pub const PC_AFTER_BOOT: u16 = 0x100;
 pub const TARGET_FRAME_TIME: u32 = 1000 / 60;
 
-// SDL window constants
-pub const SCALE: i32 = 4;
-pub const SCREEN_WIDTH: u32 = 18 * 8 * (SCALE as u32);
-pub const SCREEN_HEIGHT: u32 = 28 * 8 * (SCALE as u32);
-pub const MAIN_SCREEN_WIDTH: u32 = 800;
-pub const MAIN_SCREEN_HEIGHT: u32 = 640;
 
 // PPU constants
 pub const LINES_PER_FRAME: u8 = 154;
@@ -28,7 +22,7 @@ pub const TILE_COLORS: [Rgb; 4] = [
     Rgb::new(0, 0, 0),
 ];
 
-// Memory Map Addresses
+// MMU Addresses
 pub const SERIAL_TRASFER_DATA: u16 = 0xFF01;
 pub const SERIAL_TRANSFER_CONTROL: u16 = 0xFF02;
 
@@ -49,7 +43,7 @@ pub const INTERRUPTS: [InterruptType; 5] = [
     InterruptType::Joypad,
 ];
 
-// Memory Address Ranges
+// MMU Ranges
 pub const BOOT: Range<u16> = 0x00..0x100;
 pub const ROM_BANK: Range<u16> = 0x0000..0x8000;
 pub const VRAM: Range<u16> = 0x8000..0xA000;

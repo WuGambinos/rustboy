@@ -32,7 +32,7 @@ fn ld_bc_u16() {
 #[test]
 fn inc_b() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.b = 0x01;
 
@@ -47,7 +47,7 @@ fn inc_b() {
 #[test]
 fn inc_c() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.c = 0x01;
 
@@ -62,7 +62,7 @@ fn inc_c() {
 #[test]
 fn inc_d() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.d = 0x05;
     inc_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
@@ -76,7 +76,7 @@ fn inc_d() {
 #[test]
 fn inc_e() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.e = 0x05;
     inc_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
@@ -90,7 +90,7 @@ fn inc_e() {
 #[test]
 fn inc_h() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.h = 0x05;
     inc_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
@@ -104,7 +104,7 @@ fn inc_h() {
 #[test]
 fn inc_l() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.l = 0x05;
     inc_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
@@ -118,7 +118,7 @@ fn inc_l() {
 #[test]
 fn inc_8bit_overflow() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.b = 0xFF;
     inc_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
@@ -132,7 +132,7 @@ fn inc_8bit_overflow() {
 #[test]
 fn dec_b() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.b = 0x02;
     dec_8bit(&mut cpu.registers.f, &mut cpu.registers.b);
@@ -146,7 +146,7 @@ fn dec_b() {
 #[test]
 fn dec_c() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.c = 0x05;
 
@@ -162,7 +162,7 @@ fn dec_c() {
 #[test]
 fn dec_d() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.d = 0x03;
     dec_8bit(&mut cpu.registers.f, &mut cpu.registers.d);
@@ -176,7 +176,7 @@ fn dec_d() {
 #[test]
 fn dec_e() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.e = 0x01;
     dec_8bit(&mut cpu.registers.f, &mut cpu.registers.e);
@@ -190,7 +190,7 @@ fn dec_e() {
 #[test]
 fn dec_h() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.h = 0x00;
     dec_8bit(&mut cpu.registers.f, &mut cpu.registers.h);
@@ -204,7 +204,7 @@ fn dec_h() {
 #[test]
 fn dec_l() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.l = 0x05;
     dec_8bit(&mut cpu.registers.f, &mut cpu.registers.l);
@@ -898,7 +898,7 @@ fn rrc_hl_test() {
 #[test]
 fn rl_test() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.d = 0x8F;
 
@@ -912,7 +912,7 @@ fn rl_test() {
 #[test]
 fn rl_hl_test() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
     let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;
@@ -930,7 +930,7 @@ fn rl_hl_test() {
 #[test]
 fn rr_test() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
 
     cpu.registers.b = 0xDD;
 
@@ -944,7 +944,7 @@ fn rr_test() {
 #[test]
 fn rr_hl_test() {
     let mut cpu = Cpu::new();
-    cpu.registers.f.clear_flags();
+    cpu.registers.f.clear_all();
     let mut mmu = Interconnect::new();
 
     let addr = 0xFFF;

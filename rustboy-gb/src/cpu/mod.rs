@@ -14,7 +14,6 @@ use crate::cpu::instructions::push_rr;
 use crate::cpu::interrupts::{get_interrupt, InterruptType};
 use crate::interconnect::Interconnect;
 
-/// Struct that represents flags of the Gameboy CPU
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Flags {
     pub data: u8,
@@ -25,7 +24,7 @@ impl Flags {
         Flags { data: 0xB0 }
     }
 
-    pub fn clear_flags(&mut self) {
+    pub fn clear_all(&mut self) {
         self.data = 0;
     }
 
@@ -77,9 +76,6 @@ impl Flags {
         self.data &= !(1 << 4);
     }
 
-    /// Updates Carry flag
-    ///
-    /// Carry flag is set when operation results in overflow
     pub fn update_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         let res: u16 = (u16::from(register)) + (u16::from(operand));
 
@@ -116,9 +112,6 @@ impl Flags {
         }
     }
 
-    /// Updates the half carry flag when there is an addition
-    ///
-    /// In 8bit addition, half carry is set when there is a carry from bit 3 to bit
     fn update_half_carry_flag_sum_8bit(&mut self, register: u8, operand: u8) {
         if ((register & 0xF) + (operand & 0xF)) > 0xF {
             self.set_half_carry_flag();
@@ -137,7 +130,6 @@ impl Flags {
         }
     }
 
-    /// Updates the half carry flag where there is a subtraction
     fn update_half_carry_flag_sub_8bit(&mut self, register: u8, operand: u8) {
         if (register & 0xF) < (operand & 0xF) {
             self.set_half_carry_flag();
@@ -163,31 +155,15 @@ impl Flags {
     }
 }
 
-/// Struct that represents registers for the Gameboy CPU
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Registers {
-    /// Accumulator
     pub a: u8,
-
-    /// B Register
     pub b: u8,
-
-    /// C Register
     pub c: u8,
-
-    /// D Register
     pub d: u8,
-
-    /// E Register
     pub e: u8,
-
-    /// H Register
     pub h: u8,
-
-    /// L Register
     pub l: u8,
-
-    /// F Register (FLAGS)
     pub f: Flags,
 }
 
@@ -261,31 +237,15 @@ pub enum RegisterPair {
     SP,
 }
 
-/// Struct that represents the gameboy cpu
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Cpu {
-    /// Registers
     pub registers: Registers,
-
-    /// Stack pointer
     pub sp: u16,
-
-    /// Program counter
     pub pc: u16,
-
-    /// Interrupt Master Enable
     pub ime: bool,
-
-    /// Help with enabled IME
     pub ime_to_be_enabled: bool,
-
-    /// Halt
     pub halted: bool,
-
-    /// Current opcode
     pub opcode: u8,
-
-    /// Last Cycle
     pub last_cycle: u64,
 }
 
@@ -335,16 +295,15 @@ impl Cpu {
                 interconnect.emu_tick(1);
 
                 let interrupt_flag = interconnect.read_mem(INTERRUPT_FLAG);
+                let interrupt_resquestd = interrupt_flag != 0;
 
-                // Iterrupt has been requested
-                if interrupt_flag != 0 {
+                if interrupt_resquestd {
                     self.halted = false;
                 }
             }
         }
     }
 
-    /// Handle Interrupts
     pub fn handle_interrupt(&mut self, interconnect: &mut Interconnect) {
         let interrupts_enabled = self.ime || self.halted;
         if interrupts_enabled {

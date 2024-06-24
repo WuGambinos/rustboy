@@ -16,7 +16,6 @@ use serde::{Deserialize, Serialize};
 
 use yazi::*;
 
-/// Struct that represents the gameboy system
 #[derive(Serialize, Deserialize)]
 pub struct GameBoy {
     pub cpu: Cpu,
@@ -24,7 +23,6 @@ pub struct GameBoy {
 }
 
 impl GameBoy {
-    /// Create new instance of Gameboy
     pub fn new() -> Self {
         Self {
             cpu: Cpu::new(),

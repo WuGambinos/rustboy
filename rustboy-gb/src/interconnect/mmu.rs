@@ -1,35 +1,27 @@
 #![allow(clippy::must_use_candidate)]
-/// Memory Mapped Unit
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Mmu {
-    /// BOOT ROM
     #[serde(with = "BigArray")]
     boot: [u8; 0x100],
 
-    /// ROM Bank
     #[serde(with = "BigArray")]
     rom_bank: [u8; 0x8000],
 
-    /// IO Registers
     #[serde(with = "BigArray")]
     io: [u8; 0x80],
 
-    /// High RAM (HRAM)
     #[serde(with = "BigArray")]
-    hram: [u8; 0x7F],
+    high_ram: [u8; 0x7F],
 
-    /// External RAM
     #[serde(with = "BigArray")]
     external_ram: [u8; 0x2000],
 
-    /// Work RAM
     #[serde(with = "BigArray")]
     work_ram: [u8; 0x2000],
 
-    // interrupt_enable
     interrupt_enable: u8,
 }
 
@@ -45,7 +37,7 @@ impl Mmu {
             boot: [0; 0x100],
             rom_bank: [0; 0x8000],
             io: [0; 0x80],
-            hram: [0; 0x7F],
+            high_ram: [0; 0x7F],
             external_ram: [0; 0x2000],
             work_ram: [0; 0x2000],
             interrupt_enable: 0,
@@ -65,7 +57,7 @@ impl Mmu {
     }
 
     pub fn write_hram(&mut self, addr: u16, value: u8) {
-        self.hram[addr as usize] = value;
+        self.high_ram[addr as usize] = value;
     }
 
     pub fn write_external_ram(&mut self, addr: u16, value: u8) {
@@ -93,7 +85,7 @@ impl Mmu {
     }
 
     pub fn read_hram(&self, addr: u16) -> u8 {
-        self.hram[addr as usize]
+        self.high_ram[addr as usize]
     }
 
     pub fn read_external_ram(&self, addr: u16) -> u8 {

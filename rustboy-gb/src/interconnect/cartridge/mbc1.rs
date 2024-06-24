@@ -12,8 +12,7 @@ pub enum BankingMode {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Mbc1State {
     pub rom: Vec<u8>,
-    pub ram: Vec<u8>,
-    rom_bank_number: usize,
+    pub ram: Vec<u8>, rom_bank_number: usize,
     ram_bank_number: usize,
     ram_enabled: bool,
     banking_mode: BankingMode,

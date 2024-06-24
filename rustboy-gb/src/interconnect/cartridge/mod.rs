@@ -15,8 +15,7 @@ use nombc::NoMbcState;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub enum Mbc {
-    NoMbc(NoMbcState),
+pub enum Mbc { NoMbc(NoMbcState),
     Mbc1(Mbc1State),
     Mbc2(Mbc2State),
     Mbc3(Mbc3State),
@@ -107,9 +106,3 @@ impl Cartridge {
     }
 }
 
-/*
-pub trait Mbc {
-    fn read(&self, addr: u16) -> u8;
-    fn write(&mut self, addr: u16, value: u8);
-}
-*/
