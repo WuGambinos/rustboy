@@ -92,14 +92,12 @@ fn main() {
 
     // File Dialog
     let path = std::env::current_dir().unwrap();
-    let mut picker = rfd::FileDialog::new()
+    let file_picker: rfd::FileDialog = rfd::FileDialog::new()
         .add_filter("gameboy", &["gb"])
         .add_filter("gameboy saves", &["sav"])
         .set_directory(&path);
 
     let mut gameboy = GameBoy::new();
-    let mut booted = false;
-
     'main: loop {
         for event in event_pump.poll_iter() {
             /* pass all events to imgui platfrom */
@@ -131,41 +129,14 @@ fn main() {
         platform.prepare_frame(&mut imgui, &window, &event_pump);
 
         let ui = imgui.new_frame();
+        gui::menu(ui, &file_picker, &mut gameboy);
         gui::display_info(ui, &gameboy);
         gui::draw_tiles(ui, &gameboy.interconnect);
         gui::display_emulator(ui, &gameboy);
         gui::debug_window(ui, &gameboy);
 
-        if let Some(main) = ui.begin_main_menu_bar() {
-            let file_menu = ui.begin_menu("File");
-            if let Some(f_menu) = file_menu {
-                let select_rom = ui.menu_item("Open Rom");
-                let save = ui.menu_item("Save State");
-                let load = ui.menu_item("Load State");
-                if select_rom {
-                    if !booted {
-                        let pick = picker.clone().pick_files().unwrap();
-                        let rom_path = pick[0].clone().into_os_string().into_string().unwrap();
-                        gameboy.boot(&rom_path, true).unwrap();
-                        booted = true;
-                    }
-                }
 
-                if load {
-                    let pick = picker.clone().pick_files().unwrap();
-                    let state_path = pick[0].clone().into_os_string().into_string().unwrap();
-                    let data: Vec<u8> = std::fs::read(state_path).unwrap();
-                    gameboy.load_state(data);
-                    booted = true;
-                }
-
-                if save {
-                    gameboy.save_state("TEST_SAVE.sav");
-                }
-            }
-        }
-
-        if booted {
+        if gameboy.booted {
             gameboy.cpu.run(&mut gameboy.interconnect);
         }
 
