@@ -1,16 +1,18 @@
 use crate::constants::RAM_BANK_SIZE;
 use crate::constants::ROM_BANK_SIZE;
-#[derive(Debug)]
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum BankingMode {
     Rom,
     Ram,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Mbc1State {
     pub rom: Vec<u8>,
-    pub ram: Vec<u8>,
-    rom_bank_number: usize,
+    pub ram: Vec<u8>, rom_bank_number: usize,
     ram_bank_number: usize,
     ram_enabled: bool,
     banking_mode: BankingMode,

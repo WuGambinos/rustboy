@@ -5,8 +5,6 @@ members = [
     "rustboy-wasm",
     "rustboy-gui",
 ]
-
-[profile.release]
 #lto = true
 
 [profile.release.package.rustboy-gb]
@@ -14,9 +12,3 @@ members = [
 #codegen-units = 1
 #panic = "abort"
 overflow-checks = true
-
-[profile.release.package.rustboy-gui]
-debug=true
-
-[profile.release.package.rustboy-wasm]
-opt-level = 's'

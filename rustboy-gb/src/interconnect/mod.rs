@@ -1,14 +1,9 @@
 #![allow(clippy::must_use_candidate)]
 
+pub mod apu;
 pub mod cartridge;
-pub mod cartridge_info;
 pub mod joypad;
-mod mbc1;
-mod mbc2;
-mod mbc3;
-mod mbc5;
 mod mmu;
-mod nombc;
 pub mod ppu;
 mod serial;
 
@@ -29,9 +24,9 @@ use crate::interconnect::serial::SerialOutput;
 use self::cartridge::Cartridge;
 use self::joypad::Key;
 
-/// Struct used to link CPU to other components of system
-///
-/// Contains MMU and Timer (so far)
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Interconnect {
     pub cartridge: Cartridge,
     pub mmu: Mmu,
@@ -195,7 +190,6 @@ impl Interconnect {
             }
         }
 
-        // Used to get cycle count over in main loop
         self.ticks = u64::from(t_cycles);
 
         let div_value: u8 = self.timer.div_clock.next(t_cycles) as u8;

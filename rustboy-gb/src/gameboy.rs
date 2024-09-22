@@ -1,9 +1,9 @@
 use crate::constants::PC_AFTER_BOOT;
 use crate::cpu::Cpu;
+use crate::interconnect::cartridge::cartridge_info::ram_size;
+use crate::interconnect::cartridge::cartridge_info::u8_to_cart_type;
+use crate::interconnect::cartridge::cartridge_info::CartridgeType;
 use crate::interconnect::cartridge::Cartridge;
-use crate::interconnect::cartridge_info::ram_size;
-use crate::interconnect::cartridge_info::u8_to_cart_type;
-use crate::interconnect::cartridge_info::CartridgeType;
 use crate::interconnect::Interconnect;
 
 use anyhow::Error;
@@ -12,24 +12,41 @@ use anyhow::Result;
 use std::fs;
 use std::path::Path;
 
-/// Struct that represents the gameboy system
-///
-/// Contains the CPU and Interconnect
+use serde::{Deserialize, Serialize};
+
+use yazi::*;
+
+#[derive(Serialize, Deserialize)]
 pub struct GameBoy {
     pub cpu: Cpu,
     pub interconnect: Interconnect,
+    pub booted : bool,
 }
 
 impl GameBoy {
-    /// Create new instance of Gameboy
     pub fn new() -> Self {
         Self {
             cpu: Cpu::new(),
             interconnect: Interconnect::new(),
+            booted: false,
         }
     }
 
+    pub fn save_state(&self, name: &str) {
+        println!("NAME: {}", name);
+        let encoded: Vec<u8> = bincode::serialize(&self).unwrap();
+        let compressed = compress(&encoded, Format::Zlib, CompressionLevel::Default).unwrap();
+        let _ = std::fs::write(name, &compressed).unwrap();
+    }
+
+    pub fn load_state(&mut self, compressed_state: Vec<u8>) {
+        let (decompressed, checksum) = decompress(&compressed_state, Format::Zlib).unwrap();
+        let decoded: GameBoy = bincode::deserialize(&decompressed[..]).unwrap();
+        *self = decoded;
+    }
+
     pub fn boot(&mut self, game: &str, skip_boot: bool) -> Result<(), Error> {
+        self.booted = true;
         let boot_rom = if !skip_boot {
             let boot_rom = "roms/bootix_dmg.bin";
             let boot_rom_path: &Path = Path::new(boot_rom);
@@ -49,6 +66,9 @@ impl GameBoy {
         let cart_type: CartridgeType = u8_to_cart_type(cart_type_value);
 
         self.interconnect.cartridge = Cartridge::new(&game_rom, &ram, &cart_type);
+        let file_name: Vec<&str> = game_rom_path.file_name().unwrap().to_str().unwrap().split('.').collect();
+        self.interconnect.cartridge.title = file_name[0].to_string();
+        println!("FILE NAME: {}", file_name[0]);
         println!("CART TYPE: {:?}", cart_type);
         println!("ROM_SIZE: {:#X}", rom_size);
         println!("RAM_SIZE: {:#X} KiB", ram_size(ram_s));

@@ -1,96 +1,151 @@
 mod constants;
 mod gui;
-mod support;
+mod sdl_support;
 
-use constants::*;
-
-use anyhow::Result;
-use clap::*;
-use env_logger::*;
-use imgui::{Condition, DrawListMut, ImColor32, Ui};
-use rustboy::constants::TILE_COLORS;
-use rustboy::interconnect::joypad::Key;
-use rustboy::interconnect::Interconnect;
-use rustboy::{
-    constants::{X_RESOLUTION, Y_RESOLUTION},
-    gameboy::*,
+use glow::HasContext;
+use imgui::Context;
+use imgui_glow_renderer::AutoRenderer;
+use sdl2::{
+    event::Event,
+    video::{GLProfile, Window},
 };
+use sdl_support::SdlPlatform;
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Path to rom file
-    #[arg(short, long)]
-    rom: String,
+use env_logger::*;
+use rustboy::gameboy::*;
+use rustboy::interconnect::joypad::Key;
 
-    /// Determines whether GUI will be run or not
-    #[arg(long, default_value = "false")]
-    headless: bool,
-
-    #[arg(long, default_value = "false")]
-    skip_boot: bool,
+// Create a new glow context.
+fn glow_context(window: &Window) -> glow::Context {
+    unsafe {
+        glow::Context::from_loader_function(|s| window.subsystem().gl_get_proc_address(s) as _)
+    }
 }
 
-fn imgui_key_to_gb_key(keycode: imgui::Key) -> Option<Key> {
+fn keycode_to_key(keycode: sdl2::keyboard::Keycode) -> Option<Key> {
     match keycode {
-        imgui::Key::RightArrow | imgui::Key::D => Some(Key::Right),
-        imgui::Key::LeftArrow | imgui::Key::A => Some(Key::Left),
-        imgui::Key::UpArrow | imgui::Key::W => Some(Key::Up),
-        imgui::Key::DownArrow | imgui::Key::S => Some(Key::Down),
-        imgui::Key::Z => Some(Key::A),
-        imgui::Key::X => Some(Key::B),
-        imgui::Key::Space => Some(Key::Select),
-        imgui::Key::Enter => Some(Key::Start),
+        sdl2::keyboard::Keycode::Right | sdl2::keyboard::Keycode::D => Some(Key::Right),
+        sdl2::keyboard::Keycode::Left | sdl2::keyboard::Keycode::A => Some(Key::Left),
+        sdl2::keyboard::Keycode::Up | sdl2::keyboard::Keycode::W => Some(Key::Up),
+        sdl2::keyboard::Keycode::Down | sdl2::keyboard::Keycode::S => Some(Key::Down),
+        sdl2::keyboard::Keycode::Z => Some(Key::A),
+        sdl2::keyboard::Keycode::X => Some(Key::B),
+        sdl2::keyboard::Keycode::Space => Some(Key::Select),
+        sdl2::keyboard::Keycode::Return => Some(Key::Start),
         _ => None,
     }
 }
 
-const keys: [imgui::Key; 8] = [
-    imgui::Key::RightArrow,
-    imgui::Key::LeftArrow,
-    imgui::Key::UpArrow,
-    imgui::Key::DownArrow,
-    imgui::Key::Z,
-    imgui::Key::X,
-    imgui::Key::Space,
-    imgui::Key::Enter,
-];
+fn main() {
+    /* initialize SDL and its video subsystem */
+    let sdl = sdl2::init().unwrap();
+    let video_subsystem = sdl.video().unwrap();
 
-fn main() -> Result<(), anyhow::Error> {
-    // Command Line Arguments
-    let args = Args::parse();
-    println!("ROM: {}", args.rom);
-    println!("HEADLESS: {}", args.headless);
+    /* hint SDL to initialize an OpenGL 3.3 core profile context */
+    let gl_attr = video_subsystem.gl_attr();
 
-    // Logger
+    gl_attr.set_context_version(3, 3);
+    gl_attr.set_context_profile(GLProfile::Core);
+
+    /* create a new window, be sure to call opengl method on the builder when using glow! */
+    let window = video_subsystem
+        .window("Rustboy", 1280, 720)
+        .allow_highdpi()
+        .opengl()
+        .position_centered()
+        .resizable()
+        .build()
+        .unwrap();
+
+    /* create a new OpenGL context and make it current */
+    let gl_context = window.gl_create_context().unwrap();
+    window.gl_make_current(&gl_context).unwrap();
+
+    /* enable vsync to cap framerate */
+    //window.subsystem().gl_set_swap_interval(1).unwrap();
+
+    /* create new glow and imgui contexts */
+    let gl = glow_context(&window);
+
+    /* create context */
+    let mut imgui = Context::create();
+
+    /* disable creation of files on disc */
+    imgui.set_ini_filename(None);
+    imgui.set_log_filename(None);
+
+    /* setup platform and renderer, and fonts to imgui */
+    imgui
+        .fonts()
+        .add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
+
+    /* create platform and renderer */
+    let mut platform = SdlPlatform::init(&mut imgui);
+    let mut renderer = AutoRenderer::initialize(gl, &mut imgui).unwrap();
+
+    /* start main loop */
+    let mut event_pump = sdl.event_pump().unwrap();
+
     let mut logger = Builder::from_default_env();
     logger.target(Target::Stdout);
     logger.init();
 
-    let mut gameboy = GameBoy::new();
-    gameboy.boot(args.rom.as_str(), args.skip_boot)?;
+    // File Dialog
+    let path = std::env::current_dir().unwrap();
+    let file_picker: rfd::FileDialog = rfd::FileDialog::new()
+        .add_filter("gameboy", &["gb"])
+        .add_filter("gameboy saves", &["sav"])
+        .set_directory(&path);
 
-    let system = support::init(file!());
-    system.main_loop(move |_, ui| {
-        for key in keys {
-            if ui.is_key_down(key) {
-                if let Some(gb_key) = imgui_key_to_gb_key(key) {
-                    gameboy.interconnect.key_down(gb_key);
+    let mut gameboy = GameBoy::new();
+    'main: loop {
+        for event in event_pump.poll_iter() {
+            /* pass all events to imgui platfrom */
+            platform.handle_event(&mut imgui, &event);
+
+            match event {
+                Event::Quit { .. } => break 'main,
+                Event::KeyUp { keycode, .. } => {
+                    if let Some(key) = keycode.and_then(keycode_to_key) {
+                        gameboy.interconnect.key_up(key)
+                    }
                 }
-            } else if ui.is_key_released(key) {
-                if let Some(gb_key) = imgui_key_to_gb_key(key) {
-                    gameboy.interconnect.key_up(gb_key);
+
+                Event::KeyDown { keycode, .. } => {
+                    if let Some(key) = keycode.and_then(keycode_to_key) {
+                        gameboy.interconnect.key_down(key)
+                    }
                 }
+
+                _ => {}
+            }
+
+            if let Event::Quit { .. } = event {
+                break 'main;
             }
         }
 
-        gameboy.cpu.run(&mut gameboy.interconnect);
-        //gui::memory_viewer(ui, &gameboy);
+        /* call prepare_frame before calling imgui.new_frame() */
+        platform.prepare_frame(&mut imgui, &window, &event_pump);
+
+        let ui = imgui.new_frame();
+        gui::menu(ui, &file_picker, &mut gameboy);
         gui::display_info(ui, &gameboy);
         gui::draw_tiles(ui, &gameboy.interconnect);
         gui::display_emulator(ui, &gameboy);
         gui::debug_window(ui, &gameboy);
-    });
 
-    Ok(())
+
+        if gameboy.booted {
+            gameboy.cpu.run(&mut gameboy.interconnect);
+        }
+
+        /* render */
+        let draw_data = imgui.render();
+
+        unsafe { renderer.gl_context().clear(glow::COLOR_BUFFER_BIT) };
+        renderer.render(draw_data).unwrap();
+
+        window.gl_swap_window();
+    }
 }

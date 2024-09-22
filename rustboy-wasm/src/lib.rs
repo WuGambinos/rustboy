@@ -4,8 +4,8 @@ use rustboy::interconnect::ppu::Rgb;
 use rustboy::{
     gameboy::GameBoy,
     interconnect::{
+        cartridge::cartridge_info::{ram_size, u8_to_cart_type},
         cartridge::Cartridge,
-        cartridge_info::{ram_size, u8_to_cart_type},
     },
 };
 use std::f64;
@@ -65,7 +65,7 @@ impl WebGameBoy {
         }
     }
 
-    pub fn reset(&mut self)  {
+    pub fn reset(&mut self) {
         self.gb = GameBoy::new();
         self.prev_buffer = None;
     }
@@ -130,23 +130,40 @@ impl WebGameBoy {
             .unwrap();
 
         let video_buffer = self.gb.interconnect.ppu.video_buffer;
-        if let Some(p_buffer) = self.prev_buffer {
-            for line_num in 0..Y_RESOLUTION {
-                for x in 0..X_RESOLUTION {
-                    let new_x = u16::from(x) * (SCALE as u16);
-                    let new_y = u16::from(line_num) * (SCALE as u16);
-                    let w = SCALE as u32;
-                    let h = SCALE as u32;
-                    let index =
-                        (u32::from(x) + (u32::from(line_num) * u32::from(X_RESOLUTION))) as usize;
-                    let color = video_buffer[index as usize];
-                    if p_buffer[index as usize] != video_buffer[index] {
-                        context.set_fill_style(&color.to_string().into());
-                        context.fill_rect(new_x as f64, new_y as f64, w as f64, h as f64);
+        for line_num in 0..Y_RESOLUTION {
+            for x in 0..X_RESOLUTION {
+                let new_x = u16::from(x) * (SCALE as u16);
+                let new_y = u16::from(line_num) * (SCALE as u16);
+                let w = SCALE as u32;
+                let h = SCALE as u32;
+                let index =
+                    (u32::from(x) + (u32::from(line_num) * u32::from(X_RESOLUTION))) as usize;
+                let color = video_buffer[index as usize];
+                context.set_fill_style(&color.to_string().into());
+                context.fill_rect(new_x as f64, new_y as f64, w as f64, h as f64);
+            }
+        }
+        /*
+            if let Some(p_buffer) = self.prev_buffer {
+                for line_num in 0..Y_RESOLUTION {
+                    for x in 0..X_RESOLUTION {
+                        let new_x = u16::from(x) * (SCALE as u16);
+                        let new_y = u16::from(line_num) * (SCALE as u16);
+                        let w = SCALE as u32;
+                        let h = SCALE as u32;
+                        let index =
+                            (u32::from(x) + (u32::from(line_num) * u32::from(X_RESOLUTION))) as usize;
+                        let color = video_buffer[index as usize];
+                        /*
+                        if p_buffer[index as usize] != video_buffer[index] {
+                            context.set_fill_style(&color.to_string().into());
+                            context.fill_rect(new_x as f64, new_y as f64, w as f64, h as f64);
+                        }
+                        */
                     }
                 }
             }
-        }
+        */
         self.prev_buffer = Some(self.gb.interconnect.ppu.video_buffer);
     }
 }

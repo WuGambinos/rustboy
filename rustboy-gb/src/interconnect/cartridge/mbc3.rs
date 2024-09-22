@@ -1,7 +1,9 @@
 use crate::constants::{RAM_BANK_SIZE, ROM_BANK_SIZE};
 
-#[derive(Debug)]
-pub struct Mbc3 {
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Mbc3State {
     pub rom: Vec<u8>,
     pub ram: Vec<u8>,
     rom_bank_number: usize,
@@ -9,9 +11,9 @@ pub struct Mbc3 {
     ram_enabled: bool,
 }
 
-impl Mbc3 {
-    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc3 {
-        Mbc3 {
+impl Mbc3State {
+    pub fn new(rom: &[u8], ram: &[u8]) -> Mbc3State {
+        Mbc3State {
             rom: rom.to_vec(),
             ram: ram.to_vec(),
             rom_bank_number: 1,

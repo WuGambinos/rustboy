@@ -1,14 +1,53 @@
-use crate::constants::{MAIN_SCREEN_HEIGHT, MAIN_SCREEN_WIDTH, SCALE, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::constants::{
+    GB_POS, GB_SCREEN_HEIGHT, GB_SCREEN_SIZE, GB_SCREEN_WIDTH, GB_SCREEN_X, GB_SCREEN_Y, SCALE,
+    TILE_SCALE, TILE_SCREEN_HEIGHT, TILE_SCREEN_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
+
 use imgui::{Condition, DrawListMut, ImColor32, Ui};
+use rfd::FileDialog;
 use rustboy::constants::{TILE_COLORS, X_RESOLUTION, Y_RESOLUTION};
 use rustboy::gameboy::GameBoy;
 use rustboy::interconnect::Interconnect;
+
+pub fn menu(ui: &mut Ui, picker: &FileDialog, gameboy: &mut GameBoy) {
+    if let Some(main) = ui.begin_main_menu_bar() {
+        let file_menu = ui.begin_menu("File");
+        if let Some(f_menu) = file_menu {
+            let select_rom = ui.menu_item("Open Rom");
+            let save = ui.menu_item("Save State");
+            let load = ui.menu_item("Load State");
+            if select_rom {
+                if !gameboy.booted {
+                    let pick = picker.clone().pick_files().unwrap();
+                    let rom_path = pick[0].clone().into_os_string().into_string().unwrap();
+                    gameboy.boot(&rom_path, true).unwrap();
+                }
+            }
+
+            if load {
+                let pick = picker.clone().pick_files().unwrap();
+                let state_path = pick[0].clone().into_os_string().into_string().unwrap();
+                let data: Vec<u8> = std::fs::read(state_path).unwrap();
+                gameboy.load_state(data);
+                gameboy.booted = true;
+            }
+
+            if save {
+                gameboy.save_state(&gameboy.interconnect.cartridge.title);
+            }
+
+            f_menu.end();
+        }
+
+        main.end();
+    }
+}
 
 pub fn memory_viewer(ui: &mut Ui, gameboy: &GameBoy) {
     let rom_size = 0xFFFF;
 
     let mut row = String::new();
-    for i in 0..rom_size{
+    for i in 0..rom_size {
         row.push_str(format!("{:X} ", gameboy.interconnect.read_mem(i)).as_str());
         if i % 16 == 0 && i != 0 {
             ui.text(row.clone());
@@ -22,6 +61,7 @@ pub fn debug_window(ui: &mut Ui, gameboy: &GameBoy) {
     ui.window("Debug Window")
         .position([200.0, 500.0], Condition::FirstUseEver)
         .size([150.0, 200.0], Condition::FirstUseEver)
+        .collapsed(true, Condition::FirstUseEver)
         .build(|| {
             let pc = format!("PC: {:#X}", gameboy.cpu.pc);
             let sp = format!("SP: {:#X}", gameboy.cpu.sp);
@@ -53,6 +93,7 @@ pub fn display_info(ui: &mut Ui, gameboy: &GameBoy) {
     ui.window("Info")
         .size([200.0, 400.0], Condition::FirstUseEver)
         .position([400.0, 600.0], Condition::FirstUseEver)
+        .collapsed(true, Condition::FirstUseEver)
         .build(|| {
             let title = format!("TITLE: {}", &gameboy.interconnect.cartridge.title);
             let cart_type = format!(
@@ -67,14 +108,8 @@ pub fn display_info(ui: &mut Ui, gameboy: &GameBoy) {
 
 pub fn display_emulator(ui: &mut Ui, gameboy: &GameBoy) {
     ui.window("Gameboy Emualtor")
-        .size(
-            [
-                (MAIN_SCREEN_WIDTH + 50) as f32,
-                (MAIN_SCREEN_HEIGHT + 50) as f32,
-            ],
-            Condition::FirstUseEver,
-        )
-        .position([0.0, 0.0], Condition::FirstUseEver)
+        .size(GB_SCREEN_SIZE, Condition::FirstUseEver)
+        .position(GB_POS, Condition::FirstUseEver)
         .scroll_bar(false)
         .build(|| {
             let draw_list = ui.get_window_draw_list();
@@ -111,10 +146,11 @@ pub fn display_emulator(ui: &mut Ui, gameboy: &GameBoy) {
 pub fn draw_tiles(ui: &mut Ui, interconnect: &Interconnect) {
     ui.window("TILES")
         .size(
-            [SCREEN_WIDTH as f32, SCREEN_HEIGHT as f32],
+            [TILE_SCREEN_WIDTH as f32, TILE_SCREEN_HEIGHT as f32],
             Condition::FirstUseEver,
         )
         .position([600.0, 600.0], Condition::FirstUseEver)
+        .collapsed(true, Condition::FirstUseEver)
         .build(|| {
             let draw_list = ui.get_window_draw_list();
             let origin: [f32; 2] = ui.cursor_screen_pos();
@@ -124,8 +160,8 @@ pub fn draw_tiles(ui: &mut Ui, interconnect: &Interconnect) {
 
             let top_left = origin;
             let bottom_right = [
-                origin[0] + SCREEN_WIDTH as f32,
-                origin[1] + SCREEN_HEIGHT as f32,
+                origin[0] + TILE_SCREEN_WIDTH as f32,
+                origin[1] + TILE_SCREEN_HEIGHT as f32,
             ];
             let background = ImColor32::from_rgb(17, 17, 17);
             draw_list
@@ -142,13 +178,13 @@ pub fn draw_tiles(ui: &mut Ui, interconnect: &Interconnect) {
                         interconnect,
                         addr,
                         tile_num,
-                        x_draw + x * SCALE,
-                        y_draw + y * SCALE,
+                        x_draw + x * TILE_SCALE,
+                        y_draw + y * TILE_SCALE,
                     );
-                    x_draw += 8 * SCALE;
+                    x_draw += 8 * TILE_SCALE;
                     tile_num += 1;
                 }
-                y_draw += 8 * SCALE;
+                y_draw += 8 * TILE_SCALE;
                 x_draw = 0;
             }
         });
@@ -185,11 +221,11 @@ fn display_tile(
                 color = 3;
             }
 
-            let new_x = (x + ((7 - bit) * SCALE)) as f32;
-            let new_y = (y + ((tile_y as i32) / 2 * SCALE)) as f32;
+            let new_x = (x + ((7 - bit) * TILE_SCALE)) as f32;
+            let new_y = (y + ((tile_y as i32) / 2 * TILE_SCALE)) as f32;
 
-            let width = SCALE as f32;
-            let height = SCALE as f32;
+            let width = TILE_SCALE as f32;
+            let height = TILE_SCALE as f32;
 
             let (r, g, b) = TILE_COLORS[color as usize].get_rgb();
             let mut top_left = [new_x, new_y];
@@ -204,66 +240,3 @@ fn display_tile(
         }
     }
 }
-
-/*
-fn keycode_to_key(keycode: Keycode) -> Option<Key> {
-    match keycode {
-        Keycode::Right | Keycode::D => Some(Key::Right),
-        Keycode::Left | Keycode::A => Some(Key::Left),
-        Keycode::Up | Keycode::W => Some(Key::Up),
-        Keycode::Down | Keycode::S => Some(Key::Down),
-        Keycode::Z => Some(Key::A),
-        Keycode::X => Some(Key::B),
-        Keycode::Space => Some(Key::Select),
-        Keycode::Return => Some(Key::Start),
-        _ => None,
-    }
-}
-*/
-
-/*
-pub fn run_sdl(gb: &mut GameBoy, headless: bool) -> Result<(), Error> {
-    if headless {
-        loop {
-            gb.cpu.run(&mut gb.interconnect);
-        }
-    } else {
-        let sdl_context = sdl2::init().expect("Failed to start SDL");
-        let mut debug_window = gui::init_window(&sdl_context, SCREEN_WIDTH, SCREEN_HEIGHT);
-        let mut event_pump = sdl_context.event_pump().expect("Failed to get event pump");
-
-        let mut main_window = gui::init_window(&sdl_context, MAIN_SCREEN_WIDTH, MAIN_SCREEN_HEIGHT);
-
-        'running: loop {
-            gb.cpu.run(&mut gb.interconnect);
-
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    Event::KeyUp { keycode, .. } => {
-                        if let Some(key) = keycode.and_then(keycode_to_key) {
-                            gb.interconnect.key_up(key)
-                        }
-                    }
-
-                    Event::KeyDown { keycode, .. } => {
-                        if let Some(key) = keycode.and_then(keycode_to_key) {
-                            gb.interconnect.key_down(key)
-                        }
-                    }
-
-                    _ => {}
-                }
-            }
-            gui::debug_window(&mut debug_window, &gb.interconnect);
-            gui::main_window(&mut main_window, &gb.interconnect);
-        }
-    }
-    Ok(())
-}
-
-*/
