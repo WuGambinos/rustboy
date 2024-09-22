@@ -1,35 +1,45 @@
 h1 {
     width: 100%;
     text-align: center;
+    color: #c0caf5;
 }
+
 body {
     text-align: center;
+    background-color: #24283b;
+    color: #FFFFFF;
 }
 
 canvas {
     color-scheme: light only;
     text-align: center;
+    border-radius: 50px;
 }
 
+
 button {
-    background: radial-gradient( #360094 0%, #000000 100%);
-    /*border-radius: 25px;*/
+    background-color: #565f89;
     border: none;
-    /*width: 15%;*/
     color: #FFFFFF;
-    width: 100px;
-    height: 50px;
-    border-radius: 4px;
+    width: 10%;
+    height: 25px;
+    border-radius: 25px;
     margin-bottom: 10px;
 }
 
-/*
-input {
-    background-color: #0000FF;
+#fps {
+    white-space: pre;
+    font-family: monospace;
 }
-*/
 
-    #fps {
-        white-space: pre;
-        font-family: monospace;
-    }
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.flex-child {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+}

@@ -8,15 +8,21 @@
     </head>
     <body>
         <script src="rustboy-wasm/web/bootstrap.js"></script>
-        <h1>Rustboy</h1>
-        <canvas id="canvas" width="640" height="600" style="border:1px solid"></canvas>
-        <div>
-            <input type="file" id="fileInput" accept=".gb,.gbc"/>
-            <button id="load">Load File </button>
+        <h1>Emuboy</h1>
+        <div class="flex-container">
+            <div class="flex-child">
+
+                <canvas id="canvas" width="640" height="600" style="border:1px solid"></canvas>
+            </div>
+            <div class="flex-child"> 
+                <p> Hello World </p>
+                <div>
+                    <input type="file" id="fileInput" accept=".gb,.gbc"/>
+                    <button id="load">Load Rom</button>
+                    <button id="reset">Reset</button>
+                </div>
+                <div id="fps"></div>
+            </div>
         </div>
-        <div>
-            <button id="reset"> Reset </button>
-        </div>
-        <div id="fps"></div>
     </body>
 </html>
